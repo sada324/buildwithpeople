@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sales.io — Build companies with people who want to contribute</title>
+<title>Build With People — Build companies with people who want to contribute</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
@@ -84,8 +84,8 @@
     height:68px;
   }
   .logo{
-    font-family:var(--font-display); font-weight:700; font-size:19px;
-    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px;
+    font-family:var(--font-display); font-weight:700; font-size:17px;
+    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px; white-space:nowrap;
   }
   .logo .mark{
     width:9px; height:9px; border-radius:3px; background:var(--ink);
@@ -189,6 +189,18 @@
   .company-card:last-child{ margin-bottom:0; }
   .cc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
   .cc-name{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14.5px; }
+  .cc-logo{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
+    background: linear-gradient(135deg,#D8D8D2,#EFEFEB);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:8.5px; color:var(--ink-soft);
+    position:relative;
+  }
+  .cc-logo::after{
+    content:''; position:absolute; right:-1px; bottom:-1px;
+    width:7px; height:7px; border-radius:50%; background:var(--green-dot);
+    border:1.5px solid var(--white);
+  }
   .cc-sub{ font-size:12.5px; color:var(--grey); margin-bottom:12px; }
   .cc-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
   .tag{
@@ -205,6 +217,19 @@
   .cc-btn:hover{ border-color:var(--ink); background:var(--off-white); }
   .cc-progress{ height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:10px; }
   .cc-progress i{ display:block; height:100%; background:var(--green-dot); border-radius:2px; }
+
+  .company-card.dark{
+    background: var(--ink); border-color: var(--ink);
+  }
+  .company-card.dark:hover{ border-color:#2c2f33; }
+  .company-card.dark .cc-name{ color:var(--white); }
+  .company-card.dark .cc-sub{ color:#B7BAC0; }
+  .company-card.dark .tag{ color:#D6D8DB; background:#22252A; border-color:#33363B; }
+  .company-card.dark .cc-btn{ background:var(--white); color:var(--ink); border-color:var(--white); }
+  .company-card.dark .cc-btn:hover{ background:#EDEDED; }
+  .company-card.dark .cc-meta{ color:#9CA0A6; }
+  .company-card.dark .cc-progress{ background:#2c2f33; }
+  .company-card.dark .cc-logo{ background: linear-gradient(135deg,#3a3d42,#4c4f54); color:#D6D8DB; }
 
   /* ---------- section shell ---------- */
   section{ padding:96px 0; }
@@ -248,6 +273,18 @@
   .comp-pill{ font-size:11px; color:var(--green); background:var(--green-soft); padding:3px 9px; border-radius:6px; font-weight:600; }
   .gc-bottom{ display:flex; align-items:center; justify-content:space-between; padding-top:14px; border-top:1px solid var(--border); }
   .gc-active{ font-size:12px; color:var(--grey); display:flex; align-items:center; gap:6px; }
+
+  .grid-card.dark{ background:var(--ink); border-color:var(--ink); }
+  .grid-card.dark:hover{ border-color:#2c2f33; }
+  .grid-card.dark .gc-name{ color:var(--white); }
+  .grid-card.dark .gc-desc{ color:#B7BAC0; }
+  .grid-card.dark .gc-label{ color:#9CA0A6; }
+  .grid-card.dark .tag{ color:#D6D8DB; background:#22252A; border-color:#33363B; }
+  .grid-card.dark .comp-pill{ background:#1c3a28; color:#7FD6A4; }
+  .grid-card.dark .gc-bottom{ border-top-color:#2c2f33; }
+  .grid-card.dark .gc-active{ color:#9CA0A6; }
+  .grid-card.dark .cc-btn{ background:var(--white); color:var(--ink); border-color:var(--white); }
+  .grid-card.dark .cc-btn:hover{ background:#EDEDED; }
 
   /* ---------- pathways ---------- */
   .path-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
@@ -404,12 +441,12 @@
   }
   .modal-overlay.open{ opacity:1; pointer-events:auto; }
   .modal{
-    background:var(--white);
+    background: var(--white);
     border:1px solid var(--border);
-    border-radius:18px;
+    border-radius:20px;
     width:100%; max-width:540px;
     max-height:88vh; overflow-y:auto;
-    box-shadow:var(--shadow-lg);
+    box-shadow: var(--shadow-lg);
     padding:32px;
     transform:translateY(10px) scale(0.98);
     transition: transform .22s ease;
@@ -420,10 +457,93 @@
   .modal-close{
     width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
     color:var(--grey); border:1px solid var(--border); flex-shrink:0;
+    background: var(--white);
     transition: all .15s ease;
   }
   .modal-close:hover{ color:var(--ink); border-color:var(--ink); }
-  .modal-sub{ font-size:13.5px; color:var(--ink-soft); margin-bottom:26px; }
+  .modal-sub{ font-size:13.5px; color:var(--ink-soft); margin-bottom:20px; }
+
+  .modal-progress{ margin-bottom:26px; }
+  .modal-progress-track{ height:4px; background:rgba(20,23,26,0.08); border-radius:2px; overflow:hidden; margin-bottom:10px; }
+  .modal-progress-fill{ display:block; height:100%; background:var(--green-dot); border-radius:2px; transition: width .3s ease; width:33.33%; }
+  .modal-progress-label{ display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--grey); }
+  .modal-progress-label .step-name{ color:var(--ink-soft); font-weight:500; }
+
+  .modal-step{ display:block; }
+  .modal-step.hidden{ display:none; }
+
+  .modal-nav{ display:flex; gap:10px; margin-top:24px; }
+  .modal-nav .btn-ghost{ background:var(--white); }
+  .modal-nav .modal-submit{ flex:1; margin-top:0; }
+
+  .revenue-slider{ padding:6px 4px 2px; }
+  .revenue-value{
+    font-family:var(--font-mono); font-size:20px; font-weight:500; color:var(--ink);
+    margin-bottom:18px;
+  }
+  .range-input{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:4px; border-radius:2px; outline:none;
+    background: var(--border);
+    margin-bottom:10px;
+  }
+  .range-input::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--white); border:2.5px solid var(--green-dot);
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+    transition: transform .12s ease;
+  }
+  .range-input::-webkit-slider-thumb:hover{ transform:scale(1.12); }
+  .range-input::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%;
+    background:var(--white); border:2.5px solid var(--green-dot);
+    box-shadow:var(--shadow-sm); cursor:pointer; transition: transform .12s ease;
+  }
+  .range-input::-moz-range-thumb:hover{ transform:scale(1.12); }
+  .range-input::-moz-range-track{ height:4px; border-radius:2px; background:var(--border); }
+
+  .revenue-scale{ display:flex; justify-content:space-between; font-size:11px; color:var(--grey); margin-bottom:18px; }
+  .privacy-hint{ display:flex; align-items:flex-start; gap:8px; background:var(--off-white); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-top:4px; }
+  .privacy-hint svg{ flex-shrink:0; margin-top:2px; }
+
+  .stage-tracker{ padding:14px 2px 4px; }
+  .stage-track{ position:relative; height:22px; margin-bottom:10px; }
+  .stage-track::before{
+    content:''; position:absolute; left:9px; right:9px; top:50%; transform:translateY(-50%);
+    height:3px; background:var(--border); border-radius:2px;
+  }
+  .stage-track-fill{
+    position:absolute; left:9px; top:50%; transform:translateY(-50%);
+    height:3px; background:var(--green-dot); border-radius:2px; width:0%;
+    transition: width .25s ease;
+  }
+  .stage-node{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:18px; height:18px; border-radius:50%;
+    background:var(--white); border:2.5px solid var(--border-strong);
+    cursor:pointer; z-index:1;
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+  }
+  .stage-node:hover{ transform:translate(-50%,-50%) scale(1.12); }
+  .stage-node[data-index="0"]{ left:0%; }
+  .stage-node[data-index="1"]{ left:25%; }
+  .stage-node[data-index="2"]{ left:50%; }
+  .stage-node[data-index="3"]{ left:75%; }
+  .stage-node[data-index="4"]{ left:100%; }
+  .stage-node.passed{ background:var(--green-dot); border-color:var(--green-dot); }
+  .stage-node.active{ background:var(--white); border-color:var(--green-dot); box-shadow:0 0 0 4px var(--green-soft); }
+  .stage-labels{ display:flex; justify-content:space-between; }
+  .stage-labels span{
+    font-size:11.5px; color:var(--grey); font-weight:500; cursor:pointer;
+    transition: color .2s ease;
+    text-align:center; flex:1;
+  }
+  .stage-labels span:first-child{ text-align:left; }
+  .stage-labels span:last-child{ text-align:right; }
+  .stage-labels span.active{ color:var(--ink); font-weight:600; }
+  .stage-desc{ margin-top:14px; }
 
   .field-group{ margin-bottom:22px; }
   .field-label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:9px; display:block; }
@@ -477,7 +597,7 @@
 <header>
   <div class="wrap">
     <nav>
-      <div class="logo"><span class="mark"></span>Sales.io</div>
+      <div class="logo"><span class="mark"></span>Build With People</div>
       <div class="nav-links">
         <a href="#browse">Explore</a>
         <a href="#companies">Companies</a>
@@ -487,7 +607,7 @@
       </div>
       <div class="nav-right">
         <a href="#">Sign in</a>
-        <a href="#" class="btn btn-dark btn-sm">Join Sales.io</a>
+        <a href="#" class="btn btn-dark btn-sm">Join Now</a>
       </div>
     </nav>
   </div>
@@ -518,7 +638,7 @@
 
       <div class="company-card">
         <div class="cc-head">
-          <div class="cc-name"><span class="dot"></span>Custom514</div>
+          <div class="cc-name"><span class="cc-logo">C5</span>Custom514</div>
           <span class="cc-btn">View company</span>
         </div>
         <div class="cc-sub">Custom signage and physical brand experiences</div>
@@ -536,7 +656,7 @@
 
       <div class="company-card">
         <div class="cc-head">
-          <div class="cc-name"><span class="dot"></span>LocalFlow</div>
+          <div class="cc-name"><span class="cc-logo">LF</span>LocalFlow</div>
           <span class="cc-btn">View company</span>
         </div>
         <div class="cc-sub">Automating customer acquisition for local businesses</div>
@@ -554,7 +674,7 @@
 
       <div class="company-card">
         <div class="cc-head">
-          <div class="cc-name"><span class="dot"></span>Studio North</div>
+          <div class="cc-name"><span class="cc-logo">SN</span>Studio North</div>
           <span class="cc-btn">View company</span>
         </div>
         <div class="cc-sub">A product design studio building physical and digital goods</div>
@@ -569,6 +689,24 @@
         </div>
         <div class="cc-progress"><i style="width:88%"></i></div>
       </div>
+
+      <div class="company-card dark">
+        <div class="cc-head">
+          <div class="cc-name"><span class="cc-logo">BW</span>Build With People</div>
+          <span class="cc-btn">View company</span>
+        </div>
+        <div class="cc-sub">The team building this platform is hiring too</div>
+        <div class="cc-tags">
+          <span class="tag">Commission sales</span>
+          <span class="tag">Content</span>
+          <span class="tag">Co-founders</span>
+        </div>
+        <div class="cc-foot">
+          <span class="cc-meta"><span class="dot"></span>We're hiring</span>
+          <span class="cc-meta">Paid · Equity · Commission</span>
+        </div>
+        <div class="cc-progress"><i style="width:100%"></i></div>
+      </div>
     </div>
   </div>
 </section>
@@ -578,7 +716,7 @@
     <div class="section-head reveal">
       <span class="kicker">Browse companies, not job posts</span>
       <h2>Discover entire missions, teams, and ideas — not isolated listings.</h2>
-      <p>Every company on Sales.io publishes what it's building, who's already on the team, and exactly where you'd fit. You decide who's worth joining before you ever apply.</p>
+      <p>Every company on Build With People publishes what it's building, who's already on the team, and exactly where you'd fit. You decide who's worth joining before you ever apply.</p>
     </div>
 
     <div class="filters reveal">
@@ -632,6 +770,20 @@
         <div class="gc-comp"><span class="comp-pill">Paid</span><span class="comp-pill">Portfolio</span><span class="comp-pill">Experience</span></div>
         <div class="gc-bottom">
           <span class="gc-active"><span class="dot"></span>19 active members</span>
+          <span class="cc-btn">View company</span>
+        </div>
+      </div>
+
+      <div class="grid-card dark reveal">
+        <div class="gc-top">
+          <div class="gc-name"><span class="cc-logo">BW</span>Build With People</div>
+        </div>
+        <div class="gc-desc">The team building this platform is hiring too.</div>
+        <div class="gc-label">Currently recruiting</div>
+        <div class="gc-roles"><span class="tag">Commission sales</span><span class="tag">Content</span><span class="tag">Co-founders</span></div>
+        <div class="gc-comp"><span class="comp-pill">Paid</span><span class="comp-pill">Equity</span><span class="comp-pill">Commission</span></div>
+        <div class="gc-bottom">
+          <span class="gc-active"><span class="dot"></span>We're hiring</span>
           <span class="cc-btn">View company</span>
         </div>
       </div>
@@ -805,14 +957,14 @@
 
 <footer>
   <div class="wrap foot-row">
-    <div class="logo"><span class="mark"></span>Sales.io</div>
+    <div class="logo"><span class="mark"></span>Build With People</div>
     <div class="foot-links">
       <a href="#browse">Explore</a>
       <a href="#companies">Companies</a>
       <a href="#training">Sales opportunities</a>
       <a href="#for-companies">For companies</a>
     </div>
-    <div class="foot-copy">© 2026 Sales.io</div>
+    <div class="foot-copy">© 2026 Build With People</div>
   </div>
 </footer>
 
@@ -827,60 +979,116 @@
       </div>
       <p class="modal-sub">Tell contributors what you're building and what you need. This becomes your public company card.</p>
 
-      <div class="field-group">
-        <label class="field-label" for="companyName">Company name</label>
-        <input class="field-input" id="companyName" type="text" placeholder="e.g. Custom514">
-      </div>
-
-      <div class="field-group">
-        <label class="field-label" for="companyDesc">What are you building?</label>
-        <textarea class="field-textarea" id="companyDesc" placeholder="One or two sentences on your mission or product."></textarea>
-      </div>
-
-      <div class="field-group">
-        <span class="field-label">What are you looking for?</span>
-        <div class="chip-group" id="rolesGroup">
-          <span class="chip-select">Sales</span>
-          <span class="chip-select">Design</span>
-          <span class="chip-select">Development</span>
-          <span class="chip-select">Marketing</span>
-          <span class="chip-select">Operations</span>
-          <span class="chip-select">Cofounder</span>
-          <span class="chip-select">General help</span>
+      <div class="modal-progress">
+        <div class="modal-progress-track"><span class="modal-progress-fill" id="progressFill"></span></div>
+        <div class="modal-progress-label">
+          <span id="stepCount">Step 1 of 3</span>
+          <span class="step-name" id="stepName">Basics</span>
         </div>
       </div>
 
-      <div class="field-group">
-        <span class="field-label">How will you compensate contributors?</span>
-        <div class="chip-group" id="compGroup">
-          <span class="chip-select">Paid</span>
-          <span class="chip-select" data-commission="true">Commission</span>
-          <span class="chip-select">Equity</span>
-          <span class="chip-select">Cofounder equity</span>
-          <span class="chip-select">Experience</span>
-          <span class="chip-select">Portfolio</span>
-          <span class="chip-select">Internship</span>
-          <span class="chip-select">Short-term task</span>
+      <div class="modal-step" data-step="1">
+        <div class="field-group">
+          <label class="field-label" for="companyName">Company name</label>
+          <input class="field-input" id="companyName" type="text" placeholder="e.g. Custom514">
         </div>
-        <p class="field-hint">Select all that apply — most companies offer more than one.</p>
+        <div class="field-group">
+          <label class="field-label" for="companyDesc">What are you building?</label>
+          <textarea class="field-textarea" id="companyDesc" placeholder="One or two sentences on your mission or product."></textarea>
+        </div>
       </div>
 
-      <div class="conditional-block" id="commissionBlock">
-        <div class="cb-icon"><span class="dot"></span>Commission details</div>
-        <div class="field-row">
-          <div>
-            <label class="field-label" for="dealPrice">Avg. price per item</label>
-            <input class="field-input" id="dealPrice" type="text" placeholder="$580">
+      <div class="modal-step hidden" data-step="2">
+        <div class="field-group">
+          <span class="field-label">What stage is your company at?</span>
+          <div class="stage-tracker">
+            <div class="stage-track">
+              <span class="stage-track-fill" id="stageFill"></span>
+              <span class="stage-node" data-index="0"></span>
+              <span class="stage-node" data-index="1"></span>
+              <span class="stage-node" data-index="2"></span>
+              <span class="stage-node" data-index="3"></span>
+              <span class="stage-node" data-index="4"></span>
+            </div>
+            <div class="stage-labels">
+              <span data-index="0">Idea</span>
+              <span data-index="1">Building</span>
+              <span data-index="2">Launched</span>
+              <span data-index="3">Growing</span>
+              <span data-index="4">Established</span>
+            </div>
           </div>
-          <div>
-            <label class="field-label" for="commRange">Commission range</label>
-            <input class="field-input" id="commRange" type="text" placeholder="8% – 15%">
-          </div>
+          <p class="field-hint stage-desc" id="stageDesc">Still validating the concept — no product built yet.</p>
         </div>
-        <p class="field-hint">Contributors see this before they start selling, so keep it accurate.</p>
       </div>
 
-      <button class="btn btn-dark modal-submit" id="modalSubmit">Create company profile</button>
+      <div class="modal-step hidden" data-step="3">
+        <div class="field-group">
+          <span class="field-label">What are you looking for?</span>
+          <div class="chip-group" id="rolesGroup">
+            <span class="chip-select">Sales</span>
+            <span class="chip-select">Design</span>
+            <span class="chip-select">Development</span>
+            <span class="chip-select">Marketing</span>
+            <span class="chip-select">Operations</span>
+            <span class="chip-select">Cofounder</span>
+            <span class="chip-select">General help</span>
+          </div>
+          <p class="field-hint">Select every role you're actively recruiting for.</p>
+        </div>
+      </div>
+
+      <div class="modal-step hidden" data-step="4">
+        <div class="field-group">
+          <span class="field-label">How will you compensate contributors?</span>
+          <div class="chip-group" id="compGroup">
+            <span class="chip-select">Paid</span>
+            <span class="chip-select" data-commission="true">Commission</span>
+            <span class="chip-select">Equity</span>
+            <span class="chip-select">Cofounder equity</span>
+            <span class="chip-select">Experience</span>
+            <span class="chip-select">Portfolio</span>
+            <span class="chip-select">Internship</span>
+            <span class="chip-select">Short-term task</span>
+          </div>
+          <p class="field-hint">Select all that apply — most companies offer more than one.</p>
+        </div>
+
+        <div class="conditional-block" id="commissionBlock">
+          <div class="cb-icon"><span class="dot"></span>Commission details</div>
+          <div class="field-row">
+            <div>
+              <label class="field-label" for="dealPrice">Avg. price per item</label>
+              <input class="field-input" id="dealPrice" type="text" placeholder="$580">
+            </div>
+            <div>
+              <label class="field-label" for="commRange">Commission range</label>
+              <input class="field-input" id="commRange" type="text" placeholder="8% – 15%">
+            </div>
+          </div>
+          <p class="field-hint">Contributors see this before they start selling, so keep it accurate.</p>
+        </div>
+      </div>
+
+      <div class="modal-step hidden" data-step="5">
+        <div class="field-group">
+          <span class="field-label">What's your monthly revenue?</span>
+          <div class="revenue-slider">
+            <div class="revenue-value" id="revenueValue">Pre-revenue</div>
+            <input type="range" min="0" max="6" step="1" value="0" class="range-input" id="revenueRange">
+            <div class="revenue-scale"><span>Pre-revenue</span><span>$50k+ / mo</span></div>
+          </div>
+          <p class="field-hint privacy-hint">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="6.5" width="8" height="5.5" rx="1.2" stroke="#8A8F98" stroke-width="1.2"/><path d="M4.5 6.5V4.5a2.5 2.5 0 0 1 5 0v2" stroke="#8A8F98" stroke-width="1.2"/></svg>
+            This is private by default. You can choose to make it visible on your company card later.
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-nav">
+        <button class="btn btn-ghost" id="modalBack" style="visibility:hidden">Back</button>
+        <button class="btn btn-dark modal-submit" id="modalNext">Continue</button>
+      </div>
     </div>
 
     <div class="modal-success" id="modalSuccess">
@@ -888,7 +1096,7 @@
         <svg width="22" height="22" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <h3>Your company profile is in review</h3>
-      <p>We'll let you know as soon as it's live and visible to contributors on Sales.io.</p>
+      <p>We'll let you know as soon as it's live and visible to contributors on Build With People.</p>
     </div>
   </div>
 </div>
@@ -925,6 +1133,24 @@
   const modalForm = document.getElementById('modalForm');
   const modalSuccess = document.getElementById('modalSuccess');
   const commissionBlock = document.getElementById('commissionBlock');
+  const steps = Array.from(document.querySelectorAll('.modal-step'));
+  const progressFill = document.getElementById('progressFill');
+  const stepCount = document.getElementById('stepCount');
+  const stepName = document.getElementById('stepName');
+  const backBtn = document.getElementById('modalBack');
+  const nextBtn = document.getElementById('modalNext');
+  const totalSteps = steps.length;
+  const stepNames = { 1:'Basics', 2:'Company stage', 3:'What you need', 4:'Compensation', 5:'Revenue' };
+  let currentStep = 1;
+
+  function renderStep(){
+    steps.forEach(s => s.classList.toggle('hidden', Number(s.dataset.step) !== currentStep));
+    progressFill.style.width = ((currentStep - 1) / totalSteps * 100) + '%';
+    stepCount.textContent = `Step ${currentStep} of ${totalSteps}`;
+    stepName.textContent = stepNames[currentStep];
+    backBtn.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+    nextBtn.textContent = currentStep === totalSteps ? 'Create company profile' : 'Continue';
+  }
 
   function resetModal(){
     modalForm.style.display = 'block';
@@ -935,6 +1161,11 @@
     document.getElementById('companyDesc').value = '';
     document.getElementById('dealPrice').value = '';
     document.getElementById('commRange').value = '';
+    revenueRange.value = 0;
+    updateRevenueDisplay();
+    setStage(0);
+    currentStep = 1;
+    renderStep();
   }
 
   function openModal(){
@@ -955,6 +1186,12 @@
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
 
   // chip toggling
+  document.querySelectorAll('#stageGroup .chip-select').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#stageGroup .chip-select').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
   document.querySelectorAll('#rolesGroup .chip-select').forEach(chip=>{
     chip.addEventListener('click', ()=> chip.classList.toggle('selected'));
   });
@@ -968,10 +1205,65 @@
     });
   });
 
-  document.getElementById('modalSubmit').addEventListener('click', ()=>{
-    modalForm.style.display = 'none';
-    modalSuccess.classList.add('show');
+  backBtn.addEventListener('click', ()=>{
+    if(currentStep > 1){ currentStep--; renderStep(); }
   });
+
+  // stage tracker
+  const stageNodes = Array.from(document.querySelectorAll('.stage-node'));
+  const stageLabels = Array.from(document.querySelectorAll('.stage-labels span'));
+  const stageFill = document.getElementById('stageFill');
+  const stageDesc = document.getElementById('stageDesc');
+  const stageInfo = [
+    'Still validating the concept — no product built yet.',
+    'Actively building the first version of the product.',
+    'Live with early users, gathering real feedback.',
+    'Consistent traction and expanding the team.',
+    'Stable operations with a proven, repeatable business.'
+  ];
+  let selectedStage = null;
+
+  function setStage(index){
+    selectedStage = index;
+    const pct = (index / (stageNodes.length - 1)) * 100;
+    stageFill.style.width = pct + '%';
+    stageNodes.forEach(n=>{
+      const i = Number(n.dataset.index);
+      n.classList.toggle('passed', i < index);
+      n.classList.toggle('active', i === index);
+    });
+    stageLabels.forEach(l=> l.classList.toggle('active', Number(l.dataset.index) === index));
+    stageDesc.textContent = stageInfo[index];
+  }
+
+  stageNodes.forEach(n=> n.addEventListener('click', ()=> setStage(Number(n.dataset.index))));
+  stageLabels.forEach(l=> l.addEventListener('click', ()=> setStage(Number(l.dataset.index))));
+  setStage(0);
+
+  // revenue slider
+  const revenueRange = document.getElementById('revenueRange');
+  const revenueValue = document.getElementById('revenueValue');
+  const revenueBrackets = ['Pre-revenue','$1k – 2k / mo','$2k – 5k / mo','$5k – 10k / mo','$10k – 25k / mo','$25k – 50k / mo','$50k+ / mo'];
+  function updateRevenueDisplay(){
+    const v = Number(revenueRange.value);
+    revenueValue.textContent = revenueBrackets[v];
+    const pct = (v / revenueRange.max) * 100;
+    revenueRange.style.background = `linear-gradient(to right, var(--green-dot) ${pct}%, var(--border) ${pct}%)`;
+  }
+  revenueRange.addEventListener('input', updateRevenueDisplay);
+  updateRevenueDisplay();
+
+  nextBtn.addEventListener('click', ()=>{
+    if(currentStep < totalSteps){
+      currentStep++;
+      renderStep();
+    } else {
+      modalForm.style.display = 'none';
+      modalSuccess.classList.add('show');
+    }
+  });
+
+  renderStep();
 </script>
 
 </body>
