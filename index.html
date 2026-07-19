@@ -1286,12 +1286,12 @@
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <p class="modal-sub">A few quick questions so we can match you with the right companies.</p>
+      <p class="modal-sub">A few quick questions — whether you're looking to join a team or bring your own idea to life.</p>
 
       <div class="modal-progress">
         <div class="modal-progress-track"><span class="modal-progress-fill" id="joinProgressFill"></span></div>
         <div class="modal-progress-label">
-          <span id="joinStepCount">Step 1 of 4</span>
+          <span id="joinStepCount">Step 1 of 6</span>
           <span class="step-name" id="joinStepName">Basics</span>
         </div>
       </div>
@@ -1305,9 +1305,26 @@
           <label class="field-label" for="joinEmail">Email address</label>
           <input class="field-input" id="joinEmail" type="email" placeholder="you@email.com">
         </div>
+        <div class="field-group">
+          <label class="field-label" for="joinHeadline">One-line headline</label>
+          <input class="field-input" id="joinHeadline" type="text" placeholder="e.g. Full-stack marketer with 5 years in DTC brands">
+          <p class="field-hint">This is the first thing companies see on your profile.</p>
+        </div>
       </div>
 
       <div class="modal-step hidden" data-step="2">
+        <div class="field-group">
+          <span class="field-label">Which best describes you?</span>
+          <div class="chip-group" id="joinPathGroup">
+            <span class="chip-select" data-path="team">Join an existing team</span>
+            <span class="chip-select" data-path="founder">Bring my own idea</span>
+            <span class="chip-select" data-path="either">Open to either</span>
+          </div>
+          <p class="field-hint">This just tailors a couple of the next questions — you're not locking anything in.</p>
+        </div>
+      </div>
+
+      <div class="modal-step hidden" data-step="3">
         <div class="field-group">
           <span class="field-label">What are you looking to do?</span>
           <div class="chip-group" id="joinRolesGroup">
@@ -1315,15 +1332,33 @@
             <span class="chip-select">Design</span>
             <span class="chip-select">Development</span>
             <span class="chip-select">Marketing</span>
+            <span class="chip-select">Videography</span>
             <span class="chip-select">Operations</span>
             <span class="chip-select">Cofounder</span>
             <span class="chip-select">General help</span>
           </div>
           <p class="field-hint">Select everything you'd consider — you can narrow it down later.</p>
         </div>
+
+        <div class="conditional-block" id="joinFounderBlock">
+          <div class="cb-icon"><span class="dot"></span>Tell us about your idea</div>
+          <div class="field-group">
+            <label class="field-label" for="joinIdea">What are you building, or want to build?</label>
+            <textarea class="field-textarea" id="joinIdea" placeholder="One or two sentences on the idea or problem you're solving."></textarea>
+          </div>
+          <div class="field-group">
+            <span class="field-label">What stage is it at?</span>
+            <div class="chip-group" id="joinStageGroup">
+              <span class="chip-select">Just an idea</span>
+              <span class="chip-select">Building it</span>
+              <span class="chip-select">Launched</span>
+              <span class="chip-select">Growing</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="modal-step hidden" data-step="3">
+      <div class="modal-step hidden" data-step="4">
         <div class="field-group">
           <span class="field-label">How do you want to be compensated?</span>
           <div class="chip-group" id="joinCompGroup">
@@ -1339,7 +1374,19 @@
         </div>
       </div>
 
-      <div class="modal-step hidden" data-step="4">
+      <div class="modal-step hidden" data-step="5">
+        <div class="field-group">
+          <label class="field-label" for="joinSkills">Skills, tools, or specialties</label>
+          <input class="field-input" id="joinSkills" type="text" placeholder="e.g. Figma, cold outreach, Premiere Pro">
+          <p class="field-hint">Comma-separated — this becomes searchable on your profile.</p>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="joinLink">Portfolio, LinkedIn, or website</label>
+          <input class="field-input" id="joinLink" type="text" placeholder="https://">
+        </div>
+      </div>
+
+      <div class="modal-step hidden" data-step="6">
         <div class="field-group">
           <span class="field-label">How much time can you commit?</span>
           <div class="chip-group" id="joinCommitGroup">
@@ -1348,7 +1395,7 @@
             <span class="chip-select">Part-time</span>
             <span class="chip-select">Full-time</span>
           </div>
-          <p class="field-hint">This helps companies gauge fit before reaching out.</p>
+          <p class="field-hint">This helps companies (and cofounders) gauge fit before reaching out.</p>
         </div>
       </div>
 
@@ -1615,7 +1662,8 @@
   const joinBackBtn = document.getElementById('joinModalBack');
   const joinNextBtn = document.getElementById('joinModalNext');
   const joinTotalSteps = joinSteps.length;
-  const joinStepNames = { 1:'Basics', 2:'What you want to do', 3:'Compensation', 4:'Availability' };
+  const joinStepNames = { 1:'Basics', 2:'Your path', 3:'What you want to do', 4:'Compensation', 5:'Skills & links', 6:'Availability' };
+  const joinFounderBlock = document.getElementById('joinFounderBlock');
   let joinCurrentStep = 1;
 
   function renderJoinStep(){
@@ -1631,8 +1679,13 @@
     joinModalForm.style.display = 'block';
     joinModalSuccess.classList.remove('show');
     joinOverlay.querySelectorAll('.chip-select').forEach(c=>c.classList.remove('selected'));
+    joinFounderBlock.classList.remove('show');
     document.getElementById('joinName').value = '';
     document.getElementById('joinEmail').value = '';
+    document.getElementById('joinHeadline').value = '';
+    document.getElementById('joinIdea').value = '';
+    document.getElementById('joinSkills').value = '';
+    document.getElementById('joinLink').value = '';
     joinCurrentStep = 1;
     renderJoinStep();
   }
@@ -1661,10 +1714,23 @@
   joinOverlay.querySelectorAll('#joinCompGroup .chip-select').forEach(chip=>{
     chip.addEventListener('click', ()=> chip.classList.toggle('selected'));
   });
+  joinOverlay.querySelectorAll('#joinStageGroup .chip-select').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      joinOverlay.querySelectorAll('#joinStageGroup .chip-select').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+    });
+  });
   joinOverlay.querySelectorAll('#joinCommitGroup .chip-select').forEach(chip=>{
     chip.addEventListener('click', ()=>{
       joinOverlay.querySelectorAll('#joinCommitGroup .chip-select').forEach(c=>c.classList.remove('selected'));
       chip.classList.add('selected');
+    });
+  });
+  joinOverlay.querySelectorAll('#joinPathGroup .chip-select').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      joinOverlay.querySelectorAll('#joinPathGroup .chip-select').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+      joinFounderBlock.classList.toggle('show', chip.dataset.path === 'founder' || chip.dataset.path === 'either');
     });
   });
 
@@ -1679,10 +1745,18 @@
     } else {
       const name = document.getElementById('joinName').value.trim();
       document.getElementById('joinSuccessName').textContent = name ? name.split(' ')[0] : 'there';
-      const picked = Array.from(joinOverlay.querySelectorAll('.chip-select.selected')).map(c=>c.textContent);
-      document.getElementById('joinSuccessSummary').textContent = picked.length
+      const picked = Array.from(joinOverlay.querySelectorAll(
+        '#joinRolesGroup .chip-select.selected, #joinCompGroup .chip-select.selected, #joinCommitGroup .chip-select.selected'
+      )).map(c=>c.textContent);
+      let summary = picked.length
         ? `We'll start matching you with companies looking for: ${picked.join(' · ')}.`
         : "We'll start matching you with companies looking for what you offer.";
+      const pathChip = joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
+      const pathVal = pathChip ? pathChip.dataset.path : null;
+      if(pathVal === 'founder' || pathVal === 'either'){
+        summary += " We'll also take a look at your idea and follow up about next steps.";
+      }
+      document.getElementById('joinSuccessSummary').textContent = summary;
       joinModalForm.style.display = 'none';
       joinModalSuccess.classList.add('show');
     }
