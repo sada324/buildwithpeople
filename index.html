@@ -630,6 +630,10 @@
   .field-group{ margin-bottom:22px; }
   .field-label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:9px; display:block; }
   .field-hint{ font-size:12px; color:var(--grey); margin-top:6px; }
+  .field-error{ display:none; font-size:12px; color:#D14343; margin-top:8px; font-weight:500; }
+  .field-error.show{ display:block; }
+  .field-input.error{ border-color:#D14343; }
+  .chip-group.error .chip-select{ border-color:#EFC2C2; }
   .field-input, .field-textarea{
     width:100%; border:1px solid var(--border-strong); border-radius:9px;
     padding:11px 13px; font-size:14px; font-family:var(--font-body); color:var(--ink);
@@ -1302,7 +1306,7 @@
         </div>
       </div>
 
-      <div class="dash-panel dash-messages">
+      <div class="dash-panel dash-messages" id="dashMessagesPanel">
         <div class="dash-panel-head"><h3>Messages</h3></div>
         <div class="dash-empty">
           <div class="dash-empty-icon">
@@ -1492,6 +1496,7 @@
           <input class="field-input" id="joinHeadline" type="text" placeholder="e.g. I help small businesses grow through smart marketing and outreach">
           <p class="field-hint">This is the first thing companies see on your profile.</p>
         </div>
+        <p class="field-error" id="joinErrStep1">Enter your name and email to continue.</p>
       </div>
 
       <div class="modal-step hidden" data-step="2">
@@ -1503,6 +1508,7 @@
             <span class="chip-select" data-path="either">Open to either</span>
           </div>
           <p class="field-hint">This just tailors a couple of the next questions — you're not locking anything in.</p>
+          <p class="field-error" id="joinErrStep2">Pick one to continue.</p>
         </div>
       </div>
 
@@ -1520,6 +1526,7 @@
             <span class="chip-select">General help</span>
           </div>
           <p class="field-hint">Select everything you'd consider — you can narrow it down later.</p>
+          <p class="field-error" id="joinErrStep3">Select at least one to continue.</p>
         </div>
 
         <div class="conditional-block" id="joinFounderBlock">
@@ -1578,6 +1585,7 @@
             <span class="chip-select">Full-time</span>
           </div>
           <p class="field-hint">This helps companies (and cofounders) gauge fit before reaching out.</p>
+          <p class="field-error" id="joinErrStep6">Pick one to continue.</p>
         </div>
       </div>
 
@@ -1618,7 +1626,7 @@
     </div>
     <div class="view-actions hidden" id="viewActionsMember">
       <a href="#" class="btn btn-dark">Apply to this role</a>
-      <button type="button" class="btn btn-ghost" id="viewMemberClose">Close</button>
+      <button type="button" class="btn btn-ghost" id="viewMemberMessageBtn">Message</button>
     </div>
   </div>
 </div>
@@ -1732,7 +1740,12 @@
   }
   document.querySelectorAll('.js-view-company').forEach(bindViewCompanyButton);
   document.getElementById('viewClose').addEventListener('click', closeViewPopup);
-  document.getElementById('viewMemberClose').addEventListener('click', closeViewPopup);
+  document.getElementById('viewMemberMessageBtn').addEventListener('click', ()=>{
+    closeViewPopup();
+    setTimeout(()=>{
+      document.getElementById('dashMessagesPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 200);
+  });
   viewOverlay.addEventListener('click', (e)=>{ if(e.target === viewOverlay) closeViewPopup(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && viewOverlay.classList.contains('open')) closeViewPopup(); });
 
@@ -1937,12 +1950,50 @@
     joinStepName.textContent = joinStepNames[joinCurrentStep];
     joinBackBtn.style.visibility = joinCurrentStep === 1 ? 'hidden' : 'visible';
     joinNextBtn.textContent = joinCurrentStep === joinTotalSteps ? 'Finish' : 'Continue';
+    joinOverlay.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+    joinOverlay.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+    joinOverlay.querySelectorAll('.chip-group.error').forEach(el => el.classList.remove('error'));
+  }
+
+  function validateJoinStep(step){
+    if(step === 1){
+      const nameEl = document.getElementById('joinName');
+      const emailEl = document.getElementById('joinEmail');
+      const nameOk = nameEl.value.trim().length > 0;
+      const emailOk = emailEl.value.trim().length > 0;
+      nameEl.classList.toggle('error', !nameOk);
+      emailEl.classList.toggle('error', !emailOk);
+      document.getElementById('joinErrStep1').classList.toggle('show', !(nameOk && emailOk));
+      return nameOk && emailOk;
+    }
+    if(step === 2){
+      const ok = !!joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
+      document.getElementById('joinPathGroup').classList.toggle('error', !ok);
+      document.getElementById('joinErrStep2').classList.toggle('show', !ok);
+      return ok;
+    }
+    if(step === 3){
+      const ok = joinOverlay.querySelectorAll('#joinRolesGroup .chip-select.selected').length > 0;
+      document.getElementById('joinRolesGroup').classList.toggle('error', !ok);
+      document.getElementById('joinErrStep3').classList.toggle('show', !ok);
+      return ok;
+    }
+    if(step === 6){
+      const ok = !!joinOverlay.querySelector('#joinCommitGroup .chip-select.selected');
+      document.getElementById('joinCommitGroup').classList.toggle('error', !ok);
+      document.getElementById('joinErrStep6').classList.toggle('show', !ok);
+      return ok;
+    }
+    return true;
   }
 
   function resetJoinModal(){
     joinModalForm.style.display = 'block';
     joinModalSuccess.classList.remove('show');
     joinOverlay.querySelectorAll('.chip-select').forEach(c=>c.classList.remove('selected'));
+    joinOverlay.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+    joinOverlay.querySelectorAll('.field-input.error').forEach(el => el.classList.remove('error'));
+    joinOverlay.querySelectorAll('.chip-group.error').forEach(el => el.classList.remove('error'));
     joinFounderBlock.classList.remove('show');
     document.getElementById('joinName').value = '';
     document.getElementById('joinEmail').value = '';
@@ -2013,6 +2064,8 @@
   });
 
   joinNextBtn.addEventListener('click', ()=>{
+    if(!validateJoinStep(joinCurrentStep)) return;
+
     if(joinCurrentStep < joinTotalSteps){
       joinCurrentStep++;
       renderJoinStep();
