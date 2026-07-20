@@ -784,7 +784,59 @@
     width:46px; height:46px; border-radius:50%; background:var(--ink); color:var(--white);
     display:flex; align-items:center; justify-content:center;
     font-family:var(--font-display); font-weight:700; font-size:15px; flex-shrink:0;
+    overflow:hidden;
   }
+  .dash-profile-avatar img, .dash-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar-upload-wrap{ position:relative; flex-shrink:0; }
+  .avatar-upload-btn{
+    position:absolute; right:-2px; bottom:-2px; width:20px; height:20px; border-radius:50%;
+    background:var(--ink); border:2px solid var(--white); color:var(--white);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition: transform .15s ease;
+  }
+  .avatar-upload-btn:hover{ transform:scale(1.1); }
+  #avatarError{ margin-top:10px; }
+
+  .conversation-list{ display:flex; flex-direction:column; gap:4px; }
+  .conversation-item{
+    display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    padding:12px 6px; border:none; border-bottom:1px solid var(--border); background:none; cursor:pointer;
+    transition: background .15s ease;
+  }
+  .conversation-item:last-child{ border-bottom:none; }
+  .conversation-item:hover{ background:var(--off-white); }
+  .conversation-avatar{
+    width:36px; height:36px; border-radius:50%; background:var(--ink); color:var(--white); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    font-family:var(--font-display); font-weight:700; font-size:12.5px;
+  }
+  .conversation-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .conversation-body{ flex:1; min-width:0; }
+  .conversation-name{ font-size:13.5px; font-weight:600; margin-bottom:2px; }
+  .conversation-preview{ font-size:12.5px; color:var(--grey); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .conversation-time{ font-size:11px; color:var(--grey); flex-shrink:0; }
+
+  .chat-modal{ display:flex; flex-direction:column; height:70vh; max-height:560px; padding:0; overflow:hidden; }
+  .chat-head{ display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .chat-head-id{ display:flex; align-items:center; gap:12px; }
+  .chat-avatar{
+    width:36px; height:36px; border-radius:50%; background:var(--ink); color:var(--white); overflow:hidden;
+    display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:12.5px;
+  }
+  .chat-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .chat-title{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .chat-body{ flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:10px; }
+  .chat-bubble{ max-width:76%; padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.4; }
+  .chat-bubble.theirs{ align-self:flex-start; background:var(--off-white); color:var(--ink); border-bottom-left-radius:4px; }
+  .chat-bubble.mine{ align-self:flex-end; background:var(--ink); color:var(--white); border-bottom-right-radius:4px; }
+  .chat-empty{ margin:auto; text-align:center; color:var(--grey); font-size:13px; }
+  .chat-foot{ display:flex; gap:10px; padding:16px 22px; border-top:1px solid var(--border); flex-shrink:0; }
+  .chat-input{
+    flex:1; border:1px solid var(--border-strong); border-radius:10px; padding:11px 13px;
+    font-size:13.5px; font-family:var(--font-body); background:var(--off-white); resize:none;
+  }
+  .chat-input:focus{ border-color:var(--green); background:var(--white); }
+  .chat-send{ flex-shrink:0; padding:0 18px; }
   .dash-profile-name{ font-weight:600; font-size:15px; margin-bottom:2px; }
   .dash-profile-bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
   .dash-profile-idea{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
@@ -810,6 +862,7 @@
   }
   .dash-match-tags{ display:flex; flex-wrap:wrap; gap:6px; }
   .dash-match-card .cc-btn{ align-self:flex-start; margin-top:2px; }
+  .dash-match-actions{ display:flex; gap:8px; align-self:flex-start; margin-top:2px; }
 
   .dash-activity{ grid-area:activity; }
   .dash-empty{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:22px 10px; }
@@ -1316,7 +1369,13 @@
           <h3>Your profile</h3>
         </div>
         <div class="dash-profile-id">
-          <div class="dash-profile-avatar" id="dashProfileAvatar">JR</div>
+          <div class="avatar-upload-wrap">
+            <div class="dash-profile-avatar" id="dashProfileAvatar">JR</div>
+            <button type="button" class="avatar-upload-btn" id="avatarUploadBtn" aria-label="Change profile picture" title="Change profile picture">
+              <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2 4.5h2l1-1.5h4l1 1.5h2a1 1 0 0 1 1 1V11a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z" stroke="white" stroke-width="1.1" stroke-linejoin="round"/><circle cx="7" cy="7.5" r="2" stroke="white" stroke-width="1.1"/></svg>
+            </button>
+            <input type="file" id="avatarFileInput" accept="image/*" style="display:none">
+          </div>
           <div>
             <div class="dash-profile-name" id="dashProfileName">There</div>
             <div class="dash-profile-bio" id="dashProfileBio">Bio not added yet.</div>
@@ -1327,6 +1386,7 @@
         <div class="dash-profile-foot">
           <span class="dash-commit-pill" id="dashCommitPill">Availability not set</span>
         </div>
+        <p class="field-error" id="avatarError">Couldn't update your profile picture — try again.</p>
       </div>
 
       <div class="dash-panel dash-matches">
@@ -1340,7 +1400,7 @@
       <div class="dash-panel dash-snapshot">
         <div class="dash-panel-head"><h3>Your momentum</h3></div>
         <div class="dash-snapshot-grid">
-          <div class="metric"><span class="num">0</span><span class="lbl">Conversations started</span></div>
+          <div class="metric"><span class="num" id="dashConvoCount">0</span><span class="lbl">Conversations started</span></div>
           <div class="metric"><span class="num" id="dashMatchCount">0</span><span class="lbl">Companies that fit you</span></div>
           <div class="metric"><span class="num" id="dashProfileScore">40%</span><span class="lbl">Profile strength</span></div>
         </div>
@@ -1348,11 +1408,12 @@
 
       <div class="dash-panel dash-messages" id="dashMessagesPanel">
         <div class="dash-panel-head"><h3>Messages</h3></div>
-        <div class="dash-empty">
+        <div class="conversation-list" id="conversationList" style="display:none"></div>
+        <div class="dash-empty" id="messagesEmpty">
           <div class="dash-empty-icon">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 4.5a1.5 1.5 0 0 1 1.5-1.5h10a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H7l-3 3v-3H4a1.5 1.5 0 0 1-1.5-1.5v-7Z" stroke="#8A8F98" stroke-width="1.4" stroke-linejoin="round"/></svg>
           </div>
-          <p>No messages yet. When a company reaches out, your conversation shows up here.</p>
+          <p id="messagesEmptyText">No messages yet. When a company reaches out, your conversation shows up here.</p>
         </div>
       </div>
 
@@ -1784,12 +1845,26 @@
     </div>
     <p class="modal-sub" id="editListingSub">Update what contributors see for this company.</p>
     <div class="field-group">
+      <span class="field-label">Logo</span>
+      <div class="avatar-upload-wrap" style="display:inline-flex;">
+        <div class="dash-profile-avatar" id="editListingLogoPreview" style="width:56px;height:56px;font-size:17px;">C</div>
+        <button type="button" class="avatar-upload-btn" id="editListingLogoBtn" aria-label="Change logo" title="Change logo">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M2 4.5h2l1-1.5h4l1 1.5h2a1 1 0 0 1 1 1V11a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z" stroke="white" stroke-width="1.1" stroke-linejoin="round"/><circle cx="7" cy="7.5" r="2" stroke="white" stroke-width="1.1"/></svg>
+        </button>
+        <input type="file" id="editListingLogoInput" accept="image/*" style="display:none">
+      </div>
+    </div>
+    <div class="field-group">
       <label class="field-label" for="editListingName">Company name</label>
       <input class="field-input" id="editListingName" type="text">
     </div>
     <div class="field-group">
       <label class="field-label" for="editListingDesc">What are you building?</label>
       <textarea class="field-textarea" id="editListingDesc"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="editListingWebsite">Website</label>
+      <input class="field-input" id="editListingWebsite" type="url" placeholder="https://yourcompany.com">
     </div>
     <div class="field-group">
       <label class="field-label" for="editListingStage">Stage</label>
@@ -1826,6 +1901,25 @@
     </div>
     <p class="field-error" id="editListingError">Something went wrong — try again.</p>
     <button type="button" class="btn btn-dark modal-submit" id="editListingSaveBtn">Save changes</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="chatModalOverlay">
+  <div class="modal chat-modal">
+    <div class="chat-head">
+      <div class="chat-head-id">
+        <div class="chat-avatar" id="chatAvatar"></div>
+        <div class="chat-title" id="chatTitle">Conversation</div>
+      </div>
+      <button class="modal-close" id="chatModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-foot">
+      <textarea class="chat-input" id="chatInput" rows="1" placeholder="Write a message…"></textarea>
+      <button type="button" class="btn btn-dark chat-send" id="chatSendBtn">Send</button>
+    </div>
   </div>
 </div>
 
@@ -1920,7 +2014,8 @@
       pathVal: m.path || null,
       roles: m.roles || [],
       comp: m.comp || [],
-      commit: m.commit || ''
+      commit: m.commit || '',
+      avatarUrl: null
     };
   }
 
@@ -1934,7 +2029,8 @@
       pathVal: row.path || null,
       roles: row.roles || [],
       comp: row.comp || [],
-      commit: row.availability || ''
+      commit: row.availability || '',
+      avatarUrl: row.avatar_url || null
     };
   }
 
@@ -2032,6 +2128,7 @@
 
   function showMemberView(card){
     const name = cardName(card) || 'Company profile';
+    currentViewCompanyName = name;
     const descEl = card && card.querySelector('.cc-sub, .gc-desc');
     const pillEls = card ? card.querySelectorAll('.cc-tags .tag, .gc-roles .tag, .comp-pill') : [];
     const logoSrc = cardLogoImg(card);
@@ -2067,9 +2164,7 @@
   document.getElementById('viewClose').addEventListener('click', closeViewPopup);
   document.getElementById('viewMemberMessageBtn').addEventListener('click', ()=>{
     closeViewPopup();
-    setTimeout(()=>{
-      document.getElementById('dashMessagesPanel')?.scrollIntoView({ behavior:'smooth', block:'start' });
-    }, 200);
+    if(currentViewCompanyName) openChatForCompanyName(currentViewCompanyName);
   });
   viewOverlay.addEventListener('click', (e)=>{ if(e.target === viewOverlay) closeViewPopup(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && viewOverlay.classList.contains('open')) closeViewPopup(); });
@@ -2595,8 +2690,71 @@
     return `${words.slice(0, -1).join(', ')}, and ${words[words.length - 1]}`;
   }
 
+  function renderMatchesList(companies, profile, editableNames){
+    const scored = companies
+      .map(c => ({ ...c, overlap: c.roles.filter(r => profile.roles.includes(r)).length }))
+      .sort((a, b) => b.overlap - a.overlap);
+
+    const matchListEl = document.getElementById('dashMatchList');
+    matchListEl.innerHTML = scored.map(c => {
+      const logo = c.logoImg
+        ? `<span class="cc-logo"><img src="${c.logoImg}" alt="${c.name} logo"></span>`
+        : `<span class="dot"></span>`;
+      const badge = c.overlap > 0 ? `<span class="dash-match-badge">Matches you</span>` : '';
+      const roleTags = c.roles.map(r => `<span class="tag">${r}</span>`).join('');
+      const compPills = c.comp.map(p => `<span class="comp-pill">${p}</span>`).join('');
+      const canEdit = editableNames === null || editableNames.has(c.name);
+      const editBtn = canEdit
+        ? `<button type="button" class="cc-btn js-edit-company" data-company-name="${escapeHtml(c.name)}">Edit</button>`
+        : '';
+      return `
+        <div class="dash-match-card">
+          <div class="dash-match-top">
+            <div class="gc-name">${logo}${c.name}</div>
+            ${badge}
+          </div>
+          <div class="gc-desc">${c.desc}</div>
+          <div class="dash-match-tags gc-roles">${roleTags}${compPills}</div>
+          <div class="dash-match-actions">
+            <button type="button" class="cc-btn js-view-company">View company</button>
+            ${editBtn}
+          </div>
+        </div>`;
+    }).join('');
+    bindViewCompanyButtons(matchListEl);
+    matchListEl.querySelectorAll('.js-edit-company').forEach(btn=>{
+      btn.addEventListener('click', ()=> openEditListingByName(btn.dataset.companyName));
+    });
+
+    const peopleList = joinWithAnd(rolesToPeople(profile.roles));
+    document.getElementById('dashMatchCount').textContent = scored.filter(c => c.overlap > 0).length;
+    document.getElementById('dashMatchesSub').textContent = profile.roles.length
+      ? `Companies looking for ${peopleList}`
+      : "Based on what you're looking for";
+  }
+
+  // Fetches live company edits + the viewer's edit rights and re-renders the
+  // matches list in place, without blocking the initial dashboard paint.
+  async function refreshDashboardMatches(profile){
+    const [companyDirectory, editableNames] = await Promise.all([
+      fetchCompanyDirectory(),
+      fetchMyEditableCompanyNames()
+    ]);
+    const merged = DASH_COMPANIES.map(c => {
+      const live = companyDirectory[c.name];
+      return live ? {
+        ...c,
+        desc: live.description || c.desc,
+        roles: (live.roles && live.roles.length) ? live.roles : c.roles,
+        comp: (live.comp && live.comp.length) ? live.comp : c.comp,
+        logoImg: live.logo_url || c.logoImg
+      } : c;
+    });
+    renderMatchesList(merged, profile, editableNames);
+  }
+
   function enterDashboard(profile){
-    profile = profile || { name:'', headline:'', skills:'', idea:'', roles:[], comp:[], commit:'' };
+    profile = profile || { name:'', headline:'', skills:'', idea:'', roles:[], comp:[], commit:'', avatarUrl:null };
     const firstName = profile.name ? profile.name.split(' ')[0] : 'there';
     const peopleList = joinWithAnd(rolesToPeople(profile.roles));
 
@@ -2605,9 +2763,7 @@
       ? `Here's what's happening for ${peopleList} right now.`
       : "Here's what's happening for you right now.";
 
-    const initialsText = initials(profile.name || 'You');
-    document.getElementById('dashAvatar').textContent = initialsText;
-    document.getElementById('dashProfileAvatar').textContent = initialsText;
+    applyAvatarImage(profile.avatarUrl, profile.name, ['dashAvatar', 'dashProfileAvatar']);
     document.getElementById('dashProfileName').textContent = profile.name || 'There';
     document.getElementById('dashProfileBio').textContent = profile.headline || 'Bio not added yet.';
 
@@ -2626,35 +2782,7 @@
     document.getElementById('dashCompChips').innerHTML = profile.comp.map(c => `<span class="comp-pill">${c}</span>`).join('');
     document.getElementById('dashCommitPill').textContent = profile.commit || 'Availability not set';
 
-    const scored = DASH_COMPANIES
-      .map(c => ({ ...c, overlap: c.roles.filter(r => profile.roles.includes(r)).length }))
-      .sort((a, b) => b.overlap - a.overlap);
-
-    const matchListEl = document.getElementById('dashMatchList');
-    matchListEl.innerHTML = scored.map(c => {
-      const logo = c.logoImg
-        ? `<span class="cc-logo"><img src="${c.logoImg}" alt="${c.name} logo"></span>`
-        : `<span class="dot"></span>`;
-      const badge = c.overlap > 0 ? `<span class="dash-match-badge">Matches you</span>` : '';
-      const roleTags = c.roles.map(r => `<span class="tag">${r}</span>`).join('');
-      const compPills = c.comp.map(p => `<span class="comp-pill">${p}</span>`).join('');
-      return `
-        <div class="dash-match-card">
-          <div class="dash-match-top">
-            <div class="gc-name">${logo}${c.name}</div>
-            ${badge}
-          </div>
-          <div class="gc-desc">${c.desc}</div>
-          <div class="dash-match-tags gc-roles">${roleTags}${compPills}</div>
-          <button type="button" class="cc-btn js-view-company">View company</button>
-        </div>`;
-    }).join('');
-    bindViewCompanyButtons(matchListEl);
-
-    document.getElementById('dashMatchCount').textContent = scored.filter(c => c.overlap > 0).length;
-    document.getElementById('dashMatchesSub').textContent = profile.roles.length
-      ? `Companies looking for ${peopleList}`
-      : "Based on what you're looking for";
+    renderMatchesList(DASH_COMPANIES, profile, new Set());
 
     let score = 20;
     if(profile.headline) score += 20;
@@ -2669,6 +2797,8 @@
 
     currentMode = 'user';
     showView('dashboard');
+    refreshDashboardMatches(profile);
+    refreshMessagesPanel();
   }
 
   function formatJoinedDate(value){
@@ -2695,7 +2825,7 @@
 
   async function enterAdminView(profile){
     profile = profile || lastJoinProfile || { name:'' };
-    document.getElementById('adminAvatar').textContent = initials(profile.name || 'You');
+    applyAvatarImage(profile.avatarUrl, profile.name, ['adminAvatar']);
 
     currentMode = 'admin';
     showView('admin');
@@ -2765,6 +2895,68 @@
     currentUser = null;
     exitDashboard();
   });
+
+  // ---------- Avatars ----------
+  // Requires supabase/media_and_messaging_setup.sql (profiles.avatar_url +
+  // the "avatars" storage bucket) to be run first.
+
+  function applyAvatarImage(url, name, elementIds){
+    const initialsText = initials(name || 'You');
+    elementIds.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(url) el.innerHTML = `<img src="${url}" alt="Profile picture">`;
+      else { el.innerHTML = ''; el.textContent = initialsText; }
+    });
+  }
+
+  document.getElementById('avatarUploadBtn').addEventListener('click', ()=>{
+    document.getElementById('avatarFileInput').click();
+  });
+  document.getElementById('avatarFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    e.target.value = '';
+    const avatarError = document.getElementById('avatarError');
+    avatarError.classList.remove('show');
+    if(!file || !currentUser) return;
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${currentUser.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await withTimeout(
+        sb.storage.from('avatars').upload(path, file, { upsert:true, contentType:file.type }), 20000
+      );
+      if(upErr) throw upErr;
+      const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
+      const { error: dbErr } = await withTimeout(sb.from('profiles').update({ avatar_url: pub.publicUrl }).eq('id', currentUser.id));
+      if(dbErr) throw dbErr;
+      if(lastJoinProfile) lastJoinProfile.avatarUrl = pub.publicUrl;
+      applyAvatarImage(pub.publicUrl, lastJoinProfile && lastJoinProfile.name, ['dashAvatar', 'dashProfileAvatar', 'adminAvatar']);
+    } catch(err){
+      avatarError.classList.add('show');
+    }
+  });
+
+  // ---------- Company directory (live overrides for the hardcoded matches list) ----------
+
+  async function fetchCompanyDirectory(){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*'));
+      if(error) throw error;
+      const byName = {};
+      (data || []).forEach(row => { byName[row.name] = row; });
+      return byName;
+    } catch(e){
+      return {};
+    }
+  }
+
+  // Returns a Set of company names the current user may edit, or null if
+  // they can edit everything (admin).
+  async function fetchMyEditableCompanyNames(){
+    if(isAdmin) return null;
+    const certs = await fetchMyCertifications();
+    return new Set(certs.filter(c => c.status === 'active' && c.companies).map(c => c.companies.name));
+  }
 
   // ---------- Create hub: "Start Building" checklist ----------
   // Requires the schema in supabase/create_hub_setup.sql (profiles verification
@@ -2997,10 +3189,254 @@
     }
   }
 
-  // -- Edit company listing (certified sales reps only, enforced by RLS) --
+  // ---------- Messaging ----------
+  // Requires supabase/media_and_messaging_setup.sql (conversations / messages
+  // tables + RLS). Realtime delivery needs the "messages" table added to the
+  // supabase_realtime publication (Database > Replication) — without that,
+  // messages still send and save, they just won't appear live for the other
+  // side until they reopen the thread.
+
+  let currentViewCompanyName = null;
+  let activeConversationId = null;
+  let activeChannel = null;
+  let renderedMessageIds = new Set();
+
+  function formatRelativeTime(value){
+    if(!value) return '';
+    const diffMs = Date.now() - new Date(value).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if(mins < 1) return 'now';
+    if(mins < 60) return `${mins}m`;
+    const hours = Math.round(mins / 60);
+    if(hours < 24) return `${hours}h`;
+    const days = Math.round(hours / 24);
+    if(days < 7) return `${days}d`;
+    return new Date(value).toLocaleDateString(undefined, { month:'short', day:'numeric' });
+  }
+
+  async function fetchMyConversations(){
+    if(!currentUser) return [];
+    try {
+      const [mineRes, certs] = await Promise.all([
+        withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, companies(id, name, logo_url)').eq('user_id', currentUser.id)),
+        fetchMyCertifications()
+      ]);
+      if(mineRes.error) throw mineRes.error;
+      const myConvos = mineRes.data || [];
+
+      const repCompanyIds = certs.filter(c => c.status === 'active' && c.companies).map(c => c.companies.id);
+      let repConvos = [];
+      if(repCompanyIds.length){
+        const repRes = await withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, companies(id, name, logo_url)').in('company_id', repCompanyIds));
+        if(repRes.error) throw repRes.error;
+        repConvos = repRes.data || [];
+      }
+
+      const byId = new Map();
+      [...myConvos, ...repConvos].forEach(c => byId.set(c.id, c));
+      let all = Array.from(byId.values());
+      if(!all.length) return [];
+
+      const contributorIds = Array.from(new Set(all.filter(c => c.user_id !== currentUser.id).map(c => c.user_id)));
+      let contributorMap = {};
+      if(contributorIds.length){
+        const profRes = await withTimeout(sb.from('profiles').select('id, name, avatar_url').in('id', contributorIds));
+        (profRes.data || []).forEach(p => { contributorMap[p.id] = p; });
+      }
+
+      const convoIds = all.map(c => c.id);
+      let previewMap = {};
+      const msgRes = await withTimeout(sb.from('messages').select('conversation_id, body, created_at').in('conversation_id', convoIds).order('created_at', { ascending:false }));
+      (msgRes.data || []).forEach(m => { if(!previewMap[m.conversation_id]) previewMap[m.conversation_id] = m.body; });
+
+      all = all.map(c => {
+        const iAmContributor = c.user_id === currentUser.id;
+        const counterpart = iAmContributor
+          ? { name: c.companies ? c.companies.name : 'Company', avatarUrl: c.companies ? c.companies.logo_url : null }
+          : { name: (contributorMap[c.user_id] && contributorMap[c.user_id].name) || 'A contributor', avatarUrl: contributorMap[c.user_id] && contributorMap[c.user_id].avatar_url };
+        return { ...c, counterpart, preview: previewMap[c.id] || 'Say hello 👋' };
+      });
+
+      all.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
+      return all;
+    } catch(e){
+      return [];
+    }
+  }
+
+  async function refreshMessagesPanel(){
+    const listEl = document.getElementById('conversationList');
+    const emptyEl = document.getElementById('messagesEmpty');
+    const countEl = document.getElementById('dashConvoCount');
+
+    const conversations = await fetchMyConversations();
+    countEl.textContent = conversations.length;
+
+    if(!conversations.length){
+      listEl.style.display = 'none';
+      emptyEl.style.display = 'flex';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    listEl.style.display = 'flex';
+    listEl.innerHTML = conversations.map(c => {
+      const avatar = c.counterpart.avatarUrl
+        ? `<img src="${c.counterpart.avatarUrl}" alt="">`
+        : initials(c.counterpart.name);
+      return `
+        <button type="button" class="conversation-item" data-conversation-id="${c.id}">
+          <span class="conversation-avatar">${avatar}</span>
+          <span class="conversation-body">
+            <div class="conversation-name">${escapeHtml(c.counterpart.name)}</div>
+            <div class="conversation-preview">${escapeHtml(c.preview)}</div>
+          </span>
+          <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+        </button>`;
+    }).join('');
+
+    listEl.querySelectorAll('[data-conversation-id]').forEach(btn=>{
+      const conv = conversations.find(c => c.id === btn.dataset.conversationId);
+      if(conv) btn.addEventListener('click', ()=> openChatModal(conv));
+    });
+  }
+
+  async function openChatForCompanyName(name){
+    if(!currentUser) return;
+    try {
+      const { data: companyRows, error: companyErr } = await withTimeout(sb.from('companies').select('id, name, logo_url').eq('name', name).limit(1));
+      if(companyErr) throw companyErr;
+      if(!companyRows || !companyRows.length) throw new Error('Company not found');
+      const company = companyRows[0];
+
+      const { data: existing, error: existErr } = await withTimeout(sb.from('conversations').select('id').eq('user_id', currentUser.id).eq('company_id', company.id).limit(1));
+      if(existErr) throw existErr;
+
+      let conversationId;
+      if(existing && existing.length){
+        conversationId = existing[0].id;
+      } else {
+        const { data: created, error: createErr } = await withTimeout(sb.from('conversations').insert({ user_id: currentUser.id, company_id: company.id }).select('id').single());
+        if(createErr) throw createErr;
+        conversationId = created.id;
+      }
+
+      openChatModal({ id: conversationId, counterpart: { name: company.name, avatarUrl: company.logo_url } });
+    } catch(e){
+      alert("Couldn't open a conversation with this company — try again.");
+    }
+  }
+
+  function renderChatMessages(messages){
+    renderedMessageIds = new Set(messages.map(m => m.id));
+    const bodyEl = document.getElementById('chatBody');
+    if(!messages.length){
+      bodyEl.innerHTML = '<p class="chat-empty">No messages yet — say hello 👋</p>';
+      return;
+    }
+    bodyEl.innerHTML = messages.map(m => {
+      const mine = currentUser && m.sender_id === currentUser.id;
+      return `<div class="chat-bubble ${mine ? 'mine' : 'theirs'}">${escapeHtml(m.body)}</div>`;
+    }).join('');
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  function appendChatBubble(message){
+    if(renderedMessageIds.has(message.id)) return;
+    renderedMessageIds.add(message.id);
+    const bodyEl = document.getElementById('chatBody');
+    const emptyMsg = bodyEl.querySelector('.chat-empty');
+    if(emptyMsg) bodyEl.innerHTML = '';
+    const mine = currentUser && message.sender_id === currentUser.id;
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${mine ? 'mine' : 'theirs'}`;
+    bubble.textContent = message.body;
+    bodyEl.appendChild(bubble);
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+  }
+
+  async function loadChatMessages(conversationId){
+    const bodyEl = document.getElementById('chatBody');
+    bodyEl.innerHTML = '<p class="chat-empty">Loading…</p>';
+    try {
+      const { data, error } = await withTimeout(sb.from('messages').select('*').eq('conversation_id', conversationId).order('created_at', { ascending:true }));
+      if(error) throw error;
+      renderChatMessages(data || []);
+    } catch(e){
+      bodyEl.innerHTML = '<p class="chat-empty">Couldn\'t load messages — try again.</p>';
+    }
+  }
+
+  function unsubscribeFromConversation(){
+    if(activeChannel){ try { sb.removeChannel(activeChannel); } catch(e){} activeChannel = null; }
+  }
+
+  function subscribeToConversation(conversationId){
+    unsubscribeFromConversation();
+    try {
+      activeChannel = sb.channel('conversation-' + conversationId)
+        .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`conversation_id=eq.${conversationId}` }, (payload)=>{
+          if(activeConversationId !== conversationId) return;
+          appendChatBubble(payload.new);
+        })
+        .subscribe();
+    } catch(e){ /* realtime is a nice-to-have; the thread still works without it */ }
+  }
+
+  async function openChatModal(conv){
+    activeConversationId = conv.id;
+    document.getElementById('chatTitle').textContent = conv.counterpart.name;
+    document.getElementById('chatAvatar').innerHTML = conv.counterpart.avatarUrl
+      ? `<img src="${conv.counterpart.avatarUrl}" alt="">`
+      : initials(conv.counterpart.name);
+    document.getElementById('chatModalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    await loadChatMessages(conv.id);
+    subscribeToConversation(conv.id);
+  }
+
+  function closeChatModal(){
+    document.getElementById('chatModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    unsubscribeFromConversation();
+    activeConversationId = null;
+    refreshMessagesPanel();
+  }
+  document.getElementById('chatModalClose').addEventListener('click', closeChatModal);
+  document.getElementById('chatModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'chatModalOverlay') closeChatModal(); });
+
+  async function sendChatMessage(){
+    const input = document.getElementById('chatInput');
+    const body = input.value.trim();
+    if(!body || !activeConversationId || !currentUser) return;
+    const sendBtn = document.getElementById('chatSendBtn');
+    sendBtn.disabled = true;
+    try {
+      const { data, error } = await withTimeout(sb.from('messages').insert({
+        conversation_id: activeConversationId, sender_id: currentUser.id, body
+      }).select().single());
+      if(error) throw error;
+      input.value = '';
+      appendChatBubble(data);
+      withTimeout(sb.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', activeConversationId)).catch(()=>{});
+    } catch(e){
+      alert("Couldn't send that message — try again.");
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+  document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+  document.getElementById('chatInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); }
+  });
+
+  // -- Edit company listing (certified sales reps + admin, enforced by RLS) --
   const editListingModalOverlay = document.getElementById('editListingModalOverlay');
   const editListingError = document.getElementById('editListingError');
+  const editListingLogoPreview = document.getElementById('editListingLogoPreview');
   let editListingCompanyId = null;
+  let editListingLogoFile = null;
 
   function toggleChip(chip, multi){
     if(multi) chip.classList.toggle('selected');
@@ -3016,16 +3452,49 @@
     chip.addEventListener('click', ()=> toggleChip(chip, true));
   });
 
+  function setLogoPreview(url, name){
+    if(url) editListingLogoPreview.innerHTML = `<img src="${url}" alt="${escapeHtml(name || '')} logo">`;
+    else { editListingLogoPreview.innerHTML = ''; editListingLogoPreview.textContent = initials(name || 'Co'); }
+  }
+
+  document.getElementById('editListingLogoBtn').addEventListener('click', ()=>{
+    document.getElementById('editListingLogoInput').click();
+  });
+  document.getElementById('editListingLogoInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    editListingLogoFile = file;
+    const reader = new FileReader();
+    reader.onload = ()=> { editListingLogoPreview.innerHTML = `<img src="${reader.result}" alt="Logo preview">`; };
+    reader.readAsDataURL(file);
+  });
+
+  async function openEditListingByName(name){
+    editListingError.classList.remove('show');
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('id').eq('name', name).limit(1));
+      if(error) throw error;
+      if(!data || !data.length) throw new Error('Company not found');
+      openEditListingModal(data[0].id);
+    } catch(e){
+      alert("Couldn't open that listing — try again.");
+    }
+  }
+
   async function openEditListingModal(companyId){
     editListingError.classList.remove('show');
     editListingCompanyId = companyId;
+    editListingLogoFile = null;
     try {
       const { data, error } = await withTimeout(sb.from('companies').select('*').eq('id', companyId).single());
       if(error || !data) throw error || new Error('not found');
       document.getElementById('editListingSub').textContent = `Update what contributors see for ${data.name}.`;
       document.getElementById('editListingName').value = data.name || '';
       document.getElementById('editListingDesc').value = data.description || '';
+      document.getElementById('editListingWebsite').value = data.website || '';
       document.getElementById('editListingStage').value = data.stage || 'Idea';
+      setLogoPreview(data.logo_url, data.name);
       const roles = data.roles || [];
       const comp = data.comp || [];
       document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(c=>{
@@ -3037,8 +3506,8 @@
       editListingModalOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch(e){
-      salesError.textContent = "Couldn't load that listing — try again.";
-      salesError.classList.add('show');
+      editListingError.textContent = "Couldn't load that listing — try again.";
+      editListingError.classList.add('show');
     }
   }
   function closeEditListingModal(){
@@ -3057,15 +3526,29 @@
     try {
       const roles = Array.from(document.querySelectorAll('#editListingRolesGroup .chip-select.selected')).map(c=>c.dataset.val);
       const comp = Array.from(document.querySelectorAll('#editListingCompGroup .chip-select.selected')).map(c=>c.dataset.val);
-      const { error } = await withTimeout(sb.from('companies').update({
+      const payload = {
         name: document.getElementById('editListingName').value.trim(),
         description: document.getElementById('editListingDesc').value.trim(),
+        website: document.getElementById('editListingWebsite').value.trim(),
         stage: document.getElementById('editListingStage').value,
         roles, comp,
         updated_at: new Date().toISOString()
-      }).eq('id', editListingCompanyId));
+      };
+      if(editListingLogoFile){
+        const ext = (editListingLogoFile.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `${editListingCompanyId}/${Date.now()}.${ext}`;
+        const { error: upErr } = await withTimeout(
+          sb.storage.from('company-logos').upload(path, editListingLogoFile, { upsert:true, contentType: editListingLogoFile.type }),
+          20000
+        );
+        if(upErr) throw upErr;
+        const { data: pub } = sb.storage.from('company-logos').getPublicUrl(path);
+        payload.logo_url = pub.publicUrl;
+      }
+      const { error } = await withTimeout(sb.from('companies').update(payload).eq('id', editListingCompanyId));
       if(error) throw error;
       closeEditListingModal();
+      if(currentMode === 'user') enterDashboard(lastJoinProfile);
     } catch(e){
       editListingError.textContent = "Couldn't save your changes — try again.";
       editListingError.classList.add('show');
