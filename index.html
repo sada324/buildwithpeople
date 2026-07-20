@@ -1707,6 +1707,31 @@
     };
   }
 
+  function profileFromRow(row){
+    return {
+      name: row.name || '',
+      headline: row.headline || '',
+      skills: row.skills || '',
+      link: row.link || '',
+      idea: row.idea || '',
+      pathVal: row.path || null,
+      roles: row.roles || [],
+      comp: row.comp || [],
+      commit: row.availability || ''
+    };
+  }
+
+  // public.profiles is the source of truth once a row exists (kept in sync
+  // by an auth.users trigger); fall back to the signup JWT metadata only
+  // if the row isn't there yet for some reason.
+  async function loadProfileForUser(user){
+    try {
+      const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+      if(!error && data) return profileFromRow(data);
+    } catch(e){ /* fall through to metadata */ }
+    return profileFromUser(user);
+  }
+
   function signInUI(profile){
     isSignedIn = true;
     document.getElementById('navSignIn').style.display = 'none';
@@ -2293,7 +2318,7 @@
       return;
     }
 
-    const profile = profileFromUser(data.user);
+    const profile = await loadProfileForUser(data.user);
     lastJoinProfile = profile;
     closeSigninModal();
     signInUI(profile);
@@ -2424,9 +2449,9 @@
   });
 
   // restore an existing session on page load (e.g. after a refresh)
-  sb.auth.getSession().then(({ data })=>{
+  sb.auth.getSession().then(async ({ data })=>{
     if(data && data.session){
-      const profile = profileFromUser(data.session.user);
+      const profile = await loadProfileForUser(data.session.user);
       lastJoinProfile = profile;
       signInUI(profile);
       enterDashboard(profile);
