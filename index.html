@@ -663,6 +663,8 @@
   .cb-icon{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--green); margin-bottom:14px; }
 
   .modal-submit{ width:100%; justify-content:center; padding:13px; font-size:14.5px; margin-top:6px; }
+  .signin-switch{ text-align:center; font-size:13px; color:var(--ink-soft); margin-top:16px; }
+  .signin-switch a{ color:var(--ink); font-weight:600; }
 
   .modal-success{ display:none; text-align:center; padding:20px 0 6px; }
   .modal-success.show{ display:block; }
@@ -1490,14 +1492,18 @@
         </div>
         <div class="field-group">
           <label class="field-label" for="joinEmail">Email address</label>
-          <input class="field-input" id="joinEmail" type="email" placeholder="you@email.com">
+          <input class="field-input" id="joinEmail" type="email" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="joinPassword">Password</label>
+          <input class="field-input" id="joinPassword" type="password" placeholder="At least 6 characters" autocomplete="new-password">
         </div>
         <div class="field-group">
           <label class="field-label" for="joinHeadline">Bio</label>
           <input class="field-input" id="joinHeadline" type="text" placeholder="e.g. I help small businesses grow through smart marketing and outreach">
           <p class="field-hint">This is the first thing companies see on your profile.</p>
         </div>
-        <p class="field-error" id="joinErrStep1">Enter your name and email to continue.</p>
+        <p class="field-error" id="joinErrStep1">Enter your name, email, and a password to continue.</p>
       </div>
 
       <div class="modal-step hidden" data-step="2">
@@ -1609,6 +1615,31 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="signinModalOverlay">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-head">
+      <h3>Sign in</h3>
+      <button class="modal-close" id="signinModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub">Welcome back.</p>
+
+    <div class="field-group">
+      <label class="field-label" for="signinEmail">Email address</label>
+      <input class="field-input" id="signinEmail" type="email" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="signinPassword">Password</label>
+      <input class="field-input" id="signinPassword" type="password" placeholder="Your password" autocomplete="current-password">
+    </div>
+    <p class="field-error" id="signinError">Incorrect email or password.</p>
+
+    <button type="button" class="btn btn-dark modal-submit" id="signinSubmitBtn">Sign in</button>
+    <p class="signin-switch">Don't have an account? <a href="#" id="signinJoinLink">Join now</a></p>
+  </div>
+</div>
+
 <div class="view-overlay" id="viewOverlay">
   <div class="view-modal" id="viewModal">
     <button class="view-close" id="viewClose" aria-label="Close">
@@ -1632,10 +1663,61 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-  // session state — true once someone completes the join flow
+  // Supabase — fill these in from Project Settings > API, then also
+  // disable "Confirm email" under Authentication > Sign In / Providers > Email
+  // so signUp() logs people in immediately instead of waiting on a confirmation click.
+  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_CONFIGURED = /^https?:\/\//.test(SUPABASE_URL) && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+
+  // Falls back to a harmless stub until real credentials are added above —
+  // createClient() throws synchronously on an invalid URL, which would
+  // otherwise take down every other script on the page with it.
+  const notConfiguredError = { message: 'Backend not connected yet — add your Supabase URL and anon key.' };
+  const sb = SUPABASE_CONFIGURED
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : {
+        auth: {
+          getSession: async () => ({ data: { session: null } }),
+          signUp: async () => ({ data: null, error: notConfiguredError }),
+          signInWithPassword: async () => ({ data: null, error: notConfiguredError }),
+          signOut: async () => ({ error: null })
+        }
+      };
+
+  // session state — true once someone is signed in
   let isSignedIn = false;
   let lastJoinProfile = null;
+  let joinPendingConfirmation = false;
+
+  function profileFromUser(user){
+    const m = (user && user.user_metadata) || {};
+    return {
+      name: m.name || '',
+      headline: m.headline || '',
+      skills: m.skills || '',
+      link: m.link || '',
+      idea: m.idea || '',
+      pathVal: m.path || null,
+      roles: m.roles || [],
+      comp: m.comp || [],
+      commit: m.commit || ''
+    };
+  }
+
+  function signInUI(profile){
+    isSignedIn = true;
+    document.getElementById('navSignIn').style.display = 'none';
+    document.getElementById('navJoinBtn').textContent = `Hi, ${profile.name ? profile.name.split(' ')[0] : 'there'}`;
+  }
+
+  function signOutUI(){
+    isSignedIn = false;
+    document.getElementById('navSignIn').style.display = '';
+    document.getElementById('navJoinBtn').textContent = 'Join Now';
+  }
 
   // contribution grid — signature element, GitHub-style history
   const grid = document.getElementById('contribGrid');
@@ -1754,7 +1836,11 @@
     closeViewPopup();
     setTimeout(openJoinModal, 200);
   }
-  document.getElementById('viewSignInBtn').addEventListener('click', goToJoinFromView);
+  function goToSigninFromView(){
+    closeViewPopup();
+    setTimeout(openSigninModal, 200);
+  }
+  document.getElementById('viewSignInBtn').addEventListener('click', goToSigninFromView);
   document.getElementById('viewCreateBtn').addEventListener('click', goToJoinFromView);
 
   // list-your-company modal
@@ -1960,12 +2046,20 @@
     if(step === 1){
       const nameEl = document.getElementById('joinName');
       const emailEl = document.getElementById('joinEmail');
+      const passwordEl = document.getElementById('joinPassword');
       const nameOk = nameEl.value.trim().length > 0;
       const emailOk = emailEl.value.trim().length > 0;
+      const passwordOk = passwordEl.value.length >= 6;
       nameEl.classList.toggle('error', !nameOk);
       emailEl.classList.toggle('error', !emailOk);
-      document.getElementById('joinErrStep1').classList.toggle('show', !(nameOk && emailOk));
-      return nameOk && emailOk;
+      passwordEl.classList.toggle('error', !passwordOk);
+      const ok = nameOk && emailOk && passwordOk;
+      const errEl = document.getElementById('joinErrStep1');
+      errEl.textContent = (nameOk && emailOk && !passwordOk)
+        ? 'Password must be at least 6 characters.'
+        : 'Enter your name, email, and a password to continue.';
+      errEl.classList.toggle('show', !ok);
+      return ok;
     }
     if(step === 2){
       const ok = !!joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
@@ -1998,6 +2092,7 @@
     joinFounderBlock.classList.remove('show');
     document.getElementById('joinName').value = '';
     document.getElementById('joinEmail').value = '';
+    document.getElementById('joinPassword').value = '';
     document.getElementById('joinHeadline').value = '';
     document.getElementById('joinIdea').value = '';
     document.getElementById('joinSkills').value = '';
@@ -2031,7 +2126,9 @@
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && joinOverlay.classList.contains('open')) closeJoinModal(); });
   document.getElementById('joinBrowseBtn').addEventListener('click', ()=>{
     closeJoinModal();
-    setTimeout(()=> enterDashboard(lastJoinProfile), 200);
+    if(!joinPendingConfirmation){
+      setTimeout(()=> enterDashboard(lastJoinProfile), 200);
+    }
   });
 
   joinOverlay.querySelectorAll('#joinRolesGroup .chip-select').forEach(chip=>{
@@ -2064,26 +2161,64 @@
     if(joinCurrentStep > 1){ joinCurrentStep--; renderJoinStep(); }
   });
 
-  joinNextBtn.addEventListener('click', ()=>{
+  joinNextBtn.addEventListener('click', async ()=>{
     if(!validateJoinStep(joinCurrentStep)) return;
 
     if(joinCurrentStep < joinTotalSteps){
       joinCurrentStep++;
       renderJoinStep();
-    } else {
-      const name = document.getElementById('joinName').value.trim();
-      const headline = document.getElementById('joinHeadline').value.trim();
-      const skills = document.getElementById('joinSkills').value.trim();
-      const idea = document.getElementById('joinIdea').value.trim();
-      const rolesPicked = Array.from(joinOverlay.querySelectorAll('#joinRolesGroup .chip-select.selected')).map(c=>c.textContent);
-      const compPicked = Array.from(joinOverlay.querySelectorAll('#joinCompGroup .chip-select.selected')).map(c=>c.textContent);
-      const commitChip = joinOverlay.querySelector('#joinCommitGroup .chip-select.selected');
-      const commitPicked = commitChip ? commitChip.textContent : '';
-      const pathChip = joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
-      const pathVal = pathChip ? pathChip.dataset.path : null;
+      return;
+    }
 
-      document.getElementById('joinSuccessName').textContent = name ? name.split(' ')[0] : 'there';
-      const picked = [...rolesPicked, ...compPicked, ...(commitPicked ? [commitPicked] : [])];
+    const name = document.getElementById('joinName').value.trim();
+    const email = document.getElementById('joinEmail').value.trim();
+    const password = document.getElementById('joinPassword').value;
+    const headline = document.getElementById('joinHeadline').value.trim();
+    const skills = document.getElementById('joinSkills').value.trim();
+    const link = document.getElementById('joinLink').value.trim();
+    const idea = document.getElementById('joinIdea').value.trim();
+    const rolesPicked = Array.from(joinOverlay.querySelectorAll('#joinRolesGroup .chip-select.selected')).map(c=>c.textContent);
+    const compPicked = Array.from(joinOverlay.querySelectorAll('#joinCompGroup .chip-select.selected')).map(c=>c.textContent);
+    const commitChip = joinOverlay.querySelector('#joinCommitGroup .chip-select.selected');
+    const commitPicked = commitChip ? commitChip.textContent : '';
+    const pathChip = joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
+    const pathVal = pathChip ? pathChip.dataset.path : null;
+
+    const errEl = document.getElementById('joinErrStep6');
+    joinNextBtn.disabled = true;
+    joinNextBtn.textContent = 'Creating your account…';
+
+    const { data, error } = await sb.auth.signUp({
+      email, password,
+      options: {
+        data: { name, headline, skills, link, idea, path: pathVal, roles: rolesPicked, comp: compPicked, commit: commitPicked }
+      }
+    });
+
+    joinNextBtn.disabled = false;
+    joinNextBtn.textContent = 'Finish';
+
+    const emailTaken = error || (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0);
+    if(emailTaken){
+      errEl.textContent = error
+        ? error.message
+        : 'An account with this email already exists — try signing in instead.';
+      errEl.classList.add('show');
+      return;
+    }
+
+    lastJoinProfile = {
+      name, headline, skills, link, idea, pathVal,
+      roles: rolesPicked, comp: compPicked, commit: commitPicked
+    };
+
+    const picked = [...rolesPicked, ...compPicked, ...(commitPicked ? [commitPicked] : [])];
+    document.getElementById('joinSuccessName').textContent = name ? name.split(' ')[0] : 'there';
+    joinModalForm.style.display = 'none';
+    joinModalSuccess.classList.add('show');
+
+    if(data.session){
+      joinPendingConfirmation = false;
       let summary = picked.length
         ? `We'll start matching you with companies looking for: ${picked.join(' · ')}.`
         : "We'll start matching you with companies looking for what you offer.";
@@ -2091,21 +2226,79 @@
         summary += " We'll also take a look at your idea and follow up about next steps.";
       }
       document.getElementById('joinSuccessSummary').textContent = summary;
-      joinModalForm.style.display = 'none';
-      joinModalSuccess.classList.add('show');
-
-      lastJoinProfile = {
-        name, headline, skills, idea, pathVal,
-        roles: rolesPicked, comp: compPicked, commit: commitPicked
-      };
-
-      isSignedIn = true;
-      document.getElementById('navSignIn').style.display = 'none';
-      document.getElementById('navJoinBtn').textContent = `Hi, ${name ? name.split(' ')[0] : 'there'}`;
+      document.getElementById('joinBrowseBtn').textContent = 'Go to your dashboard';
+      signInUI(lastJoinProfile);
+    } else {
+      joinPendingConfirmation = true;
+      document.getElementById('joinSuccessSummary').textContent =
+        `We sent a confirmation link to ${email}. Confirm it, then sign in to get started.`;
+      document.getElementById('joinBrowseBtn').textContent = 'Got it';
     }
   });
 
   renderJoinStep();
+
+  // sign-in modal
+  const signinOverlay = document.getElementById('signinModalOverlay');
+  const signinEmailEl = document.getElementById('signinEmail');
+  const signinPasswordEl = document.getElementById('signinPassword');
+  const signinErrorEl = document.getElementById('signinError');
+  const signinSubmitBtn = document.getElementById('signinSubmitBtn');
+
+  function openSigninModal(){
+    signinOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSigninModal(){
+    signinOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    signinEmailEl.value = '';
+    signinPasswordEl.value = '';
+    signinErrorEl.classList.remove('show');
+  }
+
+  document.getElementById('navSignIn').addEventListener('click', (e)=>{
+    e.preventDefault();
+    openSigninModal();
+  });
+  document.getElementById('signinModalClose').addEventListener('click', closeSigninModal);
+  signinOverlay.addEventListener('click', (e)=>{ if(e.target === signinOverlay) closeSigninModal(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && signinOverlay.classList.contains('open')) closeSigninModal(); });
+  document.getElementById('signinJoinLink').addEventListener('click', (e)=>{
+    e.preventDefault();
+    closeSigninModal();
+    setTimeout(openJoinModal, 200);
+  });
+
+  signinSubmitBtn.addEventListener('click', async ()=>{
+    const email = signinEmailEl.value.trim();
+    const password = signinPasswordEl.value;
+    signinErrorEl.classList.remove('show');
+
+    if(!email || !password){
+      signinErrorEl.textContent = 'Enter your email and password.';
+      signinErrorEl.classList.add('show');
+      return;
+    }
+
+    signinSubmitBtn.disabled = true;
+    signinSubmitBtn.textContent = 'Signing in…';
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    signinSubmitBtn.disabled = false;
+    signinSubmitBtn.textContent = 'Sign in';
+
+    if(error){
+      signinErrorEl.textContent = error.message;
+      signinErrorEl.classList.add('show');
+      return;
+    }
+
+    const profile = profileFromUser(data.user);
+    lastJoinProfile = profile;
+    closeSigninModal();
+    signInUI(profile);
+    enterDashboard(profile);
+  });
 
   // signed-in dashboard — a distinct, compartmentalized view swapped in for the marketing page
   const marketingView = document.getElementById('marketingView');
@@ -2224,12 +2417,21 @@
     window.scrollTo(0, 0);
   }
 
-  document.getElementById('dashLogoutBtn').addEventListener('click', ()=>{
-    isSignedIn = false;
-    document.getElementById('navSignIn').style.display = '';
-    document.getElementById('navJoinBtn').textContent = 'Join Now';
+  document.getElementById('dashLogoutBtn').addEventListener('click', async ()=>{
+    await sb.auth.signOut();
+    signOutUI();
     exitDashboard();
   });
+
+  // restore an existing session on page load (e.g. after a refresh)
+  sb.auth.getSession().then(({ data })=>{
+    if(data && data.session){
+      const profile = profileFromUser(data.session.user);
+      lastJoinProfile = profile;
+      signInUI(profile);
+      enterDashboard(profile);
+    }
+  }).catch(()=>{});
 </script>
 
 </body>
