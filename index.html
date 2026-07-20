@@ -696,12 +696,88 @@
   .service-card.dark .btn-dark{ background:var(--white); color:var(--ink); }
   .service-card.dark .btn-dark:hover{ background:#EDEDED; }
 
+  /* ---------- signed-in dashboard ---------- */
+  .view-hidden{ display:none; }
+  #dashboardView{ background:var(--off-white); min-height:100vh; }
+  .dash-topbar{ background:var(--white); border-bottom:1px solid var(--border); }
+  .dash-topbar-inner{ display:flex; align-items:center; justify-content:space-between; padding:18px 0; }
+  .dash-top-right{ display:flex; align-items:center; gap:16px; }
+  .dash-textlink{ font-size:14px; font-weight:500; color:var(--ink-soft); background:none; border:none; cursor:pointer; }
+  .dash-textlink:hover{ color:var(--ink); }
+  .dash-avatar{
+    width:34px; height:34px; border-radius:50%; background:var(--ink); color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:13px; flex-shrink:0;
+  }
+
+  .dash-body{ padding:48px 0 90px; }
+  .dash-greeting h1{ font-family:var(--font-display); font-size:28px; font-weight:700; letter-spacing:-0.02em; margin-bottom:6px; }
+  .dash-greeting p{ color:var(--ink-soft); font-size:14.5px; margin-bottom:36px; }
+
+  .dash-grid{
+    display:grid; grid-template-columns:340px 1fr; gap:20px;
+    grid-template-areas: "profile matches" "snapshot matches" "activity activity";
+  }
+  @media (max-width:900px){
+    .dash-grid{ grid-template-columns:1fr; grid-template-areas:"profile" "matches" "snapshot" "activity"; }
+  }
+  .dash-panel{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
+  .dash-panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:18px; }
+  .dash-panel-head h3{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-0.01em; }
+  .dash-panel-sub{ font-size:11.5px; color:var(--grey); text-align:right; }
+
+  .dash-profile{ grid-area:profile; }
+  .dash-profile-id{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .dash-profile-avatar{
+    width:46px; height:46px; border-radius:50%; background:var(--ink); color:var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; font-size:15px; flex-shrink:0;
+  }
+  .dash-profile-name{ font-weight:600; font-size:15px; margin-bottom:2px; }
+  .dash-profile-bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
+  .dash-profile-idea{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
+  .dash-chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .dash-profile-foot{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  .dash-commit-pill{
+    font-size:12px; font-weight:600; color:var(--green); background:var(--green-soft);
+    padding:5px 11px; border-radius:20px; display:inline-block;
+  }
+
+  .dash-matches{ grid-area:matches; }
+  .dash-match-list{ display:flex; flex-direction:column; gap:12px; }
+  .dash-match-card{
+    border:1px solid var(--border); border-radius:12px; padding:16px;
+    display:flex; flex-direction:column; gap:8px;
+    transition: box-shadow .15s ease, border-color .15s ease;
+  }
+  .dash-match-card:hover{ border-color:var(--border-strong); box-shadow:var(--shadow-sm); }
+  .dash-match-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .dash-match-badge{
+    font-size:10.5px; font-weight:600; color:var(--green); background:var(--green-soft);
+    padding:3px 8px; border-radius:20px; font-family:var(--font-mono); white-space:nowrap; flex-shrink:0;
+  }
+  .dash-match-tags{ display:flex; flex-wrap:wrap; gap:6px; }
+  .dash-match-card .cc-btn{ align-self:flex-start; margin-top:2px; }
+
+  .dash-activity{ grid-area:activity; }
+  .dash-empty{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:22px 10px; }
+  .dash-empty-icon{
+    width:36px; height:36px; border-radius:10px; background:var(--off-white); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dash-empty p{ font-size:13px; color:var(--grey); max-width:380px; }
+
+  .dash-snapshot{ grid-area:snapshot; }
+  .dash-snapshot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+
   /* reveal on scroll */
   .reveal{ opacity:0; transform:translateY(16px); transition: opacity .6s ease, transform .6s ease; }
   .reveal.in{ opacity:1; transform:translateY(0); }
 </style>
 </head>
 <body>
+
+<div id="marketingView">
 
 <header>
   <div class="wrap">
@@ -1149,6 +1225,74 @@
   </div>
 </footer>
 
+</div>
+
+<div id="dashboardView" class="view-hidden">
+  <header class="dash-topbar">
+    <div class="wrap dash-topbar-inner">
+      <div class="logo"><span class="mark"></span>Build With People</div>
+      <div class="dash-top-right">
+        <button class="dash-textlink" id="dashLogoutBtn">Log out</button>
+        <div class="dash-avatar" id="dashAvatar">JR</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap dash-body">
+    <div class="dash-greeting">
+      <h1 id="dashGreeting">Welcome, there.</h1>
+      <p id="dashSubGreeting">Here's what's happening for you right now.</p>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-panel dash-profile">
+        <div class="dash-panel-head">
+          <h3>Your profile</h3>
+        </div>
+        <div class="dash-profile-id">
+          <div class="dash-profile-avatar" id="dashProfileAvatar">JR</div>
+          <div>
+            <div class="dash-profile-name" id="dashProfileName">There</div>
+            <div class="dash-profile-bio" id="dashProfileBio">Bio not added yet.</div>
+          </div>
+        </div>
+        <div class="dash-chip-row" id="dashRoleChips"></div>
+        <div class="dash-chip-row" id="dashCompChips"></div>
+        <div class="dash-profile-foot">
+          <span class="dash-commit-pill" id="dashCommitPill">Availability not set</span>
+        </div>
+      </div>
+
+      <div class="dash-panel dash-matches">
+        <div class="dash-panel-head">
+          <h3>Matches for you</h3>
+          <span class="dash-panel-sub" id="dashMatchesSub">Based on what you're looking for</span>
+        </div>
+        <div class="dash-match-list" id="dashMatchList"></div>
+      </div>
+
+      <div class="dash-panel dash-activity">
+        <div class="dash-panel-head"><h3>Your activity</h3></div>
+        <div class="dash-empty">
+          <div class="dash-empty-icon">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#8A8F98" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p>No applications yet. Once you apply to a company, you'll track its status here.</p>
+        </div>
+      </div>
+
+      <div class="dash-panel dash-snapshot">
+        <div class="dash-panel-head"><h3>Snapshot</h3></div>
+        <div class="dash-snapshot-grid">
+          <div class="metric"><span class="num">0</span><span class="lbl">Applications sent</span></div>
+          <div class="metric"><span class="num" id="dashMatchCount">0</span><span class="lbl">Companies matched</span></div>
+          <div class="metric"><span class="num" id="dashProfileScore">40%</span><span class="lbl">Profile complete</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div id="modalForm">
@@ -1418,7 +1562,7 @@
       <h3>You're in, <span id="joinSuccessName">there</span>.</h3>
       <p id="joinSuccessSummary">We'll start matching you with companies looking for what you offer.</p>
       <div class="join-success-actions">
-        <a href="#browse" class="btn btn-dark" id="joinBrowseBtn">Browse opportunities</a>
+        <button type="button" class="btn btn-dark" id="joinBrowseBtn">Go to your dashboard</button>
       </div>
     </div>
   </div>
@@ -1450,6 +1594,7 @@
 <script>
   // session state — true once someone completes the join flow
   let isSignedIn = false;
+  let lastJoinProfile = null;
 
   // contribution grid — signature element, GitHub-style history
   const grid = document.getElementById('contribGrid');
@@ -1530,16 +1675,20 @@
     viewActionsMember.classList.remove('hidden');
   }
 
-  document.querySelectorAll('.js-view-company').forEach(btn=>{
+  function bindViewCompanyButton(btn){
     btn.addEventListener('click', ()=>{
       if(isSignedIn){
-        showMemberView(btn.closest('.company-card, .grid-card'));
+        showMemberView(btn.closest('.company-card, .grid-card, .dash-match-card'));
       } else {
         showGuestView();
       }
       openViewPopup();
     });
-  });
+  }
+  function bindViewCompanyButtons(container){
+    container.querySelectorAll('.js-view-company').forEach(bindViewCompanyButton);
+  }
+  document.querySelectorAll('.js-view-company').forEach(bindViewCompanyButton);
   document.getElementById('viewClose').addEventListener('click', closeViewPopup);
   document.getElementById('viewMemberClose').addEventListener('click', closeViewPopup);
   viewOverlay.addEventListener('click', (e)=>{ if(e.target === viewOverlay) closeViewPopup(); });
@@ -1786,7 +1935,10 @@
   document.getElementById('joinModalClose').addEventListener('click', closeJoinModal);
   joinOverlay.addEventListener('click', (e)=>{ if(e.target === joinOverlay) closeJoinModal(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && joinOverlay.classList.contains('open')) closeJoinModal(); });
-  document.getElementById('joinBrowseBtn').addEventListener('click', closeJoinModal);
+  document.getElementById('joinBrowseBtn').addEventListener('click', ()=>{
+    closeJoinModal();
+    setTimeout(()=> enterDashboard(lastJoinProfile), 200);
+  });
 
   joinOverlay.querySelectorAll('#joinRolesGroup .chip-select').forEach(chip=>{
     chip.addEventListener('click', ()=> chip.classList.toggle('selected'));
@@ -1824,21 +1976,32 @@
       renderJoinStep();
     } else {
       const name = document.getElementById('joinName').value.trim();
+      const headline = document.getElementById('joinHeadline').value.trim();
+      const skills = document.getElementById('joinSkills').value.trim();
+      const idea = document.getElementById('joinIdea').value.trim();
+      const rolesPicked = Array.from(joinOverlay.querySelectorAll('#joinRolesGroup .chip-select.selected')).map(c=>c.textContent);
+      const compPicked = Array.from(joinOverlay.querySelectorAll('#joinCompGroup .chip-select.selected')).map(c=>c.textContent);
+      const commitChip = joinOverlay.querySelector('#joinCommitGroup .chip-select.selected');
+      const commitPicked = commitChip ? commitChip.textContent : '';
+      const pathChip = joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
+      const pathVal = pathChip ? pathChip.dataset.path : null;
+
       document.getElementById('joinSuccessName').textContent = name ? name.split(' ')[0] : 'there';
-      const picked = Array.from(joinOverlay.querySelectorAll(
-        '#joinRolesGroup .chip-select.selected, #joinCompGroup .chip-select.selected, #joinCommitGroup .chip-select.selected'
-      )).map(c=>c.textContent);
+      const picked = [...rolesPicked, ...compPicked, ...(commitPicked ? [commitPicked] : [])];
       let summary = picked.length
         ? `We'll start matching you with companies looking for: ${picked.join(' · ')}.`
         : "We'll start matching you with companies looking for what you offer.";
-      const pathChip = joinOverlay.querySelector('#joinPathGroup .chip-select.selected');
-      const pathVal = pathChip ? pathChip.dataset.path : null;
       if(pathVal === 'founder' || pathVal === 'either'){
         summary += " We'll also take a look at your idea and follow up about next steps.";
       }
       document.getElementById('joinSuccessSummary').textContent = summary;
       joinModalForm.style.display = 'none';
       joinModalSuccess.classList.add('show');
+
+      lastJoinProfile = {
+        name, headline, skills, idea, pathVal,
+        roles: rolesPicked, comp: compPicked, commit: commitPicked
+      };
 
       isSignedIn = true;
       document.getElementById('navSignIn').style.display = 'none';
@@ -1847,6 +2010,108 @@
   });
 
   renderJoinStep();
+
+  // signed-in dashboard — a distinct, compartmentalized view swapped in for the marketing page
+  const marketingView = document.getElementById('marketingView');
+  const dashboardView = document.getElementById('dashboardView');
+
+  const DASH_COMPANIES = [
+    { name:'Custom514', logoImg:'/assets/logos/custom514.png', desc:"Custom signage and physical brand experiences", roles:['Sales','Design','Videography'], comp:['Paid','Commission','Experience'] },
+    { name:'LocalFlow', desc:"Automating customer acquisition for local businesses", roles:['Sales','Development','Marketing'], comp:['Equity','Commission'] },
+    { name:'Studio North', desc:"A product design studio building physical and digital goods", roles:['Design','Videography','Operations'], comp:['Paid','Portfolio','Experience'] },
+    { name:'Build With People', desc:"The team building this platform is hiring too", roles:['Sales','Videography','Cofounder'], comp:['Paid','Equity','Commission'] }
+  ];
+
+  function initials(name){
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    return parts.slice(0, 2).map(p => p[0].toUpperCase()).join('') || '?';
+  }
+
+  function enterDashboard(profile){
+    profile = profile || { name:'', headline:'', skills:'', idea:'', roles:[], comp:[], commit:'' };
+    const firstName = profile.name ? profile.name.split(' ')[0] : 'there';
+
+    document.getElementById('dashGreeting').textContent = `Welcome, ${firstName}.`;
+    document.getElementById('dashSubGreeting').textContent = profile.roles.length
+      ? `Here's what's happening for ${profile.roles.join(', ')} right now.`
+      : "Here's what's happening for you right now.";
+
+    const initialsText = initials(profile.name || 'You');
+    document.getElementById('dashAvatar').textContent = initialsText;
+    document.getElementById('dashProfileAvatar').textContent = initialsText;
+    document.getElementById('dashProfileName').textContent = profile.name || 'There';
+    document.getElementById('dashProfileBio').textContent = profile.headline || 'Bio not added yet.';
+
+    const ideaEl = document.getElementById('dashProfileBio').parentElement.querySelector('.dash-profile-idea');
+    if(ideaEl) ideaEl.remove();
+    if(profile.idea){
+      const p = document.createElement('div');
+      p.className = 'dash-profile-idea';
+      p.textContent = `Building: ${profile.idea}`;
+      document.getElementById('dashProfileBio').insertAdjacentElement('afterend', p);
+    }
+
+    document.getElementById('dashRoleChips').innerHTML = profile.roles.length
+      ? profile.roles.map(r => `<span class="tag">${r}</span>`).join('')
+      : '<span class="tag">No roles selected</span>';
+    document.getElementById('dashCompChips').innerHTML = profile.comp.map(c => `<span class="comp-pill">${c}</span>`).join('');
+    document.getElementById('dashCommitPill').textContent = profile.commit || 'Availability not set';
+
+    const scored = DASH_COMPANIES
+      .map(c => ({ ...c, overlap: c.roles.filter(r => profile.roles.includes(r)).length }))
+      .sort((a, b) => b.overlap - a.overlap);
+
+    const matchListEl = document.getElementById('dashMatchList');
+    matchListEl.innerHTML = scored.map(c => {
+      const logo = c.logoImg
+        ? `<span class="cc-logo"><img src="${c.logoImg}" alt="${c.name} logo"></span>`
+        : `<span class="dot"></span>`;
+      const badge = c.overlap > 0 ? `<span class="dash-match-badge">Matches you</span>` : '';
+      const roleTags = c.roles.map(r => `<span class="tag">${r}</span>`).join('');
+      const compPills = c.comp.map(p => `<span class="comp-pill">${p}</span>`).join('');
+      return `
+        <div class="dash-match-card">
+          <div class="dash-match-top">
+            <div class="gc-name">${logo}${c.name}</div>
+            ${badge}
+          </div>
+          <div class="gc-desc">${c.desc}</div>
+          <div class="dash-match-tags gc-roles">${roleTags}${compPills}</div>
+          <button type="button" class="cc-btn js-view-company">View company</button>
+        </div>`;
+    }).join('');
+    bindViewCompanyButtons(matchListEl);
+
+    document.getElementById('dashMatchCount').textContent = scored.filter(c => c.overlap > 0).length;
+    document.getElementById('dashMatchesSub').textContent = profile.roles.length
+      ? `Based on ${profile.roles.join(', ')}`
+      : "Based on what you're looking for";
+
+    let score = 20;
+    if(profile.headline) score += 20;
+    if(profile.roles.length) score += 20;
+    if(profile.comp.length) score += 15;
+    if(profile.commit) score += 15;
+    if(profile.skills) score += 10;
+    document.getElementById('dashProfileScore').textContent = Math.min(score, 100) + '%';
+
+    marketingView.classList.add('view-hidden');
+    dashboardView.classList.remove('view-hidden');
+    window.scrollTo(0, 0);
+  }
+
+  function exitDashboard(){
+    dashboardView.classList.add('view-hidden');
+    marketingView.classList.remove('view-hidden');
+    window.scrollTo(0, 0);
+  }
+
+  document.getElementById('dashLogoutBtn').addEventListener('click', ()=>{
+    isSignedIn = false;
+    document.getElementById('navSignIn').style.display = '';
+    document.getElementById('navJoinBtn').textContent = 'Join Now';
+    exitDashboard();
+  });
 </script>
 
 </body>
