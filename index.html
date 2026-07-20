@@ -184,6 +184,7 @@
   .preview-top .title{ font-size:13px; color:var(--ink-soft); font-weight:500; }
 
   .company-card{
+    position:relative;
     background:var(--white); border:1px solid var(--border); border-radius:13px;
     padding:16px; margin-bottom:12px;
     transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
@@ -265,6 +266,7 @@
   @media (max-width:640px){ .company-grid{ grid-template-columns:1fr; } }
 
   .grid-card{
+    position:relative;
     background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
     padding:22px; transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
   }
@@ -901,6 +903,39 @@
     display:flex; align-items:center; justify-content:center;
     font-family:var(--font-mono); font-size:9px; font-weight:700; line-height:1;
   }
+
+  /* "Easy onboarding" stamp — a physical rubber-stamp badge, tilted like it
+     was actually stamped onto the corner of the card. */
+  .card-stamp{
+    position:absolute; top:-14px; left:-14px; width:96px; z-index:2;
+    transform:rotate(-11deg); pointer-events:none;
+    filter:drop-shadow(0 3px 6px rgba(20,23,26,0.18));
+  }
+  .dash-match-card .card-stamp{ width:78px; top:-10px; left:-10px; }
+  .company-card .card-stamp{ width:76px; top:-10px; left:-10px; }
+
+  .admin-companies-panel{ grid-column:1 / -1; }
+  .admin-companies-hint{ font-size:12.5px; color:var(--grey); margin:-10px 0 14px; }
+  .admin-companies-list{ display:flex; flex-direction:column; gap:8px; }
+  .admin-company-row{
+    display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--border);
+    border-radius:10px; background:var(--white); flex-wrap:wrap; transition: opacity .15s ease, border-color .15s ease;
+  }
+  .admin-company-row.dragging{ opacity:0.35; }
+  .admin-company-row:hover{ border-color:var(--border-strong); }
+  .admin-company-drag{ cursor:grab; color:var(--grey); flex-shrink:0; user-select:none; font-size:15px; line-height:1; }
+  .admin-company-logo{
+    width:32px; height:32px; border-radius:8px; background:var(--ink); color:var(--white);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;
+    font-family:var(--font-display); font-weight:700; font-size:11px;
+  }
+  .admin-company-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .admin-company-body{ flex:1; min-width:160px; }
+  .admin-company-name{ font-size:13.5px; font-weight:600; margin-bottom:4px; }
+  .admin-company-check{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft); cursor:pointer; white-space:nowrap; }
+  .admin-company-stats{ display:flex; gap:10px; flex-shrink:0; }
+  .admin-company-stats label{ display:flex; flex-direction:column; gap:3px; font-size:9.5px; color:var(--grey); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.03em; }
+  .admin-company-num{ width:56px; border:1px solid var(--border-strong); border-radius:6px; padding:5px 6px; font-size:12.5px; font-family:var(--font-body); }
 
   .manage-company-modal{ max-width:560px; }
   .manage-company-head-id{ display:flex; align-items:center; gap:12px; }
@@ -1565,6 +1600,16 @@
           <p id="adminUsersEmptyText">No one has signed up yet.</p>
         </div>
       </div>
+
+      <div class="dash-panel admin-companies-panel">
+        <div class="dash-panel-head">
+          <h3>Manage companies</h3>
+          <button type="button" class="btn btn-dark btn-sm" id="adminAddCompanyBtn">Add company</button>
+        </div>
+        <p class="admin-companies-hint">Drag to reorder which companies show as "Recruiting now" on the homepage. Toggle Featured to include one there, and Stamp to show the Easy Onboarding badge on its card.</p>
+        <div id="adminCompaniesList" class="admin-companies-list"></div>
+        <p class="field-error" id="adminCompaniesError">Something went wrong — try again.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -1933,7 +1978,7 @@
 <div class="modal-overlay" id="editListingModalOverlay">
   <div class="modal">
     <div class="modal-head">
-      <h3>Edit company listing</h3>
+      <h3 id="editListingTitle">Edit company listing</h3>
       <button class="modal-close" id="editListingClose" aria-label="Close">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
@@ -2241,6 +2286,112 @@
       f.classList.add('active');
     });
   });
+
+  // ---------- Homepage company curation ----------
+  // The "Recruiting now" hero preview and the "Browse companies" grid below
+  // ship with real, hand-written cards baked into the HTML so the site never
+  // looks empty for a new/anonymous visitor. If an admin has featured any
+  // companies (Admin dashboard > Manage companies), this swaps both sections
+  // over to that curated, drag-ordered list instead. If nothing's featured
+  // yet, or the fetch fails, the shipped cards are left exactly as they are —
+  // only a matching company's "stamp" gets layered on top.
+
+  function stampImgHtml(){
+    return '<img class="card-stamp" src="/assets/stamps/easy-onboarding.png" alt="Easy onboarding stamp">';
+  }
+
+  function heroPreviewCardHtml(c){
+    const logo = c.logo_url
+      ? `<span class="cc-logo"><img src="${c.logo_url}" alt="${escapeHtml(c.name)} logo"></span>`
+      : `<span class="cc-logo">${escapeHtml(initials(c.name || 'Co'))}</span>`;
+    const tags = (c.roles || []).slice(0, 3).map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('');
+    const compText = (c.comp || []).join(' · ');
+    const activeText = c.active_members > 0 ? `${c.active_members} active members` : "We're hiring";
+    const pct = c.total_members > 0
+      ? Math.max(5, Math.min(100, Math.round((c.active_members / c.total_members) * 100)))
+      : 50;
+    const stamp = c.has_stamp ? stampImgHtml() : '';
+    return `
+      <div class="company-card">
+        ${stamp}
+        <div class="cc-head">
+          <div class="cc-name">${logo}${escapeHtml(c.name)}</div>
+          <span class="cc-btn js-view-company">View company</span>
+        </div>
+        <div class="cc-sub">${escapeHtml(c.description || '')}</div>
+        <div class="cc-tags">${tags}</div>
+        <div class="cc-foot">
+          <span class="cc-meta"><span class="dot"></span>${escapeHtml(activeText)}</span>
+          <span class="cc-meta">${escapeHtml(compText)}</span>
+        </div>
+        <div class="cc-progress"><i style="width:${pct}%"></i></div>
+      </div>`;
+  }
+
+  function browseGridCardHtml(c){
+    const logo = c.logo_url
+      ? `<span class="cc-logo"><img src="${c.logo_url}" alt="${escapeHtml(c.name)} logo"></span>`
+      : `<span class="dot"></span>`;
+    const roleTags = (c.roles || []).map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('');
+    const compPills = (c.comp || []).map(p => `<span class="comp-pill">${escapeHtml(p)}</span>`).join('');
+    const activeText = c.active_members > 0 ? `${c.active_members} active members` : "We're hiring";
+    const stamp = c.has_stamp ? stampImgHtml() : '';
+    return `
+      <div class="grid-card reveal in">
+        ${stamp}
+        <div class="gc-top">
+          <div class="gc-name">${logo}${escapeHtml(c.name)}</div>
+        </div>
+        <div class="gc-desc">${escapeHtml(c.description || '')}</div>
+        <div class="gc-label">Currently recruiting</div>
+        <div class="gc-roles">${roleTags}</div>
+        <div class="gc-comp">${compPills}</div>
+        <div class="gc-bottom">
+          <span class="gc-active"><span class="dot"></span>${escapeHtml(activeText)}</span>
+          <span class="cc-btn js-view-company">View company</span>
+        </div>
+      </div>`;
+  }
+
+  async function refreshHomeCompanyGrid(){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*').order('home_order', { ascending:true }), 8000);
+      if(error) throw error;
+      const companies = data || [];
+      const featured = companies.filter(c => c.featured_on_home);
+
+      if(featured.length){
+        const previewEl = document.querySelector('.preview');
+        if(previewEl){
+          const topHtml = previewEl.querySelector('.preview-top') ? previewEl.querySelector('.preview-top').outerHTML : '';
+          previewEl.innerHTML = topHtml + featured.map(c => heroPreviewCardHtml(c)).join('');
+          bindViewCompanyButtons(previewEl);
+        }
+
+        const gridEl = document.getElementById('companies');
+        if(gridEl){
+          gridEl.innerHTML = featured.map(c => browseGridCardHtml(c)).join('');
+          bindViewCompanyButtons(gridEl);
+        }
+        return;
+      }
+
+      // Nothing curated yet — keep the shipped cards, but still surface any
+      // stamp admin has already turned on for a company that matches one.
+      const byName = {};
+      companies.forEach(c => { byName[c.name] = c; });
+      document.querySelectorAll('.preview .company-card, #companies .grid-card').forEach(card=>{
+        const name = cardName(card);
+        const match = name && byName[name];
+        if(match && match.has_stamp && !card.querySelector('.card-stamp')){
+          card.insertAdjacentHTML('afterbegin', stampImgHtml());
+        }
+      });
+    } catch(e){
+      // network hiccup on the public page — leave the shipped cards as they are
+    }
+  }
+  refreshHomeCompanyGrid();
 
   // company view popup — locked teaser for guests, full solid card for signed-in members
   const viewOverlay = document.getElementById('viewOverlay');
@@ -2894,8 +3045,10 @@
             ${pendingCount > 0 ? `<span class="card-notif-badge">${pendingCount}</span>` : ''}
           </button>`
         : '';
+      const stamp = c.hasStamp ? stampImgHtml() : '';
       return `
         <div class="dash-match-card${canEdit ? ' has-bell' : ''}">
+          ${stamp}
           ${notifBell}
           <div class="dash-match-top">
             <div class="gc-name">${logo}${c.name}</div>
@@ -2940,7 +3093,8 @@
         roles: (live.roles && live.roles.length) ? live.roles : c.roles,
         comp: (live.comp && live.comp.length) ? live.comp : c.comp,
         logoImg: live.logo_url || c.logoImg,
-        companyId: live.id
+        companyId: live.id,
+        hasStamp: !!live.has_stamp
       } : c;
     });
 
@@ -3029,6 +3183,7 @@
 
     currentMode = 'admin';
     showView('admin');
+    refreshAdminCompaniesList();
 
     const tbody = document.getElementById('adminUsersTbody');
     const wrapEl = document.getElementById('adminUsersTableWrap');
@@ -3071,6 +3226,119 @@
     }).join('');
     wrapEl.style.display = '';
   }
+
+  // ---------- Admin: manage companies (add, feature, order, stamp, stats) ----------
+  // Requires supabase/company_curation_setup.sql (featured_on_home, home_order,
+  // active_members, total_members, has_stamp columns on companies).
+
+  let draggedCompanyRow = null;
+
+  async function fetchAllCompaniesForAdmin(){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*').order('home_order', { ascending:true }));
+      if(error) throw error;
+      return data || [];
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function updateCompanyField(companyId, patch){
+    try {
+      const { error } = await withTimeout(sb.from('companies').update(patch).eq('id', companyId));
+      if(error) throw error;
+    } catch(e){
+      document.getElementById('adminCompaniesError').classList.add('show');
+    }
+  }
+
+  async function persistCompanyOrder(){
+    const rows = Array.from(document.getElementById('adminCompaniesList').children);
+    try {
+      await Promise.all(rows.map((row, idx) =>
+        withTimeout(sb.from('companies').update({ home_order: idx }).eq('id', row.dataset.companyId))
+      ));
+    } catch(e){
+      document.getElementById('adminCompaniesError').classList.add('show');
+    }
+  }
+
+  function bindCompanyRowDrag(row){
+    row.addEventListener('dragstart', ()=>{
+      draggedCompanyRow = row;
+      setTimeout(()=> row.classList.add('dragging'), 0);
+    });
+    row.addEventListener('dragend', ()=>{
+      row.classList.remove('dragging');
+      draggedCompanyRow = null;
+      persistCompanyOrder();
+    });
+    row.addEventListener('dragover', (e)=>{
+      e.preventDefault();
+      if(!draggedCompanyRow || draggedCompanyRow === row) return;
+      const list = document.getElementById('adminCompaniesList');
+      const rows = Array.from(list.children);
+      if(rows.indexOf(draggedCompanyRow) < rows.indexOf(row)) row.after(draggedCompanyRow);
+      else row.before(draggedCompanyRow);
+    });
+  }
+
+  async function refreshAdminCompaniesList(){
+    const listEl = document.getElementById('adminCompaniesList');
+    const errEl = document.getElementById('adminCompaniesError');
+    errEl.classList.remove('show');
+    listEl.innerHTML = '<p class="field-hint">Loading…</p>';
+
+    const companies = await fetchAllCompaniesForAdmin();
+    if(companies === null){
+      listEl.innerHTML = '';
+      errEl.classList.add('show');
+      return;
+    }
+    if(!companies.length){
+      listEl.innerHTML = '<p class="field-hint">No companies yet — add one to get started.</p>';
+      return;
+    }
+
+    listEl.innerHTML = companies.map(c => {
+      const logo = c.logo_url ? `<img src="${c.logo_url}" alt="">` : escapeHtml(initials(c.name || 'Co'));
+      return `
+        <div class="admin-company-row" draggable="true" data-company-id="${c.id}" data-company-name="${escapeHtml(c.name)}">
+          <span class="admin-company-drag" title="Drag to reorder">⠿</span>
+          <span class="admin-company-logo">${logo}</span>
+          <div class="admin-company-body">
+            <div class="admin-company-name">${escapeHtml(c.name)}</div>
+            <label class="admin-company-check"><input type="checkbox" class="js-featured-toggle" ${c.featured_on_home ? 'checked' : ''}> Featured on homepage</label>
+          </div>
+          <div class="admin-company-stats">
+            <label>Active<input type="number" min="0" class="admin-company-num js-active-members" value="${c.active_members || 0}"></label>
+            <label>Total<input type="number" min="0" class="admin-company-num js-total-members" value="${c.total_members || 0}"></label>
+          </div>
+          <label class="admin-company-check"><input type="checkbox" class="js-stamp-toggle" ${c.has_stamp ? 'checked' : ''}> Stamp</label>
+          <button type="button" class="btn btn-ghost btn-sm js-edit-company-admin">Edit</button>
+        </div>`;
+    }).join('');
+
+    Array.from(listEl.children).forEach(bindCompanyRowDrag);
+
+    listEl.querySelectorAll('.js-featured-toggle').forEach(cb=>{
+      cb.addEventListener('change', ()=> updateCompanyField(cb.closest('.admin-company-row').dataset.companyId, { featured_on_home: cb.checked }));
+    });
+    listEl.querySelectorAll('.js-stamp-toggle').forEach(cb=>{
+      cb.addEventListener('change', ()=> updateCompanyField(cb.closest('.admin-company-row').dataset.companyId, { has_stamp: cb.checked }));
+    });
+    listEl.querySelectorAll('.js-active-members').forEach(inp=>{
+      inp.addEventListener('change', ()=> updateCompanyField(inp.closest('.admin-company-row').dataset.companyId, { active_members: parseInt(inp.value, 10) || 0 }));
+    });
+    listEl.querySelectorAll('.js-total-members').forEach(inp=>{
+      inp.addEventListener('change', ()=> updateCompanyField(inp.closest('.admin-company-row').dataset.companyId, { total_members: parseInt(inp.value, 10) || 0 }));
+    });
+    listEl.querySelectorAll('.js-edit-company-admin').forEach(btn=>{
+      btn.addEventListener('click', ()=> openEditListingModal(btn.closest('.admin-company-row').dataset.companyId));
+    });
+  }
+
+  document.getElementById('adminAddCompanyBtn').addEventListener('click', ()=> openEditListingModal(null));
 
   document.getElementById('dashSwapBtn').addEventListener('click', ()=> enterAdminView(lastJoinProfile));
   document.getElementById('adminSwapBtn').addEventListener('click', ()=> enterDashboard(lastJoinProfile));
@@ -4177,6 +4445,26 @@
     editListingError.classList.remove('show');
     editListingCompanyId = companyId;
     editListingLogoFile = null;
+
+    if(!companyId){
+      // Create mode — admin adding a brand new company.
+      document.getElementById('editListingTitle').textContent = 'Add company';
+      document.getElementById('editListingSub').textContent = 'Add a new company listing.';
+      document.getElementById('editListingName').value = '';
+      document.getElementById('editListingDesc').value = '';
+      document.getElementById('editListingWebsite').value = '';
+      document.getElementById('editListingStage').value = 'Idea';
+      setLogoPreview(null, 'New company');
+      document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('#editListingCompGroup .chip-select').forEach(c => c.classList.remove('selected'));
+      document.getElementById('editListingSaveBtn').textContent = 'Add company';
+      editListingModalOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
+    document.getElementById('editListingSaveBtn').textContent = 'Save changes';
+    document.getElementById('editListingTitle').textContent = 'Edit company listing';
     try {
       const { data, error } = await withTimeout(sb.from('companies').select('*').eq('id', companyId).single());
       if(error || !data) throw error || new Error('not found');
@@ -4209,25 +4497,44 @@
   editListingModalOverlay.addEventListener('click', (e)=>{ if(e.target === editListingModalOverlay) closeEditListingModal(); });
 
   document.getElementById('editListingSaveBtn').addEventListener('click', async ()=>{
-    if(!editListingCompanyId) return;
+    const isCreating = !editListingCompanyId;
     const btn = document.getElementById('editListingSaveBtn');
     editListingError.classList.remove('show');
+
+    const name = document.getElementById('editListingName').value.trim();
+    if(isCreating && !name){
+      editListingError.textContent = 'Give the company a name first.';
+      editListingError.classList.add('show');
+      return;
+    }
+
     btn.disabled = true;
     btn.textContent = 'Saving…';
     try {
       const roles = Array.from(document.querySelectorAll('#editListingRolesGroup .chip-select.selected')).map(c=>c.dataset.val);
       const comp = Array.from(document.querySelectorAll('#editListingCompGroup .chip-select.selected')).map(c=>c.dataset.val);
       const payload = {
-        name: document.getElementById('editListingName').value.trim(),
+        name,
         description: document.getElementById('editListingDesc').value.trim(),
         website: document.getElementById('editListingWebsite').value.trim(),
         stage: document.getElementById('editListingStage').value,
         roles, comp,
         updated_at: new Date().toISOString()
       };
+
+      let companyId = editListingCompanyId;
+      if(isCreating){
+        const { data: created, error: createErr } = await withTimeout(sb.from('companies').insert(payload).select('id').single());
+        if(createErr) throw createErr;
+        companyId = created.id;
+        if(currentUser){
+          withTimeout(sb.from('company_certifications').insert({ user_id: currentUser.id, company_id: companyId, status: 'active' })).catch(()=>{});
+        }
+      }
+
       if(editListingLogoFile){
         const ext = (editListingLogoFile.name.split('.').pop() || 'jpg').toLowerCase();
-        const path = `${editListingCompanyId}/${Date.now()}.${ext}`;
+        const path = `${companyId}/${Date.now()}.${ext}`;
         const { error: upErr } = await withTimeout(
           sb.storage.from('company-logos').upload(path, editListingLogoFile, { upsert:true, contentType: editListingLogoFile.type }),
           20000
@@ -4236,16 +4543,21 @@
         const { data: pub } = sb.storage.from('company-logos').getPublicUrl(path);
         payload.logo_url = pub.publicUrl;
       }
-      const { error } = await withTimeout(sb.from('companies').update(payload).eq('id', editListingCompanyId));
-      if(error) throw error;
+
+      if(!isCreating || editListingLogoFile){
+        const { error } = await withTimeout(sb.from('companies').update(payload).eq('id', companyId));
+        if(error) throw error;
+      }
+
       closeEditListingModal();
       if(currentMode === 'user') enterDashboard(lastJoinProfile);
+      if(isAdmin) refreshAdminCompaniesList();
     } catch(e){
-      editListingError.textContent = "Couldn't save your changes — try again.";
+      editListingError.textContent = isCreating ? "Couldn't add that company — try again." : "Couldn't save your changes — try again.";
       editListingError.classList.add('show');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Save changes';
+      btn.textContent = isCreating ? 'Add company' : 'Save changes';
     }
   });
 
