@@ -1663,14 +1663,14 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="/assets/js/supabase.js"></script>
 <script>
   // Supabase — fill these in from Project Settings > API, then also
   // disable "Confirm email" under Authentication > Sign In / Providers > Email
   // so signUp() logs people in immediately instead of waiting on a confirmation click.
-  const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-  const SUPABASE_CONFIGURED = /^https?:\/\//.test(SUPABASE_URL) && !SUPABASE_ANON_KEY.startsWith('YOUR_');
+  const SUPABASE_URL = 'https://tdcnrevhsyfdjknnjsgg.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_zQkVd8uSet9ZZxXis8Dmeg_paSzAsMn';
+  const SUPABASE_CONFIGURED = /^https?:\/\//.test(SUPABASE_URL) && !SUPABASE_ANON_KEY.startsWith('YOUR_') && typeof window.supabase !== 'undefined';
 
   // Falls back to a harmless stub until real credentials are added above —
   // createClient() throws synchronously on an invalid URL, which would
