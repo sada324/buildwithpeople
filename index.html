@@ -773,6 +773,25 @@
   @media (max-width:900px){
     .dash-grid{ grid-template-columns:1fr; grid-template-areas:"profile" "matches" "snapshot" "messages" "activity"; }
   }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 18px; }
+
+    .dash-topbar-inner{ flex-wrap:wrap; row-gap:10px; padding:14px 0; }
+    .dash-top-right{ gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .dash-badge-admin{ font-size:10px; padding:2px 7px; }
+    .dash-top-right .btn.btn-sm{ font-size:12px; padding:7px 10px; }
+    .dash-textlink{ font-size:13px; }
+
+    .dash-body{ padding:28px 0 56px; }
+    .dash-greeting h1{ font-size:22px; }
+    .dash-greeting p{ margin-bottom:0; }
+    .dash-greeting-row{ flex-direction:column; align-items:stretch; gap:18px; margin-bottom:28px; }
+    .dash-greeting-row .btn{ width:100%; margin-top:0; }
+
+    .dash-grid{ gap:14px; }
+    .dash-panel{ padding:18px; }
+  }
   .dash-panel{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
   .dash-panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:18px; }
   .dash-panel-head h3{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-0.01em; }
