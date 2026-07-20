@@ -596,9 +596,13 @@
   .view-modal h3{ font-family:var(--font-display); font-size:19px; font-weight:700; letter-spacing:-0.02em; margin-bottom:8px; }
   .view-modal p{ font-size:13.5px; color:var(--ink-soft); margin-bottom:24px; }
   .view-actions{ display:flex; flex-direction:column; gap:10px; }
+  .view-actions.hidden{ display:none; }
   .view-actions .btn{ justify-content:center; padding:12px; font-size:14px; }
   .view-actions .btn-dark{ background:var(--ink); }
   .view-actions .btn-ghost{ background:rgba(255,255,255,0.55); }
+  .view-tags{ display:none; flex-wrap:wrap; gap:6px; justify-content:center; margin:-8px 0 22px; }
+  .view-tags.show{ display:flex; }
+  .view-icon.member{ background:var(--green-soft); }
 
   .field-group{ margin-bottom:22px; }
   .field-label{ font-size:13px; font-weight:600; color:var(--ink); margin-bottom:9px; display:block; }
@@ -710,8 +714,8 @@
         <a href="#services">Launch services</a>
       </div>
       <div class="nav-right">
-        <a href="#">Sign in</a>
-        <button class="btn btn-dark btn-sm js-open-join-modal">Join Now</button>
+        <a href="#" id="navSignIn">Sign in</a>
+        <button class="btn btn-dark btn-sm js-open-join-modal" id="navJoinBtn">Join Now</button>
       </div>
     </nav>
   </div>
@@ -1423,19 +1427,28 @@
     <button class="view-close" id="viewClose" aria-label="Close">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     </button>
-    <div class="view-icon">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="4" y="9" width="12" height="8" rx="1.5" stroke="#14171A" stroke-width="1.4"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="#14171A" stroke-width="1.4"/></svg>
+    <div class="view-icon" id="viewIcon">
+      <svg id="viewIconLock" width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="4" y="9" width="12" height="8" rx="1.5" stroke="#14171A" stroke-width="1.4"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="#14171A" stroke-width="1.4"/></svg>
+      <svg id="viewIconCheck" width="20" height="20" viewBox="0 0 16 16" fill="none" style="display:none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <h3>Sign in to view this company</h3>
-    <p>Create a free account to see the full profile, team, open roles, and compensation details.</p>
-    <div class="view-actions">
-      <a href="#" class="btn btn-dark">Sign in</a>
-      <a href="#" class="btn btn-ghost">Create account</a>
+    <h3 id="viewTitle">Sign in to view this company</h3>
+    <p id="viewDesc">Create a free account to see the full profile, team, open roles, and compensation details.</p>
+    <div class="view-tags" id="viewTags"></div>
+    <div class="view-actions" id="viewActionsGuest">
+      <a href="#" class="btn btn-dark" id="viewSignInBtn">Sign in</a>
+      <a href="#" class="btn btn-ghost" id="viewCreateBtn">Create account</a>
+    </div>
+    <div class="view-actions hidden" id="viewActionsMember">
+      <a href="#" class="btn btn-dark">Apply to this role</a>
+      <button type="button" class="btn btn-ghost" id="viewMemberClose">Close</button>
     </div>
   </div>
 </div>
 
 <script>
+  // session state — true once someone completes the join flow
+  let isSignedIn = false;
+
   // contribution grid — signature element, GitHub-style history
   const grid = document.getElementById('contribGrid');
   const levels = ['','l1','l1','l2','l2','l2','l3','l3','l4'];
@@ -1462,8 +1475,16 @@
     });
   });
 
-  // sign-in-to-view popup
+  // company view popup — locked teaser for guests, full card for signed-in members
   const viewOverlay = document.getElementById('viewOverlay');
+  const viewIconLock = document.getElementById('viewIconLock');
+  const viewIconCheck = document.getElementById('viewIconCheck');
+  const viewTitle = document.getElementById('viewTitle');
+  const viewDesc = document.getElementById('viewDesc');
+  const viewTags = document.getElementById('viewTags');
+  const viewActionsGuest = document.getElementById('viewActionsGuest');
+  const viewActionsMember = document.getElementById('viewActionsMember');
+
   function openViewPopup(){
     viewOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -1472,12 +1493,62 @@
     viewOverlay.classList.remove('open');
     document.body.style.overflow = '';
   }
+  function showGuestView(){
+    document.getElementById('viewIcon').classList.remove('member');
+    viewIconLock.style.display = 'block';
+    viewIconCheck.style.display = 'none';
+    viewTitle.textContent = 'Sign in to view this company';
+    viewDesc.textContent = 'Create a free account to see the full profile, team, open roles, and compensation details.';
+    viewTags.classList.remove('show');
+    viewTags.innerHTML = '';
+    viewActionsGuest.classList.remove('hidden');
+    viewActionsMember.classList.add('hidden');
+  }
+  function cardName(card){
+    const nameEl = card && card.querySelector('.cc-name, .gc-name');
+    if(!nameEl) return null;
+    const clone = nameEl.cloneNode(true);
+    clone.querySelectorAll('.cc-logo, .dot').forEach(el=>el.remove());
+    return clone.textContent.trim();
+  }
+
+  function showMemberView(card){
+    const name = cardName(card);
+    const descEl = card && card.querySelector('.cc-sub, .gc-desc');
+    const pillEls = card ? card.querySelectorAll('.cc-tags .tag, .gc-roles .tag, .comp-pill') : [];
+
+    document.getElementById('viewIcon').classList.add('member');
+    viewIconLock.style.display = 'none';
+    viewIconCheck.style.display = 'block';
+    viewTitle.textContent = name || 'Company profile';
+    viewDesc.textContent = descEl ? descEl.textContent.trim() : "You're signed in — here's the full profile.";
+    viewTags.innerHTML = Array.from(pillEls).map(t=>`<span class="${t.className}">${t.textContent}</span>`).join('');
+    viewTags.classList.toggle('show', pillEls.length > 0);
+    viewActionsGuest.classList.add('hidden');
+    viewActionsMember.classList.remove('hidden');
+  }
+
   document.querySelectorAll('.js-view-company').forEach(btn=>{
-    btn.addEventListener('click', openViewPopup);
+    btn.addEventListener('click', ()=>{
+      if(isSignedIn){
+        showMemberView(btn.closest('.company-card, .grid-card'));
+      } else {
+        showGuestView();
+      }
+      openViewPopup();
+    });
   });
   document.getElementById('viewClose').addEventListener('click', closeViewPopup);
+  document.getElementById('viewMemberClose').addEventListener('click', closeViewPopup);
   viewOverlay.addEventListener('click', (e)=>{ if(e.target === viewOverlay) closeViewPopup(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && viewOverlay.classList.contains('open')) closeViewPopup(); });
+
+  function goToJoinFromView(){
+    closeViewPopup();
+    setTimeout(openJoinModal, 200);
+  }
+  document.getElementById('viewSignInBtn').addEventListener('click', goToJoinFromView);
+  document.getElementById('viewCreateBtn').addEventListener('click', goToJoinFromView);
 
   // list-your-company modal
   const overlay = document.getElementById('modalOverlay');
@@ -1701,7 +1772,14 @@
   }
 
   document.querySelectorAll('.js-open-join-modal').forEach(btn=>{
-    btn.addEventListener('click', openJoinModal);
+    btn.addEventListener('click', (e)=>{
+      if(isSignedIn && btn.id === 'navJoinBtn'){
+        e.preventDefault();
+        document.getElementById('profile').scrollIntoView({ behavior:'smooth' });
+        return;
+      }
+      openJoinModal();
+    });
   });
   document.getElementById('joinModalClose').addEventListener('click', closeJoinModal);
   joinOverlay.addEventListener('click', (e)=>{ if(e.target === joinOverlay) closeJoinModal(); });
@@ -1759,6 +1837,10 @@
       document.getElementById('joinSuccessSummary').textContent = summary;
       joinModalForm.style.display = 'none';
       joinModalSuccess.classList.add('show');
+
+      isSignedIn = true;
+      document.getElementById('navSignIn').style.display = 'none';
+      document.getElementById('navJoinBtn').textContent = `Hi, ${name ? name.split(' ')[0] : 'there'}`;
     }
   });
 
