@@ -855,6 +855,10 @@
   .conversation-company-tag{ font-family:var(--font-mono); font-size:10.5px; color:var(--grey); margin-bottom:2px; }
   .conversation-preview{ font-size:12.5px; color:var(--grey); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .conversation-time{ font-size:11px; color:var(--grey); flex-shrink:0; }
+  .conversation-time-col{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .conversation-unread-dot{ width:8px; height:8px; border-radius:50%; background:var(--ink); flex-shrink:0; }
+  .conversation-item.unread .conversation-name{ font-weight:700; color:var(--ink); }
+  .conversation-item.unread .conversation-preview{ color:var(--ink-soft); }
 
   .chat-modal{ display:flex; flex-direction:column; height:70vh; max-height:560px; padding:0; overflow:hidden; }
   .chat-head{ display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
@@ -1614,14 +1618,6 @@
         </div>
       </div>
 
-      <div class="dash-panel admin-companies-panel" id="adminPendingPanel" style="display:none">
-        <div class="dash-panel-head">
-          <h3>Pending company submissions</h3>
-          <span class="dash-panel-sub" id="adminPendingCount"></span>
-        </div>
-        <div id="adminPendingList"></div>
-      </div>
-
       <div class="dash-panel admin-companies-panel">
         <div class="dash-panel-head">
           <h3>Manage companies</h3>
@@ -1630,6 +1626,15 @@
         <p class="admin-companies-hint">Drag to reorder which companies show as "Recruiting now" on the homepage. Toggle Featured to include one there, and Stamp to show the Easy Onboarding badge on its card.</p>
         <div id="adminCompaniesList" class="admin-companies-list"></div>
         <p class="field-error" id="adminCompaniesError">Something went wrong — try again.</p>
+      </div>
+
+      <div class="dash-panel admin-companies-panel" id="adminPendingPanel">
+        <div class="dash-panel-head">
+          <h3>Company creation requests</h3>
+          <span class="dash-panel-sub" id="adminPendingCount"></span>
+        </div>
+        <p class="admin-companies-hint">Review companies people have submitted through "List your company." Approving sends them a welcome message from Build With People and lists the company; declining lets them know.</p>
+        <div id="adminPendingList"></div>
       </div>
     </div>
   </div>
@@ -3463,17 +3468,23 @@
   }
 
   async function refreshAdminPendingCompanies(){
-    const panel = document.getElementById('adminPendingPanel');
     const listEl = document.getElementById('adminPendingList');
     const countEl = document.getElementById('adminPendingCount');
 
     const pending = await fetchPendingCompanies();
-    if(!pending || !pending.length){
-      panel.style.display = 'none';
+
+    if(pending === null){
+      countEl.textContent = '';
+      listEl.innerHTML = '<p class="field-hint">Couldn\'t load pending submissions — try again.</p>';
       return;
     }
 
-    panel.style.display = '';
+    if(!pending.length){
+      countEl.textContent = '';
+      listEl.innerHTML = '<p class="field-hint">No pending submissions right now.</p>';
+      return;
+    }
+
     countEl.textContent = `${pending.length} awaiting review`;
     listEl.innerHTML = pending.map(c => `
       <div class="cert-card sales-cert-card applicant-card">
@@ -3886,6 +3897,7 @@
 
   let currentViewCompanyName = null;
   let activeConversationId = null;
+  let activeConversationIsContributor = true;
   let activeChannel = null;
   let renderedMessageIds = new Set();
   // null = can edit every company (admin); Set = the specific names this
@@ -3913,7 +3925,7 @@
     if(!currentUser) return [];
     try {
       const [mineRes, certs] = await Promise.all([
-        withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, companies(id, name, logo_url)').eq('user_id', currentUser.id)),
+        withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, user_last_read_at, rep_last_read_at, companies(id, name, logo_url)').eq('user_id', currentUser.id)),
         fetchMyCertifications()
       ]);
       if(mineRes.error) throw mineRes.error;
@@ -3922,7 +3934,7 @@
       const repCompanyIds = certs.filter(c => c.status === 'active' && c.companies).map(c => c.companies.id);
       let repConvos = [];
       if(repCompanyIds.length){
-        const repRes = await withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, companies(id, name, logo_url)').in('company_id', repCompanyIds));
+        const repRes = await withTimeout(sb.from('conversations').select('id, user_id, company_id, last_message_at, user_last_read_at, rep_last_read_at, companies(id, name, logo_url)').in('company_id', repCompanyIds));
         if(repRes.error) throw repRes.error;
         repConvos = repRes.data || [];
       }
@@ -3949,7 +3961,9 @@
         const company = { id: c.company_id, name: c.companies ? c.companies.name : 'Company', avatarUrl: c.companies ? c.companies.logo_url : null };
         const contributorRow = contributorMap[c.user_id];
         const contributor = { id: c.user_id, name: (contributorRow && contributorRow.name) || 'A contributor', avatarUrl: contributorRow && contributorRow.avatar_url };
-        return { ...c, iAmContributor, company, contributor, preview: previewMap[c.id] || 'Say hello 👋' };
+        const lastRead = iAmContributor ? c.user_last_read_at : c.rep_last_read_at;
+        const unread = !!c.last_message_at && (!lastRead || new Date(c.last_message_at) > new Date(lastRead));
+        return { ...c, iAmContributor, company, contributor, unread, preview: previewMap[c.id] || 'Say hello 👋' };
       });
 
       all.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
@@ -3986,14 +4000,17 @@
       const name = c.iAmContributor ? c.company.name : c.contributor.name;
       const companyTag = c.iAmContributor ? '' : `<div class="conversation-company-tag">For ${escapeHtml(c.company.name)}</div>`;
       return `
-        <button type="button" class="conversation-item" data-conversation-id="${c.id}">
+        <button type="button" class="conversation-item${c.unread ? ' unread' : ''}" data-conversation-id="${c.id}">
           ${avatar}
           <span class="conversation-body">
             ${companyTag}
             <div class="conversation-name">${escapeHtml(name)}</div>
             <div class="conversation-preview">${escapeHtml(c.preview)}</div>
           </span>
-          <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+          <span class="conversation-time-col">
+            ${c.unread ? '<span class="conversation-unread-dot"></span>' : ''}
+            <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+          </span>
         </button>`;
     }).join('');
 
@@ -4089,8 +4106,14 @@
     } catch(e){ /* realtime is a nice-to-have; the thread still works without it */ }
   }
 
+  async function markConversationRead(conversationId, iAmContributor){
+    const patch = iAmContributor ? { user_last_read_at: new Date().toISOString() } : { rep_last_read_at: new Date().toISOString() };
+    try { await withTimeout(sb.from('conversations').update(patch).eq('id', conversationId)); } catch(e){}
+  }
+
   async function openChatModal(conv){
     activeConversationId = conv.id;
+    activeConversationIsContributor = conv.iAmContributor;
     const headEl = document.getElementById('chatHeadId');
 
     if(conv.iAmContributor){
@@ -4120,6 +4143,7 @@
 
     await loadChatMessages(conv.id);
     subscribeToConversation(conv.id);
+    markConversationRead(conv.id, conv.iAmContributor);
   }
 
   function closeChatModal(){
@@ -4198,7 +4222,11 @@
       if(error) throw error;
       input.value = '';
       appendChatBubble(data);
-      withTimeout(sb.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', activeConversationId)).catch(()=>{});
+      const nowIso = new Date().toISOString();
+      const convPatch = activeConversationIsContributor
+        ? { last_message_at: nowIso, user_last_read_at: nowIso }
+        : { last_message_at: nowIso, rep_last_read_at: nowIso };
+      withTimeout(sb.from('conversations').update(convPatch).eq('id', activeConversationId)).catch(()=>{});
     } catch(e){
       alert("Couldn't send that message — try again.");
     } finally {
@@ -4554,7 +4582,7 @@
 
   async function fetchCompanyConversations(companyId){
     try {
-      const { data, error } = await withTimeout(sb.from('conversations').select('id, user_id, last_message_at').eq('company_id', companyId).order('last_message_at', { ascending:false }));
+      const { data, error } = await withTimeout(sb.from('conversations').select('id, user_id, last_message_at, rep_last_read_at').eq('company_id', companyId).order('last_message_at', { ascending:false }));
       if(error) throw error;
       const convos = data || [];
       if(!convos.length) return [];
@@ -4568,6 +4596,7 @@
       (msgs || []).forEach(m => { if(!previewMap[m.conversation_id]) previewMap[m.conversation_id] = m.body; });
       return convos.map(c => ({
         id: c.id, last_message_at: c.last_message_at,
+        unread: !!c.last_message_at && (!c.rep_last_read_at || new Date(c.last_message_at) > new Date(c.rep_last_read_at)),
         contributor: { id: c.user_id, name: (profileMap[c.user_id] && profileMap[c.user_id].name) || 'A contributor', avatarUrl: profileMap[c.user_id] && profileMap[c.user_id].avatar_url },
         preview: previewMap[c.id] || 'Say hello 👋'
       }));
@@ -4592,13 +4621,16 @@
     }
     const company = { id: manageCompanyState.id, name: manageCompanyState.name, avatarUrl: manageCompanyState.logoUrl };
     panel.innerHTML = `<div class="conversation-list">${convos.map(c => `
-      <button type="button" class="conversation-item" data-conversation-id="${c.id}">
+      <button type="button" class="conversation-item${c.unread ? ' unread' : ''}" data-conversation-id="${c.id}">
         ${avatarStackHtml(c.contributor.avatarUrl, c.contributor.name, null, null, 'sm')}
         <span class="conversation-body">
           <div class="conversation-name">${escapeHtml(c.contributor.name)}</div>
           <div class="conversation-preview">${escapeHtml(c.preview)}</div>
         </span>
-        <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+        <span class="conversation-time-col">
+          ${c.unread ? '<span class="conversation-unread-dot"></span>' : ''}
+          <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+        </span>
       </button>`).join('')}</div>`;
     panel.querySelectorAll('[data-conversation-id]').forEach(btn=>{
       const conv = convos.find(c => c.id === btn.dataset.conversationId);
