@@ -740,6 +740,31 @@
   .dash-body{ padding:48px 0 90px; }
   .dash-greeting h1{ font-family:var(--font-display); font-size:28px; font-weight:700; letter-spacing:-0.02em; margin-bottom:6px; }
   .dash-greeting p{ color:var(--ink-soft); font-size:14.5px; margin-bottom:36px; }
+  .dash-greeting-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .dash-greeting-row .btn{ flex-shrink:0; margin-top:2px; }
+
+  .create-hub-list{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+  .create-hub-item{
+    display:flex; align-items:center; gap:14px; text-align:left; width:100%;
+    padding:16px; border:1px solid var(--border); border-radius:12px;
+    background:var(--white); cursor:pointer; transition: all .15s ease;
+  }
+  .create-hub-item:hover{ border-color:var(--border-strong); box-shadow:var(--shadow-sm); }
+  .create-hub-status{
+    width:22px; height:22px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    border:2px solid var(--border-strong); color:transparent;
+  }
+  .create-hub-item.done .create-hub-status{ background:var(--green-dot); border-color:var(--green-dot); color:var(--white); }
+  .create-hub-item.pending .create-hub-status{ border-color:var(--green-dot); }
+  .create-hub-body{ flex:1; }
+  .create-hub-body h4{ font-family:var(--font-display); font-size:14.5px; font-weight:700; margin-bottom:3px; }
+  .create-hub-body p{ font-size:12.5px; color:var(--grey); }
+  .create-hub-chevron{ color:var(--grey); flex-shrink:0; }
+
+  .sales-cert-card{ margin-bottom:14px; }
+  .sales-cert-card:last-child{ margin-bottom:0; }
+  .sales-cert-card .modal-submit{ margin-top:0; }
 
   .dash-grid{
     display:grid; grid-template-columns:340px 1fr; gap:20px;
@@ -1277,9 +1302,12 @@
   </header>
 
   <div class="wrap dash-body">
-    <div class="dash-greeting">
-      <h1 id="dashGreeting">Welcome, there.</h1>
-      <p id="dashSubGreeting">Here's what's happening for you right now.</p>
+    <div class="dash-greeting dash-greeting-row">
+      <div>
+        <h1 id="dashGreeting">Welcome, there.</h1>
+        <p id="dashSubGreeting">Here's what's happening for you right now.</p>
+      </div>
+      <button type="button" class="btn btn-dark" id="startBuildingBtn">Start Building</button>
     </div>
 
     <div class="dash-grid">
@@ -1693,6 +1721,114 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="createHubOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Create</h3>
+      <button class="modal-close" id="createHubClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub">Grow your profile, list a company, get certified to sell, or get help building.</p>
+    <div class="create-hub-list" id="createHubList"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="verifyModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Get verified</h3>
+      <button class="modal-close" id="verifyModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub">Improve your profile and unlock more matches. Everything here is optional — add what applies to you.</p>
+    <div class="field-group">
+      <label class="field-label" for="verifyWebsite">Website</label>
+      <input class="field-input" id="verifyWebsite" type="url" placeholder="https://yoursite.com">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="verifyInstagram">Instagram</label>
+      <input class="field-input" id="verifyInstagram" type="text" placeholder="@yourhandle or profile link">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="verifyLinkedin">LinkedIn</label>
+      <input class="field-input" id="verifyLinkedin" type="text" placeholder="Profile link">
+    </div>
+    <p class="field-error" id="verifyError">Something went wrong — try again.</p>
+    <button type="button" class="btn btn-dark modal-submit" id="verifySaveBtn">Save and complete profile</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="salesModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Start a sales profile</h3>
+      <button class="modal-close" id="salesModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub">Become certified to represent a company and earn commission on what you sell.</p>
+    <div id="salesCertList"></div>
+    <p class="field-error" id="salesError">Something went wrong — try again.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editListingModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Edit company listing</h3>
+      <button class="modal-close" id="editListingClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub" id="editListingSub">Update what contributors see for this company.</p>
+    <div class="field-group">
+      <label class="field-label" for="editListingName">Company name</label>
+      <input class="field-input" id="editListingName" type="text">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="editListingDesc">What are you building?</label>
+      <textarea class="field-textarea" id="editListingDesc"></textarea>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="editListingStage">Stage</label>
+      <select class="field-input" id="editListingStage">
+        <option value="Idea">Idea</option>
+        <option value="Building">Building</option>
+        <option value="Launched">Launched</option>
+        <option value="Growing">Growing</option>
+        <option value="Established">Established</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <span class="field-label">Roles needed</span>
+      <div class="chip-group" id="editListingRolesGroup">
+        <span class="chip-select" data-val="Sales">Sales</span>
+        <span class="chip-select" data-val="Design">Design</span>
+        <span class="chip-select" data-val="Development">Development</span>
+        <span class="chip-select" data-val="Marketing">Marketing</span>
+        <span class="chip-select" data-val="Videography">Videography</span>
+        <span class="chip-select" data-val="Operations">Operations</span>
+        <span class="chip-select" data-val="Cofounder">Cofounder</span>
+        <span class="chip-select" data-val="General help">General help</span>
+      </div>
+    </div>
+    <div class="field-group">
+      <span class="field-label">Compensation</span>
+      <div class="chip-group" id="editListingCompGroup">
+        <span class="chip-select" data-val="Paid">Paid</span>
+        <span class="chip-select" data-val="Commission">Commission</span>
+        <span class="chip-select" data-val="Equity">Equity</span>
+        <span class="chip-select" data-val="Experience">Experience</span>
+        <span class="chip-select" data-val="Portfolio">Portfolio</span>
+      </div>
+    </div>
+    <p class="field-error" id="editListingError">Something went wrong — try again.</p>
+    <button type="button" class="btn btn-dark modal-submit" id="editListingSaveBtn">Save changes</button>
+  </div>
+</div>
+
 <div class="view-overlay" id="viewOverlay">
   <div class="view-modal" id="viewModal">
     <button class="view-close" id="viewClose" aria-label="Close">
@@ -1744,6 +1880,7 @@
   let isSignedIn = false;
   let lastJoinProfile = null;
   let joinPendingConfirmation = false;
+  let currentUser = null;
 
   // admin access — gated by email rather than a DB column, since this is a
   // static client-only app with no backend to enforce it server-side. Note
@@ -1760,8 +1897,9 @@
     return !!email && ADMIN_EMAILS.includes(email.toLowerCase());
   }
 
-  function setAuthContext(email){
-    isAdmin = isAdminEmail(email);
+  function setAuthContext(user){
+    currentUser = user || null;
+    isAdmin = isAdminEmail(user && user.email);
     currentMode = isAdmin ? 'admin' : 'user';
   }
 
@@ -2114,6 +2252,7 @@
     } else {
       modalForm.style.display = 'none';
       modalSuccess.classList.add('show');
+      markCompanyListed();
     }
   });
 
@@ -2315,7 +2454,7 @@
       name, headline, skills, link, idea, pathVal,
       roles: rolesPicked, comp: compPicked, commit: commitPicked
     };
-    setAuthContext(email);
+    setAuthContext(data.user);
 
     const picked = [...rolesPicked, ...compPicked, ...(commitPicked ? [commitPicked] : [])];
     document.getElementById('joinSuccessName').textContent = name ? name.split(' ')[0] : 'there';
@@ -2400,7 +2539,7 @@
 
     const profile = await loadProfileForUser(data.user);
     lastJoinProfile = profile;
-    setAuthContext(data.user.email);
+    setAuthContext(data.user);
     closeSigninModal();
     signInUI(profile);
     routeToView(profile);
@@ -2539,10 +2678,14 @@
     return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
   }
 
+  function withTimeout(promise, ms = 10000){
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
+    return Promise.race([promise, timeout]);
+  }
+
   async function fetchAllProfiles(){
     try {
-      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000));
-      const { data, error } = await Promise.race([sb.from('profiles').select('*'), timeout]);
+      const { data, error } = await withTimeout(sb.from('profiles').select('*'));
       if(error) throw error;
       return data || [];
     } catch(e){
@@ -2611,6 +2754,7 @@
     await sb.auth.signOut();
     signOutUI();
     isAdmin = false;
+    currentUser = null;
     exitDashboard();
   });
 
@@ -2618,7 +2762,317 @@
     await sb.auth.signOut();
     signOutUI();
     isAdmin = false;
+    currentUser = null;
     exitDashboard();
+  });
+
+  // ---------- Create hub: "Start Building" checklist ----------
+  // Requires the schema in supabase/create_hub_setup.sql (profiles verification
+  // columns + companies / company_certifications tables and RLS) to be run in
+  // the Supabase SQL editor first — the fetches below fail gracefully until then.
+
+  const AVAILABLE_CERTIFICATES = [
+    { name: 'Custom514', logoImg: '/assets/logos/custom514.png', desc: 'Custom signage and physical brand experiences' }
+  ];
+
+  function checkSvg(){
+    return '<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  function chevronSvg(){
+    return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#8A8F98" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  async function fetchVerificationState(){
+    if(!currentUser) return { website:'', instagram:'', linkedin:'', hasListedCompany:false };
+    try {
+      const { data, error } = await withTimeout(sb.from('profiles').select('website, instagram, linkedin, has_listed_company').eq('id', currentUser.id).single());
+      if(error || !data) throw error || new Error('no data');
+      return {
+        website: data.website || '',
+        instagram: data.instagram || '',
+        linkedin: data.linkedin || '',
+        hasListedCompany: !!data.has_listed_company
+      };
+    } catch(e){
+      return { website:'', instagram:'', linkedin:'', hasListedCompany:false };
+    }
+  }
+
+  async function fetchMyCertifications(){
+    if(!currentUser) return [];
+    try {
+      const { data, error } = await withTimeout(sb.from('company_certifications')
+        .select('status, companies(id, name, description, stage, roles, comp, logo_url)')
+        .eq('user_id', currentUser.id));
+      if(error) throw error;
+      return data || [];
+    } catch(e){
+      return [];
+    }
+  }
+
+  async function markCompanyListed(){
+    if(!currentUser) return;
+    try { await withTimeout(sb.from('profiles').update({ has_listed_company: true }).eq('id', currentUser.id)); }
+    catch(e){ /* non-critical — the checklist just won't tick this item yet */ }
+  }
+
+  const createHubOverlay = document.getElementById('createHubOverlay');
+  function openCreateHub(){
+    createHubOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    refreshCreateHub();
+  }
+  function closeCreateHub(){
+    createHubOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('startBuildingBtn').addEventListener('click', openCreateHub);
+  document.getElementById('createHubClose').addEventListener('click', closeCreateHub);
+  createHubOverlay.addEventListener('click', (e)=>{ if(e.target === createHubOverlay) closeCreateHub(); });
+
+  async function refreshCreateHub(){
+    const listEl = document.getElementById('createHubList');
+    listEl.innerHTML = '<p class="field-hint">Loading…</p>';
+
+    const [verification, certifications] = await Promise.all([fetchVerificationState(), fetchMyCertifications()]);
+    const isVerified = !!(verification.website || verification.instagram || verification.linkedin);
+    const hasActiveCert = certifications.some(c => c.status === 'active');
+    const hasPendingCert = !hasActiveCert && certifications.some(c => c.status === 'pending');
+
+    const items = [
+      { id:'verify', done:isVerified, title:'Get verified', desc:'Improve your profile and unlock more matches.' },
+      { id:'list-company', done:verification.hasListedCompany, title:'List your company', desc:'Recruit contributors and build your team.' },
+      { id:'sales', done:hasActiveCert, pending:hasPendingCert, title:'Start a sales profile', desc:'Become certified to represent companies.' },
+      { id:'services', done:false, title:'Launch services', desc:'Get help building your startup. 🚀' }
+    ];
+
+    listEl.innerHTML = items.map(item => `
+      <button type="button" class="create-hub-item ${item.done ? 'done' : ''} ${item.pending ? 'pending' : ''}" data-hub-item="${item.id}">
+        <span class="create-hub-status">${item.done ? checkSvg() : ''}</span>
+        <span class="create-hub-body">
+          <h4>${item.title}</h4>
+          <p>${item.pending ? 'Pending review' : item.desc}</p>
+        </span>
+        <span class="create-hub-chevron">${chevronSvg()}</span>
+      </button>`).join('');
+
+    listEl.querySelectorAll('[data-hub-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openHubItem(btn.dataset.hubItem));
+    });
+  }
+
+  function openHubItem(id){
+    closeCreateHub();
+    if(id === 'verify') openVerifyModal();
+    else if(id === 'list-company') openModal();
+    else if(id === 'sales') openSalesModal();
+    else if(id === 'services'){
+      showView('marketing');
+      setTimeout(()=>{
+        const el = document.getElementById('services');
+        if(el) el.scrollIntoView({ behavior:'smooth' });
+      }, 250);
+    }
+  }
+
+  // -- Get verified --
+  const verifyModalOverlay = document.getElementById('verifyModalOverlay');
+  const verifyError = document.getElementById('verifyError');
+
+  async function openVerifyModal(){
+    verifyError.classList.remove('show');
+    const state = await fetchVerificationState();
+    document.getElementById('verifyWebsite').value = state.website;
+    document.getElementById('verifyInstagram').value = state.instagram;
+    document.getElementById('verifyLinkedin').value = state.linkedin;
+    verifyModalOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeVerifyModal(){
+    verifyModalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('verifyModalClose').addEventListener('click', closeVerifyModal);
+  verifyModalOverlay.addEventListener('click', (e)=>{ if(e.target === verifyModalOverlay) closeVerifyModal(); });
+
+  document.getElementById('verifySaveBtn').addEventListener('click', async ()=>{
+    if(!currentUser) return;
+    const btn = document.getElementById('verifySaveBtn');
+    verifyError.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const { error } = await withTimeout(sb.from('profiles').update({
+        website: document.getElementById('verifyWebsite').value.trim(),
+        instagram: document.getElementById('verifyInstagram').value.trim(),
+        linkedin: document.getElementById('verifyLinkedin').value.trim()
+      }).eq('id', currentUser.id));
+      if(error) throw error;
+      closeVerifyModal();
+      openCreateHub();
+    } catch(e){
+      verifyError.textContent = 'Something went wrong — try again.';
+      verifyError.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save and complete profile';
+    }
+  });
+
+  // -- Start a sales profile --
+  const salesModalOverlay = document.getElementById('salesModalOverlay');
+  const salesError = document.getElementById('salesError');
+
+  async function openSalesModal(){
+    salesError.classList.remove('show');
+    salesModalOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    await renderSalesCertList();
+  }
+  function closeSalesModal(){
+    salesModalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('salesModalClose').addEventListener('click', closeSalesModal);
+  salesModalOverlay.addEventListener('click', (e)=>{ if(e.target === salesModalOverlay) closeSalesModal(); });
+
+  async function renderSalesCertList(){
+    const listEl = document.getElementById('salesCertList');
+    listEl.innerHTML = '<p class="field-hint">Loading…</p>';
+    const certifications = await fetchMyCertifications();
+
+    listEl.innerHTML = AVAILABLE_CERTIFICATES.map(cert => {
+      const mine = certifications.find(c => c.companies && c.companies.name === cert.name);
+      let action;
+      if(mine && mine.status === 'active'){
+        action = `<button type="button" class="btn btn-ghost btn-sm" data-edit-company="${mine.companies.id}">Edit listing</button>`;
+      } else if(mine && mine.status === 'pending'){
+        action = `<span class="status-chip">Pending review</span>`;
+      } else {
+        action = `<button type="button" class="btn btn-dark btn-sm" data-request-cert="${escapeHtml(cert.name)}">Request certification</button>`;
+      }
+      return `
+        <div class="cert-card sales-cert-card">
+          <div class="cert-card-head">
+            <div class="company">
+              <div class="cert-badge"><img src="${cert.logoImg}" alt="${escapeHtml(cert.name)} logo"></div>
+              <div>
+                <div class="cert-title">${escapeHtml(cert.name)}</div>
+                <div class="cert-sub">${escapeHtml(cert.desc)}</div>
+              </div>
+            </div>
+          </div>
+          ${action}
+        </div>`;
+    }).join('');
+
+    listEl.querySelectorAll('[data-request-cert]').forEach(btn=>{
+      btn.addEventListener('click', ()=> requestCertification(btn.dataset.requestCert, btn));
+    });
+    listEl.querySelectorAll('[data-edit-company]').forEach(btn=>{
+      btn.addEventListener('click', ()=> openEditListingModal(btn.dataset.editCompany));
+    });
+  }
+
+  async function requestCertification(companyName, btn){
+    if(!currentUser) return;
+    salesError.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Requesting…';
+    try {
+      const { data: companyRows, error: companyErr } = await withTimeout(sb.from('companies').select('id').eq('name', companyName).limit(1));
+      if(companyErr) throw companyErr;
+      if(!companyRows || !companyRows.length) throw new Error('Company not found');
+      const { error } = await withTimeout(sb.from('company_certifications').insert({
+        user_id: currentUser.id, company_id: companyRows[0].id, status: 'pending'
+      }));
+      if(error) throw error;
+      await renderSalesCertList();
+    } catch(e){
+      salesError.textContent = "Couldn't submit your request — try again.";
+      salesError.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Request certification';
+    }
+  }
+
+  // -- Edit company listing (certified sales reps only, enforced by RLS) --
+  const editListingModalOverlay = document.getElementById('editListingModalOverlay');
+  const editListingError = document.getElementById('editListingError');
+  let editListingCompanyId = null;
+
+  function toggleChip(chip, multi){
+    if(multi) chip.classList.toggle('selected');
+    else {
+      chip.parentElement.querySelectorAll('.chip-select').forEach(c=>c.classList.remove('selected'));
+      chip.classList.add('selected');
+    }
+  }
+  document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(chip=>{
+    chip.addEventListener('click', ()=> toggleChip(chip, true));
+  });
+  document.querySelectorAll('#editListingCompGroup .chip-select').forEach(chip=>{
+    chip.addEventListener('click', ()=> toggleChip(chip, true));
+  });
+
+  async function openEditListingModal(companyId){
+    editListingError.classList.remove('show');
+    editListingCompanyId = companyId;
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('id', companyId).single());
+      if(error || !data) throw error || new Error('not found');
+      document.getElementById('editListingSub').textContent = `Update what contributors see for ${data.name}.`;
+      document.getElementById('editListingName').value = data.name || '';
+      document.getElementById('editListingDesc').value = data.description || '';
+      document.getElementById('editListingStage').value = data.stage || 'Idea';
+      const roles = data.roles || [];
+      const comp = data.comp || [];
+      document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(c=>{
+        c.classList.toggle('selected', roles.includes(c.dataset.val));
+      });
+      document.querySelectorAll('#editListingCompGroup .chip-select').forEach(c=>{
+        c.classList.toggle('selected', comp.includes(c.dataset.val));
+      });
+      editListingModalOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } catch(e){
+      salesError.textContent = "Couldn't load that listing — try again.";
+      salesError.classList.add('show');
+    }
+  }
+  function closeEditListingModal(){
+    editListingModalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('editListingClose').addEventListener('click', closeEditListingModal);
+  editListingModalOverlay.addEventListener('click', (e)=>{ if(e.target === editListingModalOverlay) closeEditListingModal(); });
+
+  document.getElementById('editListingSaveBtn').addEventListener('click', async ()=>{
+    if(!editListingCompanyId) return;
+    const btn = document.getElementById('editListingSaveBtn');
+    editListingError.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    try {
+      const roles = Array.from(document.querySelectorAll('#editListingRolesGroup .chip-select.selected')).map(c=>c.dataset.val);
+      const comp = Array.from(document.querySelectorAll('#editListingCompGroup .chip-select.selected')).map(c=>c.dataset.val);
+      const { error } = await withTimeout(sb.from('companies').update({
+        name: document.getElementById('editListingName').value.trim(),
+        description: document.getElementById('editListingDesc').value.trim(),
+        stage: document.getElementById('editListingStage').value,
+        roles, comp,
+        updated_at: new Date().toISOString()
+      }).eq('id', editListingCompanyId));
+      if(error) throw error;
+      closeEditListingModal();
+    } catch(e){
+      editListingError.textContent = "Couldn't save your changes — try again.";
+      editListingError.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save changes';
+    }
   });
 
   // restore an existing session on page load (e.g. after a refresh)
@@ -2626,7 +3080,7 @@
     if(data && data.session){
       const profile = await loadProfileForUser(data.session.user);
       lastJoinProfile = profile;
-      setAuthContext(data.session.user.email);
+      setAuthContext(data.session.user);
       signInUI(profile);
       routeToView(profile);
     }
