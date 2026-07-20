@@ -773,6 +773,25 @@
   @media (max-width:900px){
     .dash-grid{ grid-template-columns:1fr; grid-template-areas:"profile" "matches" "snapshot" "messages" "activity"; }
   }
+
+  @media (max-width:640px){
+    .wrap{ padding:0 18px; }
+
+    .dash-topbar-inner{ flex-wrap:wrap; row-gap:10px; padding:14px 0; }
+    .dash-top-right{ gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .dash-badge-admin{ font-size:10px; padding:2px 7px; }
+    .dash-top-right .btn.btn-sm{ font-size:12px; padding:7px 10px; }
+    .dash-textlink{ font-size:13px; }
+
+    .dash-body{ padding:28px 0 56px; }
+    .dash-greeting h1{ font-size:22px; }
+    .dash-greeting p{ margin-bottom:0; }
+    .dash-greeting-row{ flex-direction:column; align-items:stretch; gap:18px; margin-bottom:28px; }
+    .dash-greeting-row .btn{ width:100%; margin-top:0; }
+
+    .dash-grid{ gap:14px; }
+    .dash-panel{ padding:18px; }
+  }
   .dash-panel{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
   .dash-panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:18px; }
   .dash-panel-head h3{ font-family:var(--font-display); font-size:15px; font-weight:700; letter-spacing:-0.01em; }
@@ -797,6 +816,25 @@
   .avatar-upload-btn:hover{ transform:scale(1.1); }
   #avatarError{ margin-top:10px; }
 
+  /* avatar-stack: a big "primary" avatar with a smaller "secondary" merged
+     onto its corner — used wherever a company-side chat needs to show both
+     the company and the person at once. */
+  .avatar-stack{ position:relative; flex-shrink:0; }
+  .avatar-stack .avatar-primary, .avatar-stack .avatar-secondary{
+    border-radius:50%; background:var(--ink); color:var(--white); overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700;
+  }
+  .avatar-stack .avatar-primary img, .avatar-stack .avatar-secondary img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar-stack .avatar-secondary{ position:absolute; right:-6px; bottom:-4px; border:2px solid var(--white); }
+  .avatar-stack.size-sm{ width:36px; height:36px; }
+  .avatar-stack.size-sm .avatar-primary{ width:36px; height:36px; font-size:12.5px; }
+  .avatar-stack.size-sm .avatar-secondary{ width:18px; height:18px; font-size:7.5px; }
+  .avatar-stack.size-md{ width:40px; height:40px; }
+  .avatar-stack.size-md .avatar-primary{ width:40px; height:40px; font-size:13.5px; }
+  .avatar-stack.size-md .avatar-secondary{ width:20px; height:20px; font-size:8px; }
+  button.avatar-stack{ border:none; background:none; padding:0; cursor:pointer; }
+
   .conversation-list{ display:flex; flex-direction:column; gap:4px; }
   .conversation-item{
     display:flex; align-items:center; gap:12px; width:100%; text-align:left;
@@ -805,26 +843,19 @@
   }
   .conversation-item:last-child{ border-bottom:none; }
   .conversation-item:hover{ background:var(--off-white); }
-  .conversation-avatar{
-    width:36px; height:36px; border-radius:50%; background:var(--ink); color:var(--white); flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; overflow:hidden;
-    font-family:var(--font-display); font-weight:700; font-size:12.5px;
-  }
-  .conversation-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
   .conversation-body{ flex:1; min-width:0; }
   .conversation-name{ font-size:13.5px; font-weight:600; margin-bottom:2px; }
+  .conversation-company-tag{ font-family:var(--font-mono); font-size:10.5px; color:var(--grey); margin-bottom:2px; }
   .conversation-preview{ font-size:12.5px; color:var(--grey); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .conversation-time{ font-size:11px; color:var(--grey); flex-shrink:0; }
 
   .chat-modal{ display:flex; flex-direction:column; height:70vh; max-height:560px; padding:0; overflow:hidden; }
   .chat-head{ display:flex; align-items:center; justify-content:space-between; padding:20px 22px; border-bottom:1px solid var(--border); flex-shrink:0; }
   .chat-head-id{ display:flex; align-items:center; gap:12px; }
-  .chat-avatar{
-    width:36px; height:36px; border-radius:50%; background:var(--ink); color:var(--white); overflow:hidden;
-    display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:12.5px;
-  }
-  .chat-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .chat-head-id-btn{ display:flex; align-items:center; gap:12px; background:none; border:none; padding:0; cursor:pointer; text-align:left; }
+  .chat-head-id-btn:hover .chat-title{ text-decoration:underline; }
   .chat-title{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .chat-subtitle{ font-size:11.5px; color:var(--grey); margin-top:1px; }
   .chat-body{ flex:1; overflow-y:auto; padding:20px 22px; display:flex; flex-direction:column; gap:10px; }
   .chat-bubble{ max-width:76%; padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.4; }
   .chat-bubble.theirs{ align-self:flex-start; background:var(--off-white); color:var(--ink); border-bottom-left-radius:4px; }
@@ -857,14 +888,47 @@
     padding:12px 14px; margin-bottom:14px; line-height:1.45;
   }
 
-  .card-notif-dot{
-    position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px;
-    border-radius:10px; background:var(--ink); color:var(--white); border:2px solid var(--white);
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:10.5px; font-weight:600; line-height:1;
-    cursor:pointer; transition: transform .15s ease;
+  .card-notif-bell{
+    position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:50%;
+    background:var(--white); border:1px solid var(--border-strong); color:var(--ink);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition: all .15s ease;
   }
-  .card-notif-dot:hover{ transform:scale(1.12); }
+  .card-notif-bell:hover{ border-color:var(--ink); transform:scale(1.08); }
+  .card-notif-badge{
+    position:absolute; top:-5px; right:-5px; min-width:16px; height:16px; padding:0 4px;
+    border-radius:9px; background:var(--ink); color:var(--white); border:2px solid var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:9px; font-weight:700; line-height:1;
+  }
+
+  .manage-company-modal{ max-width:560px; }
+  .manage-company-head-id{ display:flex; align-items:center; gap:12px; }
+  .manage-company-logo{
+    width:38px; height:38px; border-radius:10px; background:var(--ink); color:var(--white);
+    display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;
+    font-family:var(--font-display); font-weight:700; font-size:13px;
+  }
+  .manage-company-logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .manage-company-sub{ font-size:12px; color:var(--grey); margin-top:2px; }
+  .manage-tabs{ display:flex; gap:6px; border-bottom:1px solid var(--border); margin:18px 0 18px; }
+  .manage-tab{
+    font-size:13px; font-weight:600; color:var(--grey); background:none; border:none;
+    padding:0 2px 12px; margin-right:16px; cursor:pointer; border-bottom:2px solid transparent;
+    display:flex; align-items:center; gap:6px;
+  }
+  .manage-tab:hover{ color:var(--ink); }
+  .manage-tab.active{ color:var(--ink); border-bottom-color:var(--ink); }
+  .manage-tab-count{
+    font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--white);
+    background:var(--ink); border-radius:8px; padding:1px 6px;
+  }
+  .manage-tab-panel.hidden{ display:none; }
+  .manage-member-card{ display:flex; align-items:center; gap:12px; padding:12px 6px; border-bottom:1px solid var(--border); }
+  .manage-member-card:last-child{ border-bottom:none; }
+  .manage-member-body{ flex:1; min-width:0; }
+  .manage-member-name{ font-size:13.5px; font-weight:600; }
+  .manage-member-sub{ font-size:12px; color:var(--grey); }
 
   .dash-profile-name{ font-weight:600; font-size:15px; margin-bottom:2px; }
   .dash-profile-bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
@@ -886,6 +950,7 @@
   }
   .dash-match-card:hover{ border-color:var(--border-strong); box-shadow:var(--shadow-sm); }
   .dash-match-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .dash-match-card.has-bell .dash-match-top{ padding-right:34px; }
   .dash-match-badge{
     font-size:10.5px; font-weight:600; color:var(--green); background:var(--green-soft);
     padding:3px 8px; border-radius:20px; font-family:var(--font-mono); white-space:nowrap; flex-shrink:0;
@@ -1937,10 +2002,7 @@
 <div class="modal-overlay" id="chatModalOverlay">
   <div class="modal chat-modal">
     <div class="chat-head">
-      <div class="chat-head-id">
-        <div class="chat-avatar" id="chatAvatar"></div>
-        <div class="chat-title" id="chatTitle">Conversation</div>
-      </div>
+      <div class="chat-head-id" id="chatHeadId"></div>
       <button class="modal-close" id="chatModalClose" aria-label="Close">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
@@ -1980,17 +2042,43 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="applicantsModalOverlay">
-  <div class="modal">
+<div class="modal-overlay" id="manageCompanyModalOverlay">
+  <div class="modal manage-company-modal">
     <div class="modal-head">
-      <h3 id="applicantsTitle">Applicants</h3>
-      <button class="modal-close" id="applicantsModalClose" aria-label="Close">
+      <div class="manage-company-head-id">
+        <div class="manage-company-logo" id="manageCompanyLogo"></div>
+        <div>
+          <h3 id="manageCompanyTitle">Company</h3>
+          <p class="manage-company-sub">Manage your team and conversations.</p>
+        </div>
+      </div>
+      <button class="modal-close" id="manageCompanyClose" aria-label="Close">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <p class="modal-sub" id="applicantsSub">People who want to join this company.</p>
-    <div id="applicantsList"></div>
-    <p class="field-error" id="applicantsError">Something went wrong — try again.</p>
+
+    <div class="manage-tabs" id="manageTabs">
+      <button type="button" class="manage-tab active" data-tab="applicants">Pending<span class="manage-tab-count" id="manageApplicantsCount" style="display:none"></span></button>
+      <button type="button" class="manage-tab" data-tab="members">Members</button>
+      <button type="button" class="manage-tab" data-tab="messages">Messages</button>
+    </div>
+
+    <div class="manage-tab-panel" id="manageApplicantsPanel"></div>
+    <div class="manage-tab-panel hidden" id="manageMembersPanel"></div>
+    <div class="manage-tab-panel hidden" id="manageMessagesPanel"></div>
+    <p class="field-error" id="manageCompanyError">Something went wrong — try again.</p>
+  </div>
+</div>
+
+<div class="view-overlay" id="profileViewOverlay">
+  <div class="view-modal member">
+    <button class="view-close" id="profileViewClose" aria-label="Close">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+    <div class="view-logo show" id="profileViewLogo"></div>
+    <h3 id="profileViewTitle">Name</h3>
+    <p id="profileViewDesc">Headline</p>
+    <div class="view-tags" id="profileViewTags"></div>
   </div>
 </div>
 
@@ -2221,8 +2309,14 @@
 
   function bindViewCompanyButton(btn){
     btn.addEventListener('click', ()=>{
+      const card = btn.closest('.company-card, .grid-card, .dash-match-card');
+      const name = cardName(card);
+      if(isSignedIn && currentUser && name && card.closest('#dashMatchList') && canManageCompany(name)){
+        openManageCompanyModal(name);
+        return;
+      }
       if(isSignedIn){
-        showMemberView(btn.closest('.company-card, .grid-card, .dash-match-card'));
+        showMemberView(card);
       } else {
         showGuestView();
       }
@@ -2741,6 +2835,19 @@
     return parts.slice(0, 2).map(p => p[0].toUpperCase()).join('') || '?';
   }
 
+  // Renders a big "primary" avatar with a smaller "secondary" merged onto its
+  // corner — used to show "this is a company chat" (company big, person small).
+  function avatarStackHtml(primaryUrl, primaryName, secondaryUrl, secondaryName, size){
+    const primary = primaryUrl ? `<img src="${primaryUrl}" alt="">` : escapeHtml(initials(primaryName || '?'));
+    let html = `<span class="avatar-stack size-${size}"><span class="avatar-primary">${primary}</span>`;
+    if(secondaryName){
+      const secondary = secondaryUrl ? `<img src="${secondaryUrl}" alt="">` : escapeHtml(initials(secondaryName || '?'));
+      html += `<span class="avatar-secondary">${secondary}</span>`;
+    }
+    html += `</span>`;
+    return html;
+  }
+
   const ROLE_PEOPLE = {
     'Sales': 'salespeople',
     'Design': 'designers',
@@ -2781,12 +2888,15 @@
         ? `<button type="button" class="cc-btn js-edit-company" data-company-name="${escapeHtml(c.name)}">Edit</button>`
         : '';
       const pendingCount = (canEdit && c.companyId && pendingCounts[c.companyId]) || 0;
-      const notifDot = pendingCount > 0
-        ? `<button type="button" class="card-notif-dot js-view-applicants" data-company-name="${escapeHtml(c.name)}" title="${pendingCount} new applicant${pendingCount > 1 ? 's' : ''}">${pendingCount}</button>`
+      const notifBell = canEdit
+        ? `<button type="button" class="card-notif-bell js-manage-company" data-company-name="${escapeHtml(c.name)}" title="${pendingCount > 0 ? pendingCount + ' new applicant' + (pendingCount > 1 ? 's' : '') : 'Members and messages'}">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5a3.5 3.5 0 0 0-3.5 3.5v2.2c0 .5-.18 1-.5 1.4L3 11h10l-1-1.4a2.3 2.3 0 0 1-.5-1.4V6a3.5 3.5 0 0 0-3.5-3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.5 13a1.6 1.6 0 0 0 3 0" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            ${pendingCount > 0 ? `<span class="card-notif-badge">${pendingCount}</span>` : ''}
+          </button>`
         : '';
       return `
-        <div class="dash-match-card">
-          ${notifDot}
+        <div class="dash-match-card${canEdit ? ' has-bell' : ''}">
+          ${notifBell}
           <div class="dash-match-top">
             <div class="gc-name">${logo}${c.name}</div>
             ${badge}
@@ -2803,8 +2913,8 @@
     matchListEl.querySelectorAll('.js-edit-company').forEach(btn=>{
       btn.addEventListener('click', ()=> openEditListingByName(btn.dataset.companyName));
     });
-    matchListEl.querySelectorAll('.js-view-applicants').forEach(btn=>{
-      btn.addEventListener('click', ()=> openApplicantsModal(btn.dataset.companyName));
+    matchListEl.querySelectorAll('.js-manage-company').forEach(btn=>{
+      btn.addEventListener('click', ()=> openManageCompanyModal(btn.dataset.companyName));
     });
 
     const peopleList = joinWithAnd(rolesToPeople(profile.roles));
@@ -2821,6 +2931,7 @@
       fetchCompanyDirectory(),
       fetchMyEditableCompanyNames()
     ]);
+    myEditableCompanyNamesCache = editableNames;
     const merged = DASH_COMPANIES.map(c => {
       const live = companyDirectory[c.name];
       return live ? {
@@ -3289,6 +3400,13 @@
   let activeConversationId = null;
   let activeChannel = null;
   let renderedMessageIds = new Set();
+  // null = can edit every company (admin); Set = the specific names this
+  // viewer is certified for. Kept in sync by refreshDashboardMatches.
+  let myEditableCompanyNamesCache = new Set();
+
+  function canManageCompany(companyName){
+    return myEditableCompanyNamesCache === null || myEditableCompanyNamesCache.has(companyName);
+  }
 
   function formatRelativeTime(value){
     if(!value) return '';
@@ -3340,10 +3458,10 @@
 
       all = all.map(c => {
         const iAmContributor = c.user_id === currentUser.id;
-        const counterpart = iAmContributor
-          ? { name: c.companies ? c.companies.name : 'Company', avatarUrl: c.companies ? c.companies.logo_url : null }
-          : { name: (contributorMap[c.user_id] && contributorMap[c.user_id].name) || 'A contributor', avatarUrl: contributorMap[c.user_id] && contributorMap[c.user_id].avatar_url };
-        return { ...c, counterpart, preview: previewMap[c.id] || 'Say hello 👋' };
+        const company = { id: c.company_id, name: c.companies ? c.companies.name : 'Company', avatarUrl: c.companies ? c.companies.logo_url : null };
+        const contributorRow = contributorMap[c.user_id];
+        const contributor = { id: c.user_id, name: (contributorRow && contributorRow.name) || 'A contributor', avatarUrl: contributorRow && contributorRow.avatar_url };
+        return { ...c, iAmContributor, company, contributor, preview: previewMap[c.id] || 'Say hello 👋' };
       });
 
       all.sort((a, b) => new Date(b.last_message_at) - new Date(a.last_message_at));
@@ -3370,14 +3488,21 @@
     emptyEl.style.display = 'none';
     listEl.style.display = 'flex';
     listEl.innerHTML = conversations.map(c => {
-      const avatar = c.counterpart.avatarUrl
-        ? `<img src="${c.counterpart.avatarUrl}" alt="">`
-        : initials(c.counterpart.name);
+      // Talking as the contributor: single avatar, it's obviously "the company".
+      // Talking as the company rep: company big + the contributor merged in
+      // smaller beside it, plus a "For {Company}" tag, since a rep can manage
+      // several companies and needs to know which one this thread is about.
+      const avatar = c.iAmContributor
+        ? avatarStackHtml(c.company.avatarUrl, c.company.name, null, null, 'sm')
+        : avatarStackHtml(c.company.avatarUrl, c.company.name, c.contributor.avatarUrl, c.contributor.name, 'sm');
+      const name = c.iAmContributor ? c.company.name : c.contributor.name;
+      const companyTag = c.iAmContributor ? '' : `<div class="conversation-company-tag">For ${escapeHtml(c.company.name)}</div>`;
       return `
         <button type="button" class="conversation-item" data-conversation-id="${c.id}">
-          <span class="conversation-avatar">${avatar}</span>
+          ${avatar}
           <span class="conversation-body">
-            <div class="conversation-name">${escapeHtml(c.counterpart.name)}</div>
+            ${companyTag}
+            <div class="conversation-name">${escapeHtml(name)}</div>
             <div class="conversation-preview">${escapeHtml(c.preview)}</div>
           </span>
           <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
@@ -3410,7 +3535,11 @@
         conversationId = created.id;
       }
 
-      openChatModal({ id: conversationId, counterpart: { name: company.name, avatarUrl: company.logo_url } });
+      openChatModal({
+        id: conversationId, iAmContributor: true,
+        company: { id: company.id, name: company.name, avatarUrl: company.logo_url },
+        contributor: null
+      });
     } catch(e){
       alert("Couldn't open a conversation with this company — try again.");
     }
@@ -3474,10 +3603,30 @@
 
   async function openChatModal(conv){
     activeConversationId = conv.id;
-    document.getElementById('chatTitle').textContent = conv.counterpart.name;
-    document.getElementById('chatAvatar').innerHTML = conv.counterpart.avatarUrl
-      ? `<img src="${conv.counterpart.avatarUrl}" alt="">`
-      : initials(conv.counterpart.name);
+    const headEl = document.getElementById('chatHeadId');
+
+    if(conv.iAmContributor){
+      // I'm the contributor — just show who I'm talking to (the company).
+      headEl.innerHTML = `
+        <button type="button" class="chat-head-id-btn" id="chatOpenCompanyBtn">
+          ${avatarStackHtml(conv.company.avatarUrl, conv.company.name, null, null, 'md')}
+          <div><div class="chat-title">${escapeHtml(conv.company.name)}</div></div>
+        </button>`;
+      document.getElementById('chatOpenCompanyBtn').addEventListener('click', ()=> openCompanyProfileFromChat(conv.company.name));
+    } else {
+      // I'm the company rep — company big, the contributor merged in smaller,
+      // so it's unmistakably a "chatting on behalf of the company" thread.
+      headEl.innerHTML = `
+        <button type="button" class="chat-head-id-btn" id="chatOpenContributorBtn">
+          ${avatarStackHtml(conv.company.avatarUrl, conv.company.name, conv.contributor.avatarUrl, conv.contributor.name, 'md')}
+          <div>
+            <div class="chat-title">${escapeHtml(conv.contributor.name)}</div>
+            <div class="chat-subtitle">On behalf of ${escapeHtml(conv.company.name)}</div>
+          </div>
+        </button>`;
+      document.getElementById('chatOpenContributorBtn').addEventListener('click', ()=> openContributorProfile(conv.contributor.id));
+    }
+
     document.getElementById('chatModalOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 
@@ -3494,6 +3643,59 @@
   }
   document.getElementById('chatModalClose').addEventListener('click', closeChatModal);
   document.getElementById('chatModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'chatModalOverlay') closeChatModal(); });
+
+  // Clicking either side of a chat's header opens that person's or that
+  // company's profile — the rep can look someone up, the contributor can
+  // jump back to the company listing, without leaving the conversation flow.
+  const profileViewOverlay = document.getElementById('profileViewOverlay');
+  function closeProfileView(){
+    profileViewOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('profileViewClose').addEventListener('click', closeProfileView);
+  profileViewOverlay.addEventListener('click', (e)=>{ if(e.target === profileViewOverlay) closeProfileView(); });
+
+  async function openContributorProfile(userId){
+    if(!userId) return;
+    try {
+      const { data, error } = await withTimeout(sb.from('profiles').select('*').eq('id', userId).single());
+      if(error || !data) throw error || new Error('not found');
+      const p = profileFromRow(data);
+      document.getElementById('profileViewLogo').innerHTML = p.avatarUrl
+        ? `<img src="${p.avatarUrl}" alt="${escapeHtml(p.name)}">`
+        : `<div class="view-logo-fallback">${escapeHtml(initials(p.name || 'User'))}</div>`;
+      document.getElementById('profileViewTitle').textContent = p.name || 'Contributor';
+      document.getElementById('profileViewDesc').textContent = p.headline || (p.roles.length ? p.roles.join(', ') : 'No headline yet.');
+      const tagsEl = document.getElementById('profileViewTags');
+      const tags = [...p.roles.map(r => `<span class="tag">${escapeHtml(r)}</span>`), ...p.comp.map(c => `<span class="comp-pill">${escapeHtml(c)}</span>`)];
+      tagsEl.innerHTML = tags.join('');
+      tagsEl.classList.toggle('show', tags.length > 0);
+      profileViewOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } catch(e){
+      alert("Couldn't load that profile — try again.");
+    }
+  }
+
+  async function openCompanyProfileFromChat(companyName){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('name', companyName).single());
+      if(error || !data) throw error || new Error('not found');
+      document.getElementById('profileViewLogo').innerHTML = data.logo_url
+        ? `<img src="${data.logo_url}" alt="${escapeHtml(data.name)}">`
+        : `<div class="view-logo-fallback">${escapeHtml(initials(data.name || 'Co'))}</div>`;
+      document.getElementById('profileViewTitle').textContent = data.name || 'Company';
+      document.getElementById('profileViewDesc').textContent = data.description || '';
+      const tagsEl = document.getElementById('profileViewTags');
+      const tags = [...(data.roles || []).map(r => `<span class="tag">${escapeHtml(r)}</span>`), ...(data.comp || []).map(c => `<span class="comp-pill">${escapeHtml(c)}</span>`)];
+      tagsEl.innerHTML = tags.join('');
+      tagsEl.classList.toggle('show', tags.length > 0);
+      profileViewOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } catch(e){
+      alert("Couldn't load that company — try again.");
+    }
+  }
 
   async function sendChatMessage(){
     const input = document.getElementById('chatInput');
@@ -3539,13 +3741,15 @@
   function refreshApplyButtonState(companyName){
     const btn = document.getElementById('viewApplyBtn');
     if(!btn) return;
+    btn.style.display = '';
     btn.disabled = false;
     btn.textContent = 'Apply to this role';
     if(!currentUser) return;
+    if(canManageCompany(companyName)){ btn.style.display = 'none'; return; }
     fetchMyApplicationStatus(companyName).then(status => {
       if(currentViewCompanyName !== companyName) return;
-      if(status === 'pending'){ btn.disabled = true; btn.textContent = 'Application pending'; }
-      else if(status === 'accepted'){ btn.disabled = true; btn.textContent = "You're in! 🎉"; }
+      if(status === 'accepted'){ btn.style.display = 'none'; }
+      else if(status === 'pending'){ btn.disabled = true; btn.textContent = 'Application pending'; }
       else if(status === 'denied'){ btn.disabled = true; btn.textContent = 'Not selected'; }
     });
   }
@@ -3617,7 +3821,7 @@
     btn.textContent = 'Send';
   });
 
-  // -- Owner side: pending-applicant counts on match cards + accept/deny --
+  // -- Owner side: "Manage company" — pending applicants, members, messages --
 
   async function fetchPendingApplicationCounts(companyIds){
     if(!companyIds.length) return {};
@@ -3632,57 +3836,98 @@
     }
   }
 
-  async function openApplicantsModal(companyName){
-    document.getElementById('applicantsTitle').textContent = `Applicants — ${companyName}`;
-    document.getElementById('applicantsSub').textContent = `People who want to join ${companyName}.`;
-    document.getElementById('applicantsError').classList.remove('show');
-    document.getElementById('applicantsList').innerHTML = '<p class="field-hint">Loading…</p>';
-    document.getElementById('applicantsModalOverlay').classList.add('open');
+  let manageCompanyState = null; // { id, name, logoUrl }
+  const manageTabLoaded = { members:false, messages:false };
+
+  function switchManageTab(tab){
+    document.querySelectorAll('#manageTabs .manage-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('manageApplicantsPanel').classList.toggle('hidden', tab !== 'applicants');
+    document.getElementById('manageMembersPanel').classList.toggle('hidden', tab !== 'members');
+    document.getElementById('manageMessagesPanel').classList.toggle('hidden', tab !== 'messages');
+  }
+
+  document.querySelectorAll('#manageTabs .manage-tab').forEach(tabBtn=>{
+    tabBtn.addEventListener('click', async ()=>{
+      switchManageTab(tabBtn.dataset.tab);
+      if(!manageCompanyState) return;
+      if(tabBtn.dataset.tab === 'members' && !manageTabLoaded.members){
+        manageTabLoaded.members = true;
+        await renderManageMembersTab();
+      }
+      if(tabBtn.dataset.tab === 'messages' && !manageTabLoaded.messages){
+        manageTabLoaded.messages = true;
+        await renderManageMessagesTab();
+      }
+    });
+  });
+
+  async function openManageCompanyModal(companyName){
+    const overlay = document.getElementById('manageCompanyModalOverlay');
+    document.getElementById('manageCompanyError').classList.remove('show');
+    document.getElementById('manageCompanyTitle').textContent = companyName;
+    document.getElementById('manageCompanyLogo').textContent = initials(companyName);
+    document.getElementById('manageApplicantsPanel').innerHTML = '<p class="field-hint">Loading…</p>';
+    document.getElementById('manageMembersPanel').innerHTML = '';
+    document.getElementById('manageMessagesPanel').innerHTML = '';
+    manageTabLoaded.members = false;
+    manageTabLoaded.messages = false;
+    switchManageTab('applicants');
+    overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
-    await renderApplicantsList(companyName);
-  }
 
-  function closeApplicantsModal(){
-    document.getElementById('applicantsModalOverlay').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.getElementById('applicantsModalClose').addEventListener('click', closeApplicantsModal);
-  document.getElementById('applicantsModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'applicantsModalOverlay') closeApplicantsModal(); });
-
-  async function renderApplicantsList(companyName){
-    const listEl = document.getElementById('applicantsList');
-    const errEl = document.getElementById('applicantsError');
     try {
-      const { data: companyRows, error: companyErr } = await withTimeout(sb.from('companies').select('id').eq('name', companyName).limit(1));
-      if(companyErr) throw companyErr;
-      if(!companyRows || !companyRows.length) throw new Error('Company not found');
-      const companyId = companyRows[0].id;
+      const { data, error } = await withTimeout(sb.from('companies').select('id, name, logo_url').eq('name', companyName).limit(1));
+      if(error) throw error;
+      if(!data || !data.length) throw new Error('Company not found');
+      manageCompanyState = { id: data[0].id, name: data[0].name, logoUrl: data[0].logo_url };
+      document.getElementById('manageCompanyLogo').innerHTML = data[0].logo_url
+        ? `<img src="${data[0].logo_url}" alt="">` : escapeHtml(initials(data[0].name));
+      await renderManageApplicantsTab();
+    } catch(e){
+      document.getElementById('manageApplicantsPanel').innerHTML = '';
+      document.getElementById('manageCompanyError').classList.add('show');
+    }
+  }
 
-      const { data: apps, error: appsErr } = await withTimeout(sb.from('applications').select('id, applicant_id, message, created_at').eq('company_id', companyId).eq('status', 'pending').order('created_at', { ascending:true }));
-      if(appsErr) throw appsErr;
+  function closeManageCompanyModal(){
+    document.getElementById('manageCompanyModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    manageCompanyState = null;
+  }
+  document.getElementById('manageCompanyClose').addEventListener('click', closeManageCompanyModal);
+  document.getElementById('manageCompanyModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'manageCompanyModalOverlay') closeManageCompanyModal(); });
+
+  async function renderManageApplicantsTab(){
+    if(!manageCompanyState) return;
+    const panel = document.getElementById('manageApplicantsPanel');
+    const countEl = document.getElementById('manageApplicantsCount');
+    panel.innerHTML = '<p class="field-hint">Loading…</p>';
+    try {
+      const { data: apps, error } = await withTimeout(sb.from('applications').select('id, applicant_id, message, created_at').eq('company_id', manageCompanyState.id).eq('status', 'pending').order('created_at', { ascending:true }));
+      if(error) throw error;
 
       if(!apps || !apps.length){
-        listEl.innerHTML = '<p class="field-hint">No pending applicants right now.</p>';
+        countEl.style.display = 'none';
+        panel.innerHTML = '<p class="field-hint">No pending applicants right now.</p>';
         return;
       }
+      countEl.style.display = '';
+      countEl.textContent = apps.length;
 
       const applicantIds = apps.map(a => a.applicant_id);
       const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name, headline, roles, avatar_url').in('id', applicantIds));
       const profileMap = {};
       (profiles || []).forEach(p => { profileMap[p.id] = p; });
 
-      listEl.innerHTML = apps.map(a => {
+      panel.innerHTML = apps.map(a => {
         const p = profileMap[a.applicant_id] || {};
-        const avatar = p.avatar_url
-          ? `<img src="${p.avatar_url}" alt="">`
-          : initials(p.name || 'Applicant');
         const sub = p.headline || (p.roles && p.roles.length ? p.roles.join(', ') : 'Contributor');
         const messageBlock = a.message ? `<p class="applicant-message">"${escapeHtml(a.message)}"</p>` : '';
         return `
           <div class="cert-card sales-cert-card applicant-card">
             <div class="cert-card-head">
               <div class="company">
-                <div class="cert-badge">${avatar}</div>
+                ${avatarStackHtml(p.avatar_url, p.name, null, null, 'sm')}
                 <div>
                   <div class="cert-title">${escapeHtml(p.name || 'Applicant')}</div>
                   <div class="cert-sub">${escapeHtml(sub)}</div>
@@ -3697,15 +3942,15 @@
           </div>`;
       }).join('');
 
-      listEl.querySelectorAll('.js-accept-application').forEach(btn=>{
-        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, companyId, companyName, 'accepted'));
+      panel.querySelectorAll('.js-accept-application').forEach(btn=>{
+        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, 'accepted'));
       });
-      listEl.querySelectorAll('.js-deny-application').forEach(btn=>{
-        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, companyId, companyName, 'denied'));
+      panel.querySelectorAll('.js-deny-application').forEach(btn=>{
+        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, 'denied'));
       });
     } catch(e){
-      listEl.innerHTML = '';
-      errEl.classList.add('show');
+      panel.innerHTML = '';
+      document.getElementById('manageCompanyError').classList.add('show');
     }
   }
 
@@ -3723,23 +3968,158 @@
     await withTimeout(sb.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', conversationId));
   }
 
-  async function respondToApplication(applicationId, applicantId, companyId, companyName, decision){
-    const errEl = document.getElementById('applicantsError');
+  async function respondToApplication(applicationId, applicantId, decision){
+    if(!manageCompanyState) return;
+    const errEl = document.getElementById('manageCompanyError');
     errEl.classList.remove('show');
     try {
       const { error } = await withTimeout(sb.from('applications').update({ status: decision, updated_at: new Date().toISOString() }).eq('id', applicationId));
       if(error) throw error;
 
       const note = decision === 'accepted'
-        ? `Good news — your application to join ${companyName} was accepted! Let's chat.`
-        : `Thanks for applying to ${companyName}. We've decided to move forward with other candidates this time.`;
-      notifyApplicant(applicantId, companyId, note).catch(()=>{});
+        ? `Good news — your application to join ${manageCompanyState.name} was accepted! Let's chat.`
+        : `Thanks for applying to ${manageCompanyState.name}. We've decided to move forward with other candidates this time.`;
+      notifyApplicant(applicantId, manageCompanyState.id, note).catch(()=>{});
 
-      await renderApplicantsList(companyName);
+      await renderManageApplicantsTab();
+      manageTabLoaded.members = false;
+      if(!document.getElementById('manageMembersPanel').classList.contains('hidden')){
+        manageTabLoaded.members = true;
+        await renderManageMembersTab();
+      }
       if(currentMode === 'user') refreshDashboardMatches(lastJoinProfile);
     } catch(e){
       errEl.classList.add('show');
     }
+  }
+
+  async function fetchCompanyMembers(companyId){
+    try {
+      const { data: apps, error } = await withTimeout(sb.from('applications').select('applicant_id, updated_at').eq('company_id', companyId).eq('status', 'accepted').order('updated_at', { ascending:false }));
+      if(error) throw error;
+      if(!apps || !apps.length) return [];
+      const ids = apps.map(a => a.applicant_id);
+      const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name, headline, roles, avatar_url').in('id', ids));
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+      return apps.map(a => ({ id: a.applicant_id, profile: profileMap[a.applicant_id] || {} }));
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function openChatWithMember(userId){
+    if(!manageCompanyState) return;
+    const company = { id: manageCompanyState.id, name: manageCompanyState.name, avatarUrl: manageCompanyState.logoUrl };
+    try {
+      const { data: existing, error: existErr } = await withTimeout(sb.from('conversations').select('id').eq('user_id', userId).eq('company_id', company.id).limit(1));
+      if(existErr) throw existErr;
+      let conversationId;
+      if(existing && existing.length){
+        conversationId = existing[0].id;
+      } else {
+        const { data: created, error: createErr } = await withTimeout(sb.from('conversations').insert({ user_id: userId, company_id: company.id }).select('id').single());
+        if(createErr) throw createErr;
+        conversationId = created.id;
+      }
+      const { data: profileRow } = await withTimeout(sb.from('profiles').select('name, avatar_url').eq('id', userId).single());
+      closeManageCompanyModal();
+      openChatModal({
+        id: conversationId, iAmContributor: false, company,
+        contributor: { id: userId, name: (profileRow && profileRow.name) || 'Member', avatarUrl: profileRow && profileRow.avatar_url }
+      });
+    } catch(e){
+      alert("Couldn't open that conversation — try again.");
+    }
+  }
+
+  async function renderManageMembersTab(){
+    if(!manageCompanyState) return;
+    const panel = document.getElementById('manageMembersPanel');
+    panel.innerHTML = '<p class="field-hint">Loading…</p>';
+    const members = await fetchCompanyMembers(manageCompanyState.id);
+    if(members === null){
+      panel.innerHTML = '';
+      document.getElementById('manageCompanyError').classList.add('show');
+      return;
+    }
+    if(!members.length){
+      panel.innerHTML = '<p class="field-hint">No members yet — accepted applicants show up here.</p>';
+      return;
+    }
+    panel.innerHTML = members.map(m => {
+      const sub = m.profile.headline || (m.profile.roles && m.profile.roles.length ? m.profile.roles.join(', ') : 'Contributor');
+      return `
+        <div class="manage-member-card">
+          ${avatarStackHtml(m.profile.avatar_url, m.profile.name, null, null, 'sm')}
+          <div class="manage-member-body">
+            <div class="manage-member-name">${escapeHtml(m.profile.name || 'Member')}</div>
+            <div class="manage-member-sub">${escapeHtml(sub)}</div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-sm js-message-member" data-user-id="${m.id}">Message</button>
+        </div>`;
+    }).join('');
+    panel.querySelectorAll('.js-message-member').forEach(btn=>{
+      btn.addEventListener('click', ()=> openChatWithMember(btn.dataset.userId));
+    });
+  }
+
+  async function fetchCompanyConversations(companyId){
+    try {
+      const { data, error } = await withTimeout(sb.from('conversations').select('id, user_id, last_message_at').eq('company_id', companyId).order('last_message_at', { ascending:false }));
+      if(error) throw error;
+      const convos = data || [];
+      if(!convos.length) return [];
+      const ids = Array.from(new Set(convos.map(c => c.user_id)));
+      const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name, avatar_url').in('id', ids));
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+      const convoIds = convos.map(c => c.id);
+      const { data: msgs } = await withTimeout(sb.from('messages').select('conversation_id, body, created_at').in('conversation_id', convoIds).order('created_at', { ascending:false }));
+      const previewMap = {};
+      (msgs || []).forEach(m => { if(!previewMap[m.conversation_id]) previewMap[m.conversation_id] = m.body; });
+      return convos.map(c => ({
+        id: c.id, last_message_at: c.last_message_at,
+        contributor: { id: c.user_id, name: (profileMap[c.user_id] && profileMap[c.user_id].name) || 'A contributor', avatarUrl: profileMap[c.user_id] && profileMap[c.user_id].avatar_url },
+        preview: previewMap[c.id] || 'Say hello 👋'
+      }));
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function renderManageMessagesTab(){
+    if(!manageCompanyState) return;
+    const panel = document.getElementById('manageMessagesPanel');
+    panel.innerHTML = '<p class="field-hint">Loading…</p>';
+    const convos = await fetchCompanyConversations(manageCompanyState.id);
+    if(convos === null){
+      panel.innerHTML = '';
+      document.getElementById('manageCompanyError').classList.add('show');
+      return;
+    }
+    if(!convos.length){
+      panel.innerHTML = '<p class="field-hint">No conversations yet.</p>';
+      return;
+    }
+    const company = { id: manageCompanyState.id, name: manageCompanyState.name, avatarUrl: manageCompanyState.logoUrl };
+    panel.innerHTML = `<div class="conversation-list">${convos.map(c => `
+      <button type="button" class="conversation-item" data-conversation-id="${c.id}">
+        ${avatarStackHtml(c.contributor.avatarUrl, c.contributor.name, null, null, 'sm')}
+        <span class="conversation-body">
+          <div class="conversation-name">${escapeHtml(c.contributor.name)}</div>
+          <div class="conversation-preview">${escapeHtml(c.preview)}</div>
+        </span>
+        <span class="conversation-time">${formatRelativeTime(c.last_message_at)}</span>
+      </button>`).join('')}</div>`;
+    panel.querySelectorAll('[data-conversation-id]').forEach(btn=>{
+      const conv = convos.find(c => c.id === btn.dataset.conversationId);
+      if(!conv) return;
+      btn.addEventListener('click', ()=>{
+        closeManageCompanyModal();
+        openChatModal({ id: conv.id, iAmContributor:false, company, contributor: conv.contributor });
+      });
+    });
   }
 
   // -- Edit company listing (certified sales reps + admin, enforced by RLS) --
