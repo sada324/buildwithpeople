@@ -1618,14 +1618,6 @@
         </div>
       </div>
 
-      <div class="dash-panel admin-companies-panel" id="adminPendingPanel" style="display:none">
-        <div class="dash-panel-head">
-          <h3>Pending company submissions</h3>
-          <span class="dash-panel-sub" id="adminPendingCount"></span>
-        </div>
-        <div id="adminPendingList"></div>
-      </div>
-
       <div class="dash-panel admin-companies-panel">
         <div class="dash-panel-head">
           <h3>Manage companies</h3>
@@ -1634,6 +1626,15 @@
         <p class="admin-companies-hint">Drag to reorder which companies show as "Recruiting now" on the homepage. Toggle Featured to include one there, and Stamp to show the Easy Onboarding badge on its card.</p>
         <div id="adminCompaniesList" class="admin-companies-list"></div>
         <p class="field-error" id="adminCompaniesError">Something went wrong — try again.</p>
+      </div>
+
+      <div class="dash-panel admin-companies-panel" id="adminPendingPanel">
+        <div class="dash-panel-head">
+          <h3>Company creation requests</h3>
+          <span class="dash-panel-sub" id="adminPendingCount"></span>
+        </div>
+        <p class="admin-companies-hint">Review companies people have submitted through "List your company." Approving sends them a welcome message from Build With People and lists the company; declining lets them know.</p>
+        <div id="adminPendingList"></div>
       </div>
     </div>
   </div>
@@ -3467,17 +3468,23 @@
   }
 
   async function refreshAdminPendingCompanies(){
-    const panel = document.getElementById('adminPendingPanel');
     const listEl = document.getElementById('adminPendingList');
     const countEl = document.getElementById('adminPendingCount');
 
     const pending = await fetchPendingCompanies();
-    if(!pending || !pending.length){
-      panel.style.display = 'none';
+
+    if(pending === null){
+      countEl.textContent = '';
+      listEl.innerHTML = '<p class="field-hint">Couldn\'t load pending submissions — try again.</p>';
       return;
     }
 
-    panel.style.display = '';
+    if(!pending.length){
+      countEl.textContent = '';
+      listEl.innerHTML = '<p class="field-hint">No pending submissions right now.</p>';
+      return;
+    }
+
     countEl.textContent = `${pending.length} awaiting review`;
     listEl.innerHTML = pending.map(c => `
       <div class="cert-card sales-cert-card applicant-card">
