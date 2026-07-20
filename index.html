@@ -837,6 +837,35 @@
   }
   .chat-input:focus{ border-color:var(--green); background:var(--white); }
   .chat-send{ flex-shrink:0; padding:0 18px; }
+
+  .apply-modal{ max-width:400px; }
+  .apply-confirm-step{ text-align:center; padding:14px 0 6px; }
+  .apply-confirm-step.hidden, .apply-message-step.hidden{ display:none; }
+  .apply-tick{
+    width:56px; height:56px; border-radius:50%; background:var(--ink);
+    display:flex; align-items:center; justify-content:center; margin:0 auto 18px;
+    animation: apply-tick-pop .35s ease;
+  }
+  @keyframes apply-tick-pop{ from{ transform:scale(0.6); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .apply-confirm-step h3{ font-family:var(--font-display); font-size:19px; font-weight:700; margin-bottom:8px; }
+  .apply-confirm-step p{ font-size:13.5px; color:var(--ink-soft); }
+
+  .applicant-card{ margin-bottom:14px; }
+  .applicant-card:last-child{ margin-bottom:0; }
+  .applicant-message{
+    font-size:13px; color:var(--ink-soft); background:var(--off-white); border-radius:10px;
+    padding:12px 14px; margin-bottom:14px; line-height:1.45;
+  }
+
+  .card-notif-dot{
+    position:absolute; top:-8px; right:-8px; min-width:20px; height:20px; padding:0 5px;
+    border-radius:10px; background:var(--ink); color:var(--white); border:2px solid var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:10.5px; font-weight:600; line-height:1;
+    cursor:pointer; transition: transform .15s ease;
+  }
+  .card-notif-dot:hover{ transform:scale(1.12); }
+
   .dash-profile-name{ font-weight:600; font-size:15px; margin-bottom:2px; }
   .dash-profile-bio{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
   .dash-profile-idea{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
@@ -850,6 +879,7 @@
   .dash-matches{ grid-area:matches; }
   .dash-match-list{ display:flex; flex-direction:column; gap:12px; }
   .dash-match-card{
+    position:relative;
     border:1px solid var(--border); border-radius:12px; padding:16px;
     display:flex; flex-direction:column; gap:8px;
     transition: box-shadow .15s ease, border-color .15s ease;
@@ -1923,6 +1953,47 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="applyModalOverlay">
+  <div class="modal apply-modal">
+    <div class="apply-confirm-step" id="applyConfirmStep">
+      <div class="apply-tick">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4.5 11.5l4.5 4.5L17.5 6.5" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3>Application sent!</h3>
+      <p id="applyConfirmDesc">We let them know you're interested.</p>
+    </div>
+    <div class="apply-message-step hidden" id="applyMessageStep">
+      <div class="modal-head">
+        <h3>Add a note</h3>
+        <button class="modal-close" id="applyModalClose" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <p class="modal-sub" id="applyMessagePrompt">Want to tell them why you'd be a good fit? Totally optional.</p>
+      <textarea class="field-textarea" id="applyMessageInput" placeholder="Optional message…" rows="4"></textarea>
+      <p class="field-error" id="applyError">Something went wrong — try again.</p>
+      <div class="modal-nav">
+        <button class="btn btn-ghost" id="applySkipBtn">Skip</button>
+        <button class="btn btn-dark modal-submit" id="applySendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="applicantsModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="applicantsTitle">Applicants</h3>
+      <button class="modal-close" id="applicantsModalClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub" id="applicantsSub">People who want to join this company.</p>
+    <div id="applicantsList"></div>
+    <p class="field-error" id="applicantsError">Something went wrong — try again.</p>
+  </div>
+</div>
+
 <div class="view-overlay" id="viewOverlay">
   <div class="view-modal" id="viewModal">
     <button class="view-close" id="viewClose" aria-label="Close">
@@ -1940,7 +2011,7 @@
       <a href="#" class="btn btn-ghost" id="viewCreateBtn">Create account</a>
     </div>
     <div class="view-actions hidden" id="viewActionsMember">
-      <a href="#" class="btn btn-dark">Apply to this role</a>
+      <button type="button" class="btn btn-dark" id="viewApplyBtn">Apply to this role</button>
       <button type="button" class="btn btn-ghost" id="viewMemberMessageBtn">Message</button>
     </div>
   </div>
@@ -2145,6 +2216,7 @@
     viewTags.classList.toggle('show', pillEls.length > 0);
     viewActionsGuest.classList.add('hidden');
     viewActionsMember.classList.remove('hidden');
+    refreshApplyButtonState(name);
   }
 
   function bindViewCompanyButton(btn){
@@ -2690,7 +2762,8 @@
     return `${words.slice(0, -1).join(', ')}, and ${words[words.length - 1]}`;
   }
 
-  function renderMatchesList(companies, profile, editableNames){
+  function renderMatchesList(companies, profile, editableNames, pendingCounts){
+    pendingCounts = pendingCounts || {};
     const scored = companies
       .map(c => ({ ...c, overlap: c.roles.filter(r => profile.roles.includes(r)).length }))
       .sort((a, b) => b.overlap - a.overlap);
@@ -2707,8 +2780,13 @@
       const editBtn = canEdit
         ? `<button type="button" class="cc-btn js-edit-company" data-company-name="${escapeHtml(c.name)}">Edit</button>`
         : '';
+      const pendingCount = (canEdit && c.companyId && pendingCounts[c.companyId]) || 0;
+      const notifDot = pendingCount > 0
+        ? `<button type="button" class="card-notif-dot js-view-applicants" data-company-name="${escapeHtml(c.name)}" title="${pendingCount} new applicant${pendingCount > 1 ? 's' : ''}">${pendingCount}</button>`
+        : '';
       return `
         <div class="dash-match-card">
+          ${notifDot}
           <div class="dash-match-top">
             <div class="gc-name">${logo}${c.name}</div>
             ${badge}
@@ -2724,6 +2802,9 @@
     bindViewCompanyButtons(matchListEl);
     matchListEl.querySelectorAll('.js-edit-company').forEach(btn=>{
       btn.addEventListener('click', ()=> openEditListingByName(btn.dataset.companyName));
+    });
+    matchListEl.querySelectorAll('.js-view-applicants').forEach(btn=>{
+      btn.addEventListener('click', ()=> openApplicantsModal(btn.dataset.companyName));
     });
 
     const peopleList = joinWithAnd(rolesToPeople(profile.roles));
@@ -2747,10 +2828,18 @@
         desc: live.description || c.desc,
         roles: (live.roles && live.roles.length) ? live.roles : c.roles,
         comp: (live.comp && live.comp.length) ? live.comp : c.comp,
-        logoImg: live.logo_url || c.logoImg
+        logoImg: live.logo_url || c.logoImg,
+        companyId: live.id
       } : c;
     });
-    renderMatchesList(merged, profile, editableNames);
+
+    const editableCompanyIds = merged
+      .filter(c => editableNames === null || (editableNames && editableNames.has(c.name)))
+      .map(c => c.companyId)
+      .filter(Boolean);
+    const pendingCounts = await fetchPendingApplicationCounts(editableCompanyIds);
+
+    renderMatchesList(merged, profile, editableNames, pendingCounts);
   }
 
   function enterDashboard(profile){
@@ -3430,6 +3519,228 @@
   document.getElementById('chatInput').addEventListener('keydown', (e)=>{
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); }
   });
+
+  // ---------- Applications: apply to a company + owner accept/deny ----------
+  // Requires supabase/applications_setup.sql (applications table + RLS, plus
+  // the extra conversations insert policy letting a rep message an applicant).
+
+  async function fetchMyApplicationStatus(companyName){
+    if(!currentUser) return null;
+    try {
+      const { data: companyRows } = await withTimeout(sb.from('companies').select('id').eq('name', companyName).limit(1));
+      if(!companyRows || !companyRows.length) return null;
+      const { data } = await withTimeout(sb.from('applications').select('status').eq('applicant_id', currentUser.id).eq('company_id', companyRows[0].id).limit(1));
+      return (data && data[0] && data[0].status) || null;
+    } catch(e){
+      return null;
+    }
+  }
+
+  function refreshApplyButtonState(companyName){
+    const btn = document.getElementById('viewApplyBtn');
+    if(!btn) return;
+    btn.disabled = false;
+    btn.textContent = 'Apply to this role';
+    if(!currentUser) return;
+    fetchMyApplicationStatus(companyName).then(status => {
+      if(currentViewCompanyName !== companyName) return;
+      if(status === 'pending'){ btn.disabled = true; btn.textContent = 'Application pending'; }
+      else if(status === 'accepted'){ btn.disabled = true; btn.textContent = "You're in! 🎉"; }
+      else if(status === 'denied'){ btn.disabled = true; btn.textContent = 'Not selected'; }
+    });
+  }
+
+  let applyPendingCompanyName = null;
+
+  document.getElementById('viewApplyBtn').addEventListener('click', ()=>{
+    if(!currentViewCompanyName || !currentUser) return;
+    closeViewPopup();
+    startApplyFlow(currentViewCompanyName);
+  });
+
+  function startApplyFlow(companyName){
+    applyPendingCompanyName = companyName;
+    document.getElementById('applyConfirmDesc').textContent = `We let ${companyName} know you're interested.`;
+    document.getElementById('applyMessagePrompt').textContent = `Want to tell ${companyName} why you'd be a good fit? Totally optional.`;
+    document.getElementById('applyMessageInput').value = '';
+    document.getElementById('applyError').classList.remove('show');
+    document.getElementById('applyConfirmStep').classList.remove('hidden');
+    document.getElementById('applyMessageStep').classList.add('hidden');
+    document.getElementById('applyModalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    setTimeout(()=>{
+      document.getElementById('applyConfirmStep').classList.add('hidden');
+      document.getElementById('applyMessageStep').classList.remove('hidden');
+    }, 1100);
+  }
+
+  function closeApplyModal(){
+    document.getElementById('applyModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('applyModalClose').addEventListener('click', closeApplyModal);
+  document.getElementById('applyModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'applyModalOverlay') closeApplyModal(); });
+
+  async function submitApplication(message){
+    if(!applyPendingCompanyName || !currentUser) return;
+    const errEl = document.getElementById('applyError');
+    errEl.classList.remove('show');
+    try {
+      const { data: companyRows, error: companyErr } = await withTimeout(sb.from('companies').select('id').eq('name', applyPendingCompanyName).limit(1));
+      if(companyErr) throw companyErr;
+      if(!companyRows || !companyRows.length) throw new Error('Company not found');
+      const { error } = await withTimeout(sb.from('applications').insert({
+        company_id: companyRows[0].id, applicant_id: currentUser.id, message: message || null
+      }));
+      if(error && error.code !== '23505') throw error; // 23505 = already applied, treat as done
+      closeApplyModal();
+    } catch(e){
+      errEl.textContent = "Couldn't send your application — try again.";
+      errEl.classList.add('show');
+    }
+  }
+
+  document.getElementById('applySkipBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('applySkipBtn');
+    btn.disabled = true;
+    await submitApplication(null);
+    btn.disabled = false;
+  });
+  document.getElementById('applySendBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('applySendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    const body = document.getElementById('applyMessageInput').value.trim();
+    await submitApplication(body || null);
+    btn.disabled = false;
+    btn.textContent = 'Send';
+  });
+
+  // -- Owner side: pending-applicant counts on match cards + accept/deny --
+
+  async function fetchPendingApplicationCounts(companyIds){
+    if(!companyIds.length) return {};
+    try {
+      const { data, error } = await withTimeout(sb.from('applications').select('company_id').eq('status', 'pending').in('company_id', companyIds));
+      if(error) throw error;
+      const counts = {};
+      (data || []).forEach(r => { counts[r.company_id] = (counts[r.company_id] || 0) + 1; });
+      return counts;
+    } catch(e){
+      return {};
+    }
+  }
+
+  async function openApplicantsModal(companyName){
+    document.getElementById('applicantsTitle').textContent = `Applicants — ${companyName}`;
+    document.getElementById('applicantsSub').textContent = `People who want to join ${companyName}.`;
+    document.getElementById('applicantsError').classList.remove('show');
+    document.getElementById('applicantsList').innerHTML = '<p class="field-hint">Loading…</p>';
+    document.getElementById('applicantsModalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    await renderApplicantsList(companyName);
+  }
+
+  function closeApplicantsModal(){
+    document.getElementById('applicantsModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('applicantsModalClose').addEventListener('click', closeApplicantsModal);
+  document.getElementById('applicantsModalOverlay').addEventListener('click', (e)=>{ if(e.target.id === 'applicantsModalOverlay') closeApplicantsModal(); });
+
+  async function renderApplicantsList(companyName){
+    const listEl = document.getElementById('applicantsList');
+    const errEl = document.getElementById('applicantsError');
+    try {
+      const { data: companyRows, error: companyErr } = await withTimeout(sb.from('companies').select('id').eq('name', companyName).limit(1));
+      if(companyErr) throw companyErr;
+      if(!companyRows || !companyRows.length) throw new Error('Company not found');
+      const companyId = companyRows[0].id;
+
+      const { data: apps, error: appsErr } = await withTimeout(sb.from('applications').select('id, applicant_id, message, created_at').eq('company_id', companyId).eq('status', 'pending').order('created_at', { ascending:true }));
+      if(appsErr) throw appsErr;
+
+      if(!apps || !apps.length){
+        listEl.innerHTML = '<p class="field-hint">No pending applicants right now.</p>';
+        return;
+      }
+
+      const applicantIds = apps.map(a => a.applicant_id);
+      const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name, headline, roles, avatar_url').in('id', applicantIds));
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+      listEl.innerHTML = apps.map(a => {
+        const p = profileMap[a.applicant_id] || {};
+        const avatar = p.avatar_url
+          ? `<img src="${p.avatar_url}" alt="">`
+          : initials(p.name || 'Applicant');
+        const sub = p.headline || (p.roles && p.roles.length ? p.roles.join(', ') : 'Contributor');
+        const messageBlock = a.message ? `<p class="applicant-message">"${escapeHtml(a.message)}"</p>` : '';
+        return `
+          <div class="cert-card sales-cert-card applicant-card">
+            <div class="cert-card-head">
+              <div class="company">
+                <div class="cert-badge">${avatar}</div>
+                <div>
+                  <div class="cert-title">${escapeHtml(p.name || 'Applicant')}</div>
+                  <div class="cert-sub">${escapeHtml(sub)}</div>
+                </div>
+              </div>
+            </div>
+            ${messageBlock}
+            <div class="dash-match-actions">
+              <button type="button" class="btn btn-dark btn-sm js-accept-application" data-application-id="${a.id}" data-applicant-id="${a.applicant_id}">Accept</button>
+              <button type="button" class="btn btn-ghost btn-sm js-deny-application" data-application-id="${a.id}" data-applicant-id="${a.applicant_id}">Deny</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.js-accept-application').forEach(btn=>{
+        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, companyId, companyName, 'accepted'));
+      });
+      listEl.querySelectorAll('.js-deny-application').forEach(btn=>{
+        btn.addEventListener('click', ()=> respondToApplication(btn.dataset.applicationId, btn.dataset.applicantId, companyId, companyName, 'denied'));
+      });
+    } catch(e){
+      listEl.innerHTML = '';
+      errEl.classList.add('show');
+    }
+  }
+
+  async function notifyApplicant(applicantId, companyId, body){
+    const { data: existing } = await withTimeout(sb.from('conversations').select('id').eq('user_id', applicantId).eq('company_id', companyId).limit(1));
+    let conversationId;
+    if(existing && existing.length){
+      conversationId = existing[0].id;
+    } else {
+      const { data: created, error } = await withTimeout(sb.from('conversations').insert({ user_id: applicantId, company_id: companyId }).select('id').single());
+      if(error) throw error;
+      conversationId = created.id;
+    }
+    await withTimeout(sb.from('messages').insert({ conversation_id: conversationId, sender_id: currentUser.id, body }));
+    await withTimeout(sb.from('conversations').update({ last_message_at: new Date().toISOString() }).eq('id', conversationId));
+  }
+
+  async function respondToApplication(applicationId, applicantId, companyId, companyName, decision){
+    const errEl = document.getElementById('applicantsError');
+    errEl.classList.remove('show');
+    try {
+      const { error } = await withTimeout(sb.from('applications').update({ status: decision, updated_at: new Date().toISOString() }).eq('id', applicationId));
+      if(error) throw error;
+
+      const note = decision === 'accepted'
+        ? `Good news — your application to join ${companyName} was accepted! Let's chat.`
+        : `Thanks for applying to ${companyName}. We've decided to move forward with other candidates this time.`;
+      notifyApplicant(applicantId, companyId, note).catch(()=>{});
+
+      await renderApplicantsList(companyName);
+      if(currentMode === 'user') refreshDashboardMatches(lastJoinProfile);
+    } catch(e){
+      errEl.classList.add('show');
+    }
+  }
 
   // -- Edit company listing (certified sales reps + admin, enforced by RLS) --
   const editListingModalOverlay = document.getElementById('editListingModalOverlay');
