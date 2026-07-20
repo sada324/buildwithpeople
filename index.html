@@ -768,6 +768,9 @@
   .sales-cert-card:last-child{ margin-bottom:0; }
   .sales-cert-card .modal-submit{ margin-top:0; }
 
+  .dash-companies-panel{ margin-bottom:20px; }
+  .dash-companies-panel .dash-match-list{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; }
+
   .dash-grid{
     display:grid; grid-template-columns:340px 1fr; gap:20px;
     grid-template-areas: "profile matches" "snapshot matches" "messages matches" "activity activity";
@@ -1493,6 +1496,14 @@
       <button type="button" class="btn btn-dark" id="startBuildingBtn">Start Building</button>
     </div>
 
+    <div class="dash-panel dash-companies-panel" id="dashCompaniesPanel" style="display:none">
+      <div class="dash-panel-head">
+        <h3>Your companies</h3>
+        <span class="dash-panel-sub" id="dashCompaniesSub"></span>
+      </div>
+      <div class="dash-match-list" id="dashCompaniesList"></div>
+    </div>
+
     <div class="dash-grid">
       <div class="dash-panel dash-profile">
         <div class="dash-panel-head">
@@ -1599,6 +1610,14 @@
           </div>
           <p id="adminUsersEmptyText">No one has signed up yet.</p>
         </div>
+      </div>
+
+      <div class="dash-panel admin-companies-panel" id="adminPendingPanel" style="display:none">
+        <div class="dash-panel-head">
+          <h3>Pending company submissions</h3>
+          <span class="dash-panel-sub" id="adminPendingCount"></span>
+        </div>
+        <div id="adminPendingList"></div>
       </div>
 
       <div class="dash-panel admin-companies-panel">
@@ -2355,7 +2374,7 @@
 
   async function refreshHomeCompanyGrid(){
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('*').order('home_order', { ascending:true }), 8000);
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('status', 'approved').order('home_order', { ascending:true }), 8000);
       if(error) throw error;
       const companies = data || [];
       const featured = companies.filter(c => c.featured_on_home);
@@ -2664,7 +2683,7 @@
     } else {
       modalForm.style.display = 'none';
       modalSuccess.classList.add('show');
-      markCompanyListed();
+      submitCompanyListing();
     }
   });
 
@@ -3153,6 +3172,75 @@
     showView('dashboard');
     refreshDashboardMatches(profile);
     refreshMessagesPanel();
+    refreshMyCompaniesPanel();
+  }
+
+  // -- "Your companies" — a business card for every approved company this
+  // user owns/reps or is an accepted member of, shown above Matches for you.
+
+  async function fetchMyCompanies(){
+    if(!currentUser) return [];
+    try {
+      const [certRes, appRes] = await Promise.all([
+        withTimeout(sb.from('company_certifications').select('status, companies(id, name, description, roles, comp, logo_url, has_stamp, status)').eq('user_id', currentUser.id).eq('status', 'active')),
+        withTimeout(sb.from('applications').select('status, companies(id, name, description, roles, comp, logo_url, has_stamp, status)').eq('applicant_id', currentUser.id).eq('status', 'accepted'))
+      ]);
+      const byId = new Map();
+      (certRes.data || []).forEach(r => {
+        if(r.companies && r.companies.status === 'approved') byId.set(r.companies.id, { ...r.companies, isOwner: true });
+      });
+      (appRes.data || []).forEach(r => {
+        if(r.companies && r.companies.status === 'approved' && !byId.has(r.companies.id)){
+          byId.set(r.companies.id, { ...r.companies, isOwner: false });
+        }
+      });
+      return Array.from(byId.values());
+    } catch(e){
+      return [];
+    }
+  }
+
+  async function refreshMyCompaniesPanel(){
+    const panel = document.getElementById('dashCompaniesPanel');
+    const listEl = document.getElementById('dashCompaniesList');
+    const subEl = document.getElementById('dashCompaniesSub');
+
+    const companies = await fetchMyCompanies();
+    if(!companies.length){
+      panel.style.display = 'none';
+      return;
+    }
+
+    panel.style.display = '';
+    subEl.textContent = companies.length > 1 ? `${companies.length} companies` : '1 company';
+    listEl.innerHTML = companies.map(c => {
+      const logo = c.logo_url
+        ? `<span class="cc-logo"><img src="${c.logo_url}" alt="${escapeHtml(c.name)} logo"></span>`
+        : `<span class="dot"></span>`;
+      const roleTags = (c.roles || []).map(r => `<span class="tag">${escapeHtml(r)}</span>`).join('');
+      const compPills = (c.comp || []).map(p => `<span class="comp-pill">${escapeHtml(p)}</span>`).join('');
+      const stamp = c.has_stamp ? stampImgHtml() : '';
+      const roleBadge = c.isOwner ? '<span class="dash-match-badge">Owner</span>' : '<span class="dash-match-badge">Member</span>';
+      const actionBtn = c.isOwner
+        ? `<button type="button" class="cc-btn js-manage-company" data-company-name="${escapeHtml(c.name)}">Manage</button>`
+        : `<button type="button" class="cc-btn js-view-company">View company</button>`;
+      return `
+        <div class="dash-match-card">
+          ${stamp}
+          <div class="dash-match-top">
+            <div class="gc-name">${logo}${escapeHtml(c.name)}</div>
+            ${roleBadge}
+          </div>
+          <div class="gc-desc">${escapeHtml(c.description || '')}</div>
+          <div class="dash-match-tags gc-roles">${roleTags}${compPills}</div>
+          <div class="dash-match-actions">${actionBtn}</div>
+        </div>`;
+    }).join('');
+
+    bindViewCompanyButtons(listEl);
+    listEl.querySelectorAll('.js-manage-company').forEach(btn=>{
+      btn.addEventListener('click', ()=> openManageCompanyModal(btn.dataset.companyName));
+    });
   }
 
   function formatJoinedDate(value){
@@ -3184,6 +3272,7 @@
     currentMode = 'admin';
     showView('admin');
     refreshAdminCompaniesList();
+    refreshAdminPendingCompanies();
 
     const tbody = document.getElementById('adminUsersTbody');
     const wrapEl = document.getElementById('adminUsersTableWrap');
@@ -3235,7 +3324,7 @@
 
   async function fetchAllCompaniesForAdmin(){
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('*').order('home_order', { ascending:true }));
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('status', 'approved').order('home_order', { ascending:true }));
       if(error) throw error;
       return data || [];
     } catch(e){
@@ -3340,6 +3429,108 @@
 
   document.getElementById('adminAddCompanyBtn').addEventListener('click', ()=> openEditListingModal(null));
 
+  // -- Admin: approve/decline company submissions --
+
+  async function fetchPendingCompanies(){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('status', 'pending').order('created_at', { ascending:true }));
+      if(error) throw error;
+      const companies = data || [];
+      if(!companies.length) return [];
+
+      const companyIds = companies.map(c => c.id);
+      const { data: certs } = await withTimeout(sb.from('company_certifications').select('company_id, user_id').in('company_id', companyIds).eq('status', 'active'));
+      const submitterIdByCompany = {};
+      (certs || []).forEach(c => { if(!submitterIdByCompany[c.company_id]) submitterIdByCompany[c.company_id] = c.user_id; });
+
+      const submitterIds = Array.from(new Set(Object.values(submitterIdByCompany)));
+      let profileMap = {};
+      if(submitterIds.length){
+        const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name').in('id', submitterIds));
+        (profiles || []).forEach(p => { profileMap[p.id] = p; });
+      }
+
+      return companies.map(c => ({
+        ...c,
+        submitterId: submitterIdByCompany[c.id] || null,
+        submitterName: (profileMap[submitterIdByCompany[c.id]] && profileMap[submitterIdByCompany[c.id]].name) || 'Someone'
+      }));
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function refreshAdminPendingCompanies(){
+    const panel = document.getElementById('adminPendingPanel');
+    const listEl = document.getElementById('adminPendingList');
+    const countEl = document.getElementById('adminPendingCount');
+
+    const pending = await fetchPendingCompanies();
+    if(!pending || !pending.length){
+      panel.style.display = 'none';
+      return;
+    }
+
+    panel.style.display = '';
+    countEl.textContent = `${pending.length} awaiting review`;
+    listEl.innerHTML = pending.map(c => `
+      <div class="cert-card sales-cert-card applicant-card">
+        <div class="cert-card-head">
+          <div class="company">
+            ${avatarStackHtml(c.logo_url, c.name, null, null, 'sm')}
+            <div>
+              <div class="cert-title">${escapeHtml(c.name)}</div>
+              <div class="cert-sub">Submitted by ${escapeHtml(c.submitterName)}</div>
+            </div>
+          </div>
+        </div>
+        ${c.description ? `<p class="applicant-message">${escapeHtml(c.description)}</p>` : ''}
+        <div class="dash-match-actions">
+          <button type="button" class="btn btn-dark btn-sm js-approve-company" data-company-id="${c.id}">Approve</button>
+          <button type="button" class="btn btn-ghost btn-sm js-decline-company" data-company-id="${c.id}">Decline</button>
+        </div>
+      </div>`).join('');
+
+    listEl.querySelectorAll('.js-approve-company').forEach(btn=>{
+      btn.addEventListener('click', ()=> respondToCompanySubmission(btn.dataset.companyId, 'approved'));
+    });
+    listEl.querySelectorAll('.js-decline-company').forEach(btn=>{
+      btn.addEventListener('click', ()=> respondToCompanySubmission(btn.dataset.companyId, 'declined'));
+    });
+  }
+
+  async function notifySubmitterOfDecision(companyId, companyName, decision){
+    try {
+      const [bwpRes, certRes] = await Promise.all([
+        withTimeout(sb.from('companies').select('id').eq('name', 'Build With People').limit(1)),
+        withTimeout(sb.from('company_certifications').select('user_id').eq('company_id', companyId).eq('status', 'active').limit(1))
+      ]);
+      const bwpId = bwpRes.data && bwpRes.data[0] && bwpRes.data[0].id;
+      const submitterId = certRes.data && certRes.data[0] && certRes.data[0].user_id;
+      if(!bwpId || !submitterId) return;
+      const body = decision === 'approved'
+        ? `Your company listing for ${companyName} was approved — welcome aboard! It's now on your dashboard under "Your companies".`
+        : `Thanks for submitting ${companyName} — we're not able to list it right now. Feel free to reach out with any questions.`;
+      await notifyApplicant(submitterId, bwpId, body);
+    } catch(e){ /* the approval itself already succeeded — a missed notification isn't worth failing the action over */ }
+  }
+
+  async function respondToCompanySubmission(companyId, decision){
+    try {
+      const { data: company, error } = await withTimeout(sb.from('companies').update({
+        status: decision, updated_at: new Date().toISOString()
+      }).eq('id', companyId).select('name').single());
+      if(error) throw error;
+
+      notifySubmitterOfDecision(companyId, company ? company.name : 'your company', decision).catch(()=>{});
+
+      await refreshAdminPendingCompanies();
+      await refreshAdminCompaniesList();
+    } catch(e){
+      document.getElementById('adminCompaniesError').classList.add('show');
+    }
+  }
+
   document.getElementById('dashSwapBtn').addEventListener('click', ()=> enterAdminView(lastJoinProfile));
   document.getElementById('adminSwapBtn').addEventListener('click', ()=> enterDashboard(lastJoinProfile));
 
@@ -3408,7 +3599,7 @@
 
   async function fetchCompanyDirectory(){
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('*'));
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('status', 'approved'));
       if(error) throw error;
       const byName = {};
       (data || []).forEach(row => { byName[row.name] = row; });
@@ -3471,10 +3662,37 @@
     }
   }
 
-  async function markCompanyListed(){
+  const LISTING_STAGE_LABELS = ['Idea', 'Building', 'Launched', 'Growing', 'Established'];
+
+  // Signed-in submitters get a real, reviewable company row (status
+  // 'pending' until an admin approves or declines it in the admin
+  // dashboard). Signed-out visitors exploring the form get the same
+  // cosmetic success screen as before, but nothing is persisted — there's
+  // no account to own the listing yet.
+  async function submitCompanyListing(){
     if(!currentUser) return;
-    try { await withTimeout(sb.from('profiles').update({ has_listed_company: true }).eq('id', currentUser.id)); }
-    catch(e){ /* non-critical — the checklist just won't tick this item yet */ }
+    try {
+      const name = document.getElementById('companyName').value.trim();
+      const description = document.getElementById('companyDesc').value.trim();
+      const roles = Array.from(document.querySelectorAll('#rolesGroup .chip-select.selected')).map(c => c.textContent);
+      const comp = Array.from(document.querySelectorAll('#compGroup .chip-select.selected')).map(c => c.textContent);
+      const stage = LISTING_STAGE_LABELS[selectedStage] || 'Idea';
+
+      const { data: created, error } = await withTimeout(sb.from('companies').insert({
+        name, description, stage, roles, comp, status: 'pending'
+      }).select('id').single());
+      if(error) throw error;
+
+      await withTimeout(sb.from('company_certifications').insert({
+        user_id: currentUser.id, company_id: created.id, status: 'active'
+      })).catch(()=>{});
+
+      await withTimeout(sb.from('profiles').update({ has_listed_company: true }).eq('id', currentUser.id)).catch(()=>{});
+    } catch(e){
+      /* the success screen is already shown — a failed submit here just
+         means the create-hub checklist won't tick and no row exists to
+         review, not a broken UI state for the user */
+    }
   }
 
   const createHubOverlay = document.getElementById('createHubOverlay');
