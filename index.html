@@ -608,6 +608,10 @@
   .view-actions .btn-ghost{ background:rgba(255,255,255,0.55); }
   .view-tags{ display:none; flex-wrap:wrap; gap:6px; justify-content:center; margin:-8px 0 22px; }
   .view-tags.show{ display:flex; }
+  .view-link{ display:none; align-items:center; gap:5px; font-size:13px; font-weight:600; color:var(--green); margin:-10px 0 20px; }
+  .view-link.show{ display:inline-flex; }
+  .view-link:hover{ text-decoration:underline; }
+  .view-modal.member .view-link{ justify-content:flex-start; }
 
   .view-modal.member{
     background:var(--white); border:1px solid var(--border);
@@ -2150,6 +2154,7 @@
     <h3 id="profileViewTitle">Name</h3>
     <p id="profileViewDesc">Headline</p>
     <div class="view-tags" id="profileViewTags"></div>
+    <a href="#" class="view-link" id="profileViewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
   </div>
 </div>
 
@@ -2165,6 +2170,7 @@
     <h3 id="viewTitle">Sign in to view this company</h3>
     <p id="viewDesc">Create a free account to see the full profile, team, open roles, and compensation details.</p>
     <div class="view-tags" id="viewTags"></div>
+    <a href="#" class="view-link" id="viewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
     <div class="view-actions" id="viewActionsGuest">
       <a href="#" class="btn btn-dark" id="viewSignInBtn">Sign in</a>
       <a href="#" class="btn btn-ghost" id="viewCreateBtn">Create account</a>
@@ -2427,8 +2433,23 @@
   const viewTitle = document.getElementById('viewTitle');
   const viewDesc = document.getElementById('viewDesc');
   const viewTags = document.getElementById('viewTags');
+  const viewLink = document.getElementById('viewLink');
   const viewActionsGuest = document.getElementById('viewActionsGuest');
   const viewActionsMember = document.getElementById('viewActionsMember');
+
+  // Shared by every "company profile" popup — only shows the website link
+  // when the admin has explicitly allowed it for that company.
+  function applyCompanyLink(linkEl, website, showWebsite){
+    if(showWebsite && website){
+      let href = website.trim();
+      if(!/^https?:\/\//i.test(href)) href = 'https://' + href;
+      linkEl.href = href;
+      linkEl.classList.add('show');
+    } else {
+      linkEl.removeAttribute('href');
+      linkEl.classList.remove('show');
+    }
+  }
 
   function openViewPopup(){
     viewOverlay.classList.add('open');
@@ -2447,6 +2468,7 @@
     viewDesc.textContent = 'Create a free account to see the full profile, team, open roles, and compensation details.';
     viewTags.classList.remove('show');
     viewTags.innerHTML = '';
+    applyCompanyLink(viewLink, null, false);
     viewActionsGuest.classList.remove('hidden');
     viewActionsMember.classList.add('hidden');
   }
@@ -2479,9 +2501,23 @@
     viewDesc.textContent = descEl ? descEl.textContent.trim() : "You're signed in — here's the full profile.";
     viewTags.innerHTML = Array.from(pillEls).map(t=>`<span class="${t.className}">${t.textContent}</span>`).join('');
     viewTags.classList.toggle('show', pillEls.length > 0);
+    applyCompanyLink(viewLink, null, false);
     viewActionsGuest.classList.add('hidden');
     viewActionsMember.classList.remove('hidden');
     refreshApplyButtonState(name);
+    refreshCompanyLink(name);
+  }
+
+  // Populates the website link asynchronously so opening the popup never
+  // waits on a network round trip — it just appears once (if) allowed.
+  async function refreshCompanyLink(name){
+    try {
+      const { data, error } = await withTimeout(sb.from('companies').select('name, website, show_website').eq('name', name).single());
+      if(error || !data) return;
+      if(currentViewCompanyName === name){
+        applyCompanyLink(viewLink, data.website, data.show_website);
+      }
+    } catch(e){ /* leave link hidden */ }
   }
 
   function bindViewCompanyButton(btn){
@@ -3046,14 +3082,17 @@
     return `${words.slice(0, -1).join(', ')}, and ${words[words.length - 1]}`;
   }
 
+  const MAX_DASH_MATCHES = 15;
+
   function renderMatchesList(companies, profile, editableNames, pendingCounts){
     pendingCounts = pendingCounts || {};
     const scored = companies
       .map(c => ({ ...c, overlap: c.roles.filter(r => profile.roles.includes(r)).length }))
       .sort((a, b) => b.overlap - a.overlap);
+    const displayed = scored.slice(0, MAX_DASH_MATCHES);
 
     const matchListEl = document.getElementById('dashMatchList');
-    matchListEl.innerHTML = scored.map(c => {
+    matchListEl.innerHTML = displayed.map(c => {
       const logo = c.logoImg
         ? `<span class="cc-logo"><img src="${c.logoImg}" alt="${c.name} logo"></span>`
         : `<span class="dot"></span>`;
@@ -3111,17 +3150,27 @@
       fetchMyEditableCompanyNames()
     ]);
     myEditableCompanyNamesCache = editableNames;
-    const merged = DASH_COMPANIES.map(c => {
-      const live = companyDirectory[c.name];
-      return live ? {
-        ...c,
-        desc: live.description || c.desc,
-        roles: (live.roles && live.roles.length) ? live.roles : c.roles,
-        comp: (live.comp && live.comp.length) ? live.comp : c.comp,
-        logoImg: live.logo_url || c.logoImg,
+
+    // Start from every approved company in the directory (not just the 4
+    // seeded demo companies) so newly-approved companies actually show up
+    // in matches, falling back to seed data only for the fields a live row
+    // doesn't have set.
+    const seedByName = {};
+    DASH_COMPANIES.forEach(c => { seedByName[c.name] = c; });
+    const allNames = new Set([...Object.keys(seedByName), ...Object.keys(companyDirectory)]);
+    const merged = Array.from(allNames).map(name => {
+      const seed = seedByName[name];
+      const live = companyDirectory[name];
+      if(!live) return seed;
+      return {
+        name,
+        desc: live.description || (seed && seed.desc) || '',
+        roles: (live.roles && live.roles.length) ? live.roles : ((seed && seed.roles) || []),
+        comp: (live.comp && live.comp.length) ? live.comp : ((seed && seed.comp) || []),
+        logoImg: live.logo_url || (seed && seed.logoImg) || null,
         companyId: live.id,
         hasStamp: !!live.has_stamp
-      } : c;
+      };
     });
 
     const editableCompanyIds = merged
@@ -3411,6 +3460,7 @@
             <label>Total<input type="number" min="0" class="admin-company-num js-total-members" value="${c.total_members || 0}"></label>
           </div>
           <label class="admin-company-check"><input type="checkbox" class="js-stamp-toggle" ${c.has_stamp ? 'checked' : ''}> Stamp</label>
+          <label class="admin-company-check"><input type="checkbox" class="js-website-toggle" ${c.show_website ? 'checked' : ''}> Show website link</label>
           <button type="button" class="btn btn-ghost btn-sm js-edit-company-admin">Edit</button>
         </div>`;
     }).join('');
@@ -3422,6 +3472,9 @@
     });
     listEl.querySelectorAll('.js-stamp-toggle').forEach(cb=>{
       cb.addEventListener('change', ()=> updateCompanyField(cb.closest('.admin-company-row').dataset.companyId, { has_stamp: cb.checked }));
+    });
+    listEl.querySelectorAll('.js-website-toggle').forEach(cb=>{
+      cb.addEventListener('change', ()=> updateCompanyField(cb.closest('.admin-company-row').dataset.companyId, { show_website: cb.checked }));
     });
     listEl.querySelectorAll('.js-active-members').forEach(inp=>{
       inp.addEventListener('change', ()=> updateCompanyField(inp.closest('.admin-company-row').dataset.companyId, { active_members: parseInt(inp.value, 10) || 0 }));
@@ -4182,6 +4235,7 @@
       const tags = [...p.roles.map(r => `<span class="tag">${escapeHtml(r)}</span>`), ...p.comp.map(c => `<span class="comp-pill">${escapeHtml(c)}</span>`)];
       tagsEl.innerHTML = tags.join('');
       tagsEl.classList.toggle('show', tags.length > 0);
+      applyCompanyLink(document.getElementById('profileViewLink'), null, false);
       profileViewOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch(e){
@@ -4202,6 +4256,7 @@
       const tags = [...(data.roles || []).map(r => `<span class="tag">${escapeHtml(r)}</span>`), ...(data.comp || []).map(c => `<span class="comp-pill">${escapeHtml(c)}</span>`)];
       tagsEl.innerHTML = tags.join('');
       tagsEl.classList.toggle('show', tags.length > 0);
+      applyCompanyLink(document.getElementById('profileViewLink'), data.website, data.show_website);
       profileViewOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch(e){
