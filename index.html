@@ -668,6 +668,59 @@
   </div>
 </section>
 
+<section class="niche-section" id="industries">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Contractor campaigns</span>
+      <h2>We build demand for high-value home services.</h2>
+      <p>Our sales teams launch localized campaigns, qualify homeowners, and book real project opportunities. Contractors quote the work, complete the job, and pay commission on agreed results.</p>
+    </div>
+
+    <div class="niche-marquee">
+      <div class="niche-track">
+        <div class="niche-grid">
+          <article class="niche-card">
+            <img src="/assets/niches/bathroom-renovation-concept.jpg" alt="Modern bathroom renovation campaign concept" loading="eager">
+            <div class="niche-copy">
+              <span class="niche-meta">Bathroom renovations</span>
+              <h3>Turn inspiration into booked estimates.</h3>
+              <p>Visual campaigns that help homeowners picture the transformation before speaking with a contractor.</p>
+            </div>
+          </article>
+
+          <article class="niche-card">
+            <img src="/assets/niches/interlock-paving-concept.jpg" alt="Residential interlock paving campaign concept" loading="eager">
+            <div class="niche-copy">
+              <span class="niche-meta">Paving &amp; interlock</span>
+              <h3>Own more of the local season.</h3>
+              <p>Territory-based outreach for driveways, walkways, patios, and complete exterior projects.</p>
+            </div>
+          </article>
+
+          <article class="niche-card">
+            <img src="/assets/niches/basement-renovation-concept.jpg" alt="Finished basement renovation campaign concept" loading="lazy">
+            <div class="niche-copy">
+              <span class="niche-meta">Basement finishing</span>
+              <h3>Find homeowners planning bigger projects.</h3>
+              <p>Qualified opportunities for family rooms, rental conversions, gyms, offices, and full basement builds.</p>
+            </div>
+          </article>
+
+          <article class="niche-card">
+            <img src="/assets/niches/kitchen-renovation-concept.jpg" alt="Modern kitchen renovation campaign concept" loading="lazy">
+            <div class="niche-copy">
+              <span class="niche-meta">Kitchen renovations</span>
+              <h3>Sell the outcome before the site visit.</h3>
+              <p>High-intent campaigns for complete kitchens, cabinet refacing, counters, and finish upgrades.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+    <p class="niche-note">Campaign concept imagery — final scope, pricing, and designs are confirmed by each contractor.</p>
+  </div>
+</section>
+
 <section id="paths">
   <div class="wrap">
     <div class="section-head reveal">
@@ -707,55 +760,6 @@
       <div class="path"><span class="idx">Step 02</span><h3>Train &amp; certify partners</h3><p>Upload sales materials, pricing, and FAQs. Partners study and pass a certification quiz before they sell.</p></div>
       <div class="path"><span class="idx">Step 03</span><h3>Track every deal</h3><p>See who's certified, who's active, and exactly what commission is owed as deals close.</p></div>
     </div>
-  </div>
-</section>
-
-<section class="niche-section" id="industries">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="kicker">Contractor campaigns</span>
-      <h2>We build demand for high-value home services.</h2>
-      <p>Our sales teams launch localized campaigns, qualify homeowners, and book real project opportunities. Contractors quote the work, complete the job, and pay commission on agreed results.</p>
-    </div>
-
-    <div class="niche-grid">
-      <article class="niche-card reveal">
-        <img src="/assets/niches/bathroom-renovation-concept.jpg" alt="Modern bathroom renovation campaign concept" loading="lazy">
-        <div class="niche-copy">
-          <span class="niche-meta">Bathroom renovations</span>
-          <h3>Turn inspiration into booked estimates.</h3>
-          <p>Visual campaigns that help homeowners picture the transformation before speaking with a contractor.</p>
-        </div>
-      </article>
-
-      <article class="niche-card reveal">
-        <img src="/assets/niches/interlock-paving-concept.jpg" alt="Residential interlock paving campaign concept" loading="lazy">
-        <div class="niche-copy">
-          <span class="niche-meta">Paving &amp; interlock</span>
-          <h3>Own more of the local season.</h3>
-          <p>Territory-based outreach for driveways, walkways, patios, and complete exterior projects.</p>
-        </div>
-      </article>
-
-      <article class="niche-card reveal">
-        <img src="/assets/niches/basement-renovation-concept.jpg" alt="Finished basement renovation campaign concept" loading="lazy">
-        <div class="niche-copy">
-          <span class="niche-meta">Basement finishing</span>
-          <h3>Find homeowners planning bigger projects.</h3>
-          <p>Qualified opportunities for family rooms, rental conversions, gyms, offices, and full basement builds.</p>
-        </div>
-      </article>
-
-      <article class="niche-card reveal">
-        <img src="/assets/niches/kitchen-renovation-concept.jpg" alt="Modern kitchen renovation campaign concept" loading="lazy">
-        <div class="niche-copy">
-          <span class="niche-meta">Kitchen renovations</span>
-          <h3>Sell the outcome before the site visit.</h3>
-          <p>High-intent campaigns for complete kitchens, cabinet refacing, counters, and finish upgrades.</p>
-        </div>
-      </article>
-    </div>
-    <p class="niche-note">Campaign concept imagery — final scope, pricing, and designs are confirmed by each contractor.</p>
   </div>
 </section>
 
@@ -4445,6 +4449,21 @@
       routeToView(profile);
     }
   }).catch(()=>{});
+</script>
+
+<script>
+  // Duplicate the niche cards once so the mobile marquee loops without a visible jump.
+  const nicheTrack = document.querySelector('.niche-track');
+  const nicheGrid = nicheTrack?.querySelector('.niche-grid');
+  if(nicheTrack && nicheGrid){
+    const nicheClone = nicheGrid.cloneNode(true);
+    nicheClone.setAttribute('aria-hidden', 'true');
+    nicheClone.querySelectorAll('img').forEach((img)=>{
+      img.alt = '';
+      img.loading = 'lazy';
+    });
+    nicheTrack.appendChild(nicheClone);
+  }
 </script>
 
 
