@@ -285,6 +285,43 @@
   .grid-card.dark .cc-btn{ background:var(--white); color:var(--ink); border-color:var(--white); }
   .grid-card.dark .cc-btn:hover{ background:#EDEDED; }
 
+  /* ---------- contractor campaign niches ---------- */
+  .niche-section{ background:var(--ink); color:var(--white); overflow:hidden; }
+  .niche-section .section-head{ max-width:720px; }
+  .niche-section .kicker{ color:#7FD6A4; }
+  .niche-section h2{ color:var(--white); }
+  .niche-section .section-head p{ color:#B7BAC0; }
+  .niche-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .niche-card{
+    position:relative; min-height:360px; overflow:hidden; border-radius:18px;
+    border:1px solid #34373c; background:#202328;
+  }
+  .niche-card img{
+    width:100%; height:100%; position:absolute; inset:0; object-fit:cover;
+    transition:transform .45s ease;
+  }
+  .niche-card:hover img{ transform:scale(1.025); }
+  .niche-card::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(16,17,19,.02) 30%,rgba(16,17,19,.94) 100%);
+  }
+  .niche-copy{ position:absolute; z-index:1; left:24px; right:24px; bottom:22px; }
+  .niche-copy h3{
+    color:var(--white); font-family:var(--font-display); font-size:24px;
+    letter-spacing:-.02em; margin-bottom:6px;
+  }
+  .niche-copy p{ color:#D6D8DB; font-size:13.5px; max-width:460px; }
+  .niche-meta{
+    display:inline-flex; margin-bottom:12px; padding:5px 9px; border-radius:999px;
+    background:rgba(16,17,19,.74); border:1px solid rgba(255,255,255,.22);
+    color:#F2F3F4; font:11px var(--font-mono); backdrop-filter:blur(8px);
+  }
+  .niche-note{ color:#8F949B; font:11px var(--font-mono); margin-top:18px; }
+  @media (max-width:760px){
+    .niche-grid{ grid-template-columns:1fr; }
+    .niche-card{ min-height:300px; }
+  }
+
   /* ---------- pathways ---------- */
   .path-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
   @media (max-width:900px){ .path-grid{ grid-template-columns:1fr 1fr; } }
