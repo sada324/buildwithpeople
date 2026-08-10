@@ -105,6 +105,22 @@
   .btn-ghost:hover{ border-color:var(--ink); }
   .btn-sm{ padding:8px 14px; font-size:13px; }
   @media (max-width:900px){ .nav-links{ display:none; } }
+  @media (max-width:640px){
+    .wrap{ padding-left:18px; padding-right:18px; }
+    nav{ height:60px; gap:10px; }
+    .logo{ font-size:14px; gap:6px; }
+    .logo .mark{ width:7px; height:7px; }
+    .nav-right{ gap:8px; margin-left:auto; }
+    .nav-right a{ font-size:12.5px; padding:8px 4px; white-space:nowrap; }
+    .nav-right .btn-sm{ padding:8px 10px; line-height:1.2; text-align:center; white-space:nowrap; }
+    #navJoinBtn{ font-size:0; }
+    #navJoinBtn::after{ content:'Launch campaign'; font-size:11.5px; }
+  }
+  @media (max-width:360px){
+    #navJoinBtn{ display:none; }
+    .nav-right{ gap:0; }
+    .nav-right a{ padding-left:10px; padding-right:2px; }
+  }
 
   /* ---------- hero ---------- */
   .hero{
@@ -291,7 +307,9 @@
   .niche-section .kicker{ color:#7FD6A4; }
   .niche-section h2{ color:var(--white); }
   .niche-section .section-head p{ color:#B7BAC0; }
+  .niche-track{ width:100%; }
   .niche-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
+  .niche-grid[aria-hidden="true"]{ display:none; }
   .niche-card{
     position:relative; min-height:360px; overflow:hidden; border-radius:18px;
     border:1px solid #34373c; background:#202328;
@@ -318,8 +336,40 @@
   }
   .niche-note{ color:#8F949B; font:11px var(--font-mono); margin-top:18px; }
   @media (max-width:760px){
-    .niche-grid{ grid-template-columns:1fr; }
-    .niche-card{ min-height:300px; }
+    .hero{ padding:56px 0 42px; }
+    .hero .preview{ display:none; }
+    .niche-section{ padding:20px 0 50px; }
+    .niche-section > .wrap{
+      max-width:none; padding-left:0; padding-right:0;
+      display:flex; flex-direction:column;
+    }
+    .niche-section .section-head,
+    .niche-section .niche-note{ margin-left:18px; margin-right:18px; }
+    .niche-section .section-head{ order:2; margin-top:34px; margin-bottom:0; }
+    .niche-marquee{ order:1; overflow:hidden; width:100%; }
+    .niche-note{ order:3; }
+    .niche-track{
+      display:flex; width:max-content; gap:14px; padding-left:18px;
+      animation:niche-scroll 42s linear infinite; will-change:transform;
+    }
+    .niche-grid,
+    .niche-grid[aria-hidden="true"]{ display:flex; flex:none; gap:14px; }
+    .niche-card{ width:min(82vw,340px); min-height:330px; flex:none; }
+    .niche-copy{ left:20px; right:20px; bottom:20px; }
+    .niche-copy h3{ font-size:21px; }
+    .niche-note{ margin-top:16px; }
+    @keyframes niche-scroll{
+      from{ transform:translateX(0); }
+      to{ transform:translateX(calc(-50% - 7px)); }
+    }
+  }
+  @media (max-width:760px) and (prefers-reduced-motion:reduce){
+    .niche-marquee{ overflow-x:auto; scrollbar-width:none; }
+    .niche-marquee::-webkit-scrollbar{ display:none; }
+    .niche-track{ animation:none; padding-right:18px; }
+    .niche-grid{ scroll-snap-type:x mandatory; }
+    .niche-card{ scroll-snap-align:start; }
+    .niche-grid[aria-hidden="true"]{ display:none; }
   }
 
   /* ---------- pathways ---------- */
