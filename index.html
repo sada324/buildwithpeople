@@ -3,442 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Build With People — Build companies with people who want to contribute</title>
+<title>Build With People — Build a commission sales team without hiring full-time</title>
+<meta name="description" content="Build With People helps early-stage B2B companies recruit, train, and manage independent commission sales partners — all in one place.">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/css/site.css">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-  :root{
-    --white:#ffffff;
-    --off-white:#FAFAF8;
-    --paper:#F6F6F4;
-    --ink:#14171A;
-    --ink-soft:#4B5157;
-    --grey:#8A8F98;
-    --border:#E7E7E3;
-    --border-strong:#DADAD5;
-    --green:#1E8E4F;
-    --green-soft:#E9F5EE;
-    --green-dot:#22B462;
-    --shadow-sm: 0 1px 2px rgba(20,23,26,0.04), 0 1px 1px rgba(20,23,26,0.03);
-    --shadow-md: 0 4px 16px rgba(20,23,26,0.06), 0 1px 3px rgba(20,23,26,0.04);
-    --shadow-lg: 0 12px 40px rgba(20,23,26,0.08), 0 2px 8px rgba(20,23,26,0.04);
-    --radius: 14px;
-    --radius-sm: 8px;
-    --font-display: 'Sora', 'Inter', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
-  }
-
-  *{ margin:0; padding:0; box-sizing:border-box; }
-  html{ scroll-behavior:smooth; overflow-x:hidden; width:100%; }
-  body{
-    font-family: var(--font-body);
-    background: var(--white);
-    color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-    line-height:1.5;
-    overflow-x:hidden;
-    width:100%;
-  }
-  ::selection{ background: var(--green-soft); color: var(--green); }
-  a{ color:inherit; text-decoration:none; }
-  button{ font-family:inherit; cursor:pointer; border:none; background:none; }
-  img{ display:block; max-width:100%; }
-  .wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
-
-  :focus-visible{ outline: 2px solid var(--green); outline-offset: 2px; }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
-  }
-
-  /* ---------- dot ---------- */
-  .dot{
-    width:6px; height:6px; border-radius:50%;
-    background: var(--green-dot);
-    display:inline-block;
-    position:relative;
-    flex-shrink:0;
-  }
-  .dot::after{
-    content:'';
-    position:absolute; inset:-4px;
-    border-radius:50%;
-    background: var(--green-dot);
-    opacity:0.28;
-    animation: pulse 2.4s ease-in-out infinite;
-  }
-  @keyframes pulse{
-    0%{ transform:scale(0.9); opacity:0.35; }
-    70%{ transform:scale(1.9); opacity:0; }
-    100%{ opacity:0; }
-  }
-
-  /* ---------- nav ---------- */
-  header{
-    position:sticky; top:0; z-index:100;
-    background: rgba(255,255,255,0.86);
-    backdrop-filter: blur(10px);
-    border-bottom:1px solid var(--border);
-  }
-  nav{
-    display:flex; align-items:center; justify-content:space-between;
-    height:68px;
-  }
-  .logo{
-    font-family:var(--font-display); font-weight:700; font-size:17px;
-    letter-spacing:-0.02em; display:flex; align-items:center; gap:8px; white-space:nowrap;
-  }
-  .logo .mark{
-    width:9px; height:9px; border-radius:3px; background:var(--ink);
-    display:inline-block; transform:rotate(45deg);
-  }
-  .nav-links{ display:flex; gap:34px; align-items:center; }
-  .nav-links a{
-    font-size:14px; color:var(--ink-soft); font-weight:500;
-    transition: color .15s ease;
-  }
-  .nav-links a:hover{ color:var(--ink); }
-  .nav-right{ display:flex; align-items:center; gap:18px; }
-  .nav-right a{ font-size:14px; font-weight:500; color:var(--ink-soft); }
-  .btn{
-    font-size:14px; font-weight:600; padding:10px 18px; border-radius:9px;
-    display:inline-flex; align-items:center; gap:8px;
-    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
-  }
-  .btn-dark{ background:var(--ink); color:var(--white); }
-  .btn-dark:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); }
-  .btn-ghost{ border:1px solid var(--border-strong); color:var(--ink); background:var(--white); }
-  .btn-ghost:hover{ border-color:var(--ink); }
-  .btn-sm{ padding:8px 14px; font-size:13px; }
-  @media (max-width:900px){ .nav-links{ display:none; } }
-
-  /* ---------- hero ---------- */
-  .hero{
-    padding:88px 0 64px;
-    background:
-      radial-gradient(600px 300px at 85% -10%, rgba(30,142,79,0.05), transparent 70%),
-      var(--white);
-  }
-  .hero-grid{
-    display:grid; grid-template-columns: 1.05fr 0.95fr; gap:64px; align-items:center;
-  }
-  @media (max-width:960px){ .hero-grid{ grid-template-columns:1fr; } }
-
-  .eyebrow{
-    display:inline-flex; align-items:center; gap:8px;
-    font-family:var(--font-mono); font-size:12px; letter-spacing:0.02em;
-    color:var(--green); background:var(--green-soft);
-    border:1px solid #D7ECDF; padding:6px 12px; border-radius:20px;
-    margin-bottom:22px;
-  }
-  h1{
-    font-family:var(--font-display); font-weight:700;
-    font-size:clamp(34px,4.6vw,54px);
-    letter-spacing:-0.03em; line-height:1.05; color:var(--ink);
-    margin-bottom:22px;
-  }
-  .hero p.lead{
-    font-size:17px; color:var(--ink-soft); max-width:520px; margin-bottom:32px;
-  }
-  .hero-ctas{ display:flex; gap:14px; margin-bottom:36px; flex-wrap:wrap; }
-  .hero-ctas .btn{ padding:13px 22px; font-size:15px; }
-
-  .avatar-row{ display:flex; align-items:center; gap:14px; }
-  .avatars{ display:flex; }
-  .avatars span{
-    width:34px; height:34px; border-radius:50%;
-    border:2.5px solid var(--white);
-    margin-left:-10px;
-    background: linear-gradient(135deg,#D8D8D2,#EFEFEB);
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:11px; color:var(--ink-soft);
-    position:relative;
-  }
-  .avatars span:first-child{ margin-left:0; }
-  .avatars span::after{
-    content:''; position:absolute; right:-1px; bottom:-1px;
-    width:9px; height:9px; border-radius:50%; background:var(--green-dot);
-    border:2px solid var(--white);
-  }
-  .avatar-row .label{ font-size:13.5px; color:var(--ink-soft); }
-  .avatar-row .label b{ color:var(--ink); font-weight:600; }
-
-  /* ---------- hero interface preview ---------- */
-  .preview{
-    background: var(--paper);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:18px;
-    box-shadow: var(--shadow-lg);
-  }
-  .preview-top{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:4px 8px 14px; border-bottom:1px solid var(--border); margin-bottom:14px;
-  }
-  .preview-top .live{
-    display:flex; align-items:center; gap:7px; font-family:var(--font-mono);
-    font-size:11.5px; color:var(--green);
-  }
-  .preview-top .title{ font-size:13px; color:var(--ink-soft); font-weight:500; }
-
-  .company-card{
-    position:relative; min-width:0;
-    background:var(--white); border:1px solid var(--border); border-radius:13px;
-    padding:16px; margin-bottom:12px;
-    transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
-  }
-  .company-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); border-color:var(--border-strong); }
-  .company-card:last-child{ margin-bottom:0; }
-  .cc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .cc-name{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14.5px; }
-  .cc-logo{
-    width:22px; height:22px; border-radius:50%; flex-shrink:0;
-    background: linear-gradient(135deg,#D8D8D2,#EFEFEB);
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:8.5px; color:var(--ink-soft);
-    position:relative;
-  }
-  .cc-logo img{ width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
-  .cc-logo::after{
-    content:''; position:absolute; right:-1px; bottom:-1px;
-    width:7px; height:7px; border-radius:50%; background:var(--green-dot);
-    border:1.5px solid var(--white);
-  }
-  .cc-sub{ font-size:12.5px; color:var(--grey); margin-bottom:12px; overflow-wrap:anywhere; }
-  .cc-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-  .tag{
-    font-size:11px; font-family:var(--font-mono); color:var(--ink-soft);
-    background:var(--off-white); border:1px solid var(--border); padding:3px 8px; border-radius:6px;
-  }
-  .cc-foot{ display:flex; align-items:center; justify-content:space-between; }
-  .cc-meta{ font-size:11.5px; color:var(--grey); display:flex; align-items:center; gap:6px; }
-  .cc-btn{
-    font-size:12px; font-weight:600; color:var(--ink); border:1px solid var(--border-strong);
-    padding:6px 12px; border-radius:7px; background:var(--white);
-    transition:border-color .15s ease, background .15s ease;
-    cursor:pointer;
-  }
-  .cc-btn:hover{ border-color:var(--ink); background:var(--off-white); }
-  .cc-progress{ height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:10px; }
-  .cc-progress i{ display:block; height:100%; background:var(--green-dot); border-radius:2px; }
-
-  .company-card.dark{
-    background: var(--ink); border-color: var(--ink);
-  }
-  .company-card.dark:hover{ border-color:#2c2f33; }
-  .company-card.dark .cc-name{ color:var(--white); }
-  .company-card.dark .cc-sub{ color:#B7BAC0; }
-  .company-card.dark .tag{ color:#D6D8DB; background:#22252A; border-color:#33363B; }
-  .company-card.dark .cc-btn{ background:var(--white); color:var(--ink); border-color:var(--white); }
-  .company-card.dark .cc-btn:hover{ background:#EDEDED; }
-  .company-card.dark .cc-meta{ color:#9CA0A6; }
-  .company-card.dark .cc-progress{ background:#2c2f33; }
-  .company-card.dark .cc-logo{ background: linear-gradient(135deg,#3a3d42,#4c4f54); color:#D6D8DB; }
-
-  /* ---------- section shell ---------- */
-  section{ padding:96px 0; }
-  .section-alt{ background:var(--off-white); }
-  .section-head{ max-width:600px; margin-bottom:52px; }
-  .kicker{
-    font-family:var(--font-mono); font-size:12px; color:var(--green);
-    text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px; display:block;
-  }
-  h2{
-    font-family:var(--font-display); font-weight:700; font-size:clamp(26px,3vw,36px);
-    letter-spacing:-0.02em; line-height:1.15; margin-bottom:14px;
-  }
-  .section-head p{ color:var(--ink-soft); font-size:15.5px; }
-
-  /* ---------- browse companies + filters ---------- */
-  .filters{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:44px; }
-  .filter{
-    font-size:13.5px; font-weight:500; padding:9px 16px; border-radius:8px;
-    border:1px solid var(--border-strong); color:var(--ink-soft); background:var(--white);
-    transition: all .15s ease;
-  }
-  .filter.active{ background:var(--ink); color:var(--white); border-color:var(--ink); }
-  .filter:not(.active):hover{ border-color:var(--ink); color:var(--ink); }
-
-  .company-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-  @media (max-width:900px){ .company-grid{ grid-template-columns:1fr 1fr; } }
-  @media (max-width:640px){ .company-grid{ grid-template-columns:1fr; } }
-
-  .grid-card{
-    position:relative; min-width:0;
-    background:var(--white); border:1px solid var(--border); border-radius:var(--radius);
-    padding:22px; transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
-  }
-  .grid-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-3px); border-color:var(--border-strong); }
-  .gc-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .gc-name{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:16.5px; }
-  .gc-desc{ font-size:13.5px; color:var(--ink-soft); margin-bottom:16px; min-height:38px; overflow-wrap:anywhere; }
-  .gc-label{ font-size:11px; color:var(--grey); font-family:var(--font-mono); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em; }
-  .gc-roles{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
-  .gc-comp{ display:flex; gap:6px; margin-bottom:18px; }
-  .comp-pill{ font-size:11px; color:var(--green); background:var(--green-soft); padding:3px 9px; border-radius:6px; font-weight:600; }
-  .gc-bottom{ display:flex; align-items:center; justify-content:space-between; padding-top:14px; border-top:1px solid var(--border); }
-  .gc-active{ font-size:12px; color:var(--grey); display:flex; align-items:center; gap:6px; }
-
-  .grid-card.dark{ background:var(--ink); border-color:var(--ink); }
-  .grid-card.dark:hover{ border-color:#2c2f33; }
-  .grid-card.dark .gc-name{ color:var(--white); }
-  .grid-card.dark .gc-desc{ color:#B7BAC0; }
-  .grid-card.dark .gc-label{ color:#9CA0A6; }
-  .grid-card.dark .tag{ color:#D6D8DB; background:#22252A; border-color:#33363B; }
-  .grid-card.dark .comp-pill{ background:#1c3a28; color:#7FD6A4; }
-  .grid-card.dark .gc-bottom{ border-top-color:#2c2f33; }
-  .grid-card.dark .gc-active{ color:#9CA0A6; }
-  .grid-card.dark .cc-btn{ background:var(--white); color:var(--ink); border-color:var(--white); }
-  .grid-card.dark .cc-btn:hover{ background:#EDEDED; }
-
-  /* ---------- pathways ---------- */
-  .path-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-  @media (max-width:900px){ .path-grid{ grid-template-columns:1fr 1fr; } }
-  @media (max-width:600px){ .path-grid{ grid-template-columns:1fr; } }
-  .path{ background:var(--white); padding:30px 26px; transition: background .15s ease; }
-  .path:hover{ background:var(--off-white); }
-  .path .idx{ font-family:var(--font-mono); font-size:12px; color:var(--grey); margin-bottom:16px; display:block; }
-  .path h3{ font-family:var(--font-display); font-size:17px; font-weight:600; margin-bottom:8px; letter-spacing:-0.01em; }
-  .path p{ font-size:13.5px; color:var(--ink-soft); }
-
-  /* ---------- certification / training ---------- */
-  .cert-section{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:center; }
-  @media (max-width:900px){ .cert-section{ grid-template-columns:1fr; gap:40px; } }
-  .cert-list{ display:flex; flex-direction:column; gap:16px; margin-top:28px; }
-  .cert-item{ display:flex; gap:14px; }
-  .cert-icon{
-    width:30px; height:30px; border-radius:8px; background:var(--off-white); border:1px solid var(--border);
-    flex-shrink:0; display:flex; align-items:center; justify-content:center;
-    font-family:var(--font-mono); font-size:12px; color:var(--ink-soft);
-  }
-  .cert-item h4{ font-size:14.5px; font-weight:600; margin-bottom:3px; }
-  .cert-item p{ font-size:13px; color:var(--ink-soft); }
-
-  .cert-card{
-    background:var(--white); border:1px solid var(--border); border-radius:16px; padding:26px;
-    box-shadow:var(--shadow-md);
-  }
-  .cert-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--border); }
-  .cert-card-head .company{ display:flex; align-items:center; gap:10px; }
-  .cert-badge{ width:36px; height:36px; border-radius:9px; background:var(--ink); color:var(--white); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; font-size:13px; overflow:hidden; }
-  .cert-badge img{ width:100%; height:100%; object-fit:cover; display:block; }
-  .cert-title{ font-weight:600; font-size:14.5px; }
-  .cert-sub{ font-size:12px; color:var(--grey); }
-  .status-chip{ font-size:11.5px; font-weight:600; color:var(--green); background:var(--green-soft); padding:5px 11px; border-radius:20px; display:flex; align-items:center; gap:6px; }
-  .cert-metrics{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .metric{ text-align:left; }
-  .metric .num{ font-family:var(--font-mono); font-size:clamp(16px,2.2vw,24px); font-weight:500; color:var(--ink); display:block; white-space:nowrap; }
-  .metric .lbl{ font-size:11.5px; color:var(--grey); margin-top:2px; }
-
-  /* ---------- contribution profile (signature) ---------- */
-  .profile-wrap{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:56px; align-items:center; }
-  @media (max-width:900px){ .profile-wrap{ grid-template-columns:1fr; gap:40px; } }
-  .profile-card{
-    background:var(--white); border:1px solid var(--border); border-radius:16px; padding:28px;
-    box-shadow:var(--shadow-md);
-  }
-  .profile-id{ display:flex; align-items:center; gap:12px; margin-bottom:22px; }
-  .profile-avatar{
-    width:46px; height:46px; border-radius:50%; background:linear-gradient(135deg,#D8D8D2,#EFEFEB);
-    display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:14px; color:var(--ink-soft);
-    position:relative;
-  }
-  .profile-avatar::after{ content:''; position:absolute; right:0; bottom:0; width:11px; height:11px; border-radius:50%; background:var(--green-dot); border:2px solid var(--white); }
-  .profile-name{ font-weight:600; font-size:15.5px; }
-  .profile-role{ font-size:12.5px; color:var(--grey); }
-  .profile-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px; padding-bottom:22px; border-bottom:1px solid var(--border); }
-
-  .contrib-label{ font-size:12px; color:var(--grey); font-family:var(--font-mono); margin-bottom:10px; display:flex; justify-content:space-between; }
-  .contrib-grid{
-    display:grid; grid-template-columns:repeat(24,1fr); gap:3px;
-  }
-  .contrib-grid i{ display:block; padding-top:100%; border-radius:2px; background:var(--border); }
-  .contrib-grid i.l1{ background:#D6EEDF; }
-  .contrib-grid i.l2{ background:#A6DCBB; }
-  .contrib-grid i.l3{ background:#5EC085; }
-  .contrib-grid i.l4{ background:var(--green-dot); }
-
-  .profile-copy .section-head{ margin-bottom:36px; }
-  .profile-feats{ display:flex; flex-direction:column; gap:18px; }
-  .profile-feat{ display:flex; gap:14px; align-items:flex-start; }
-  .profile-feat .d{ margin-top:7px; }
-  .profile-feat h4{ font-size:14.5px; font-weight:600; margin-bottom:3px; }
-  .profile-feat p{ font-size:13px; color:var(--ink-soft); }
-
-  /* ---------- for companies ---------- */
-  .companies-panel{
-    display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
-  }
-  @media (max-width:900px){ .companies-panel{ grid-template-columns:1fr; gap:36px; } }
-  .checklist{ display:flex; flex-direction:column; gap:14px; margin-top:26px; }
-  .check-item{ display:flex; gap:12px; align-items:flex-start; font-size:14px; color:var(--ink-soft); }
-  .check-item svg{ flex-shrink:0; margin-top:2px; }
-
-  .mock-dashboard{
-    background:var(--paper); border:1px solid var(--border); border-radius:16px; padding:20px;
-    box-shadow:var(--shadow-md);
-  }
-  .mock-row{
-    background:var(--white); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
-    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
-  }
-  .mock-row:last-child{ margin-bottom:0; }
-  .mock-left{ display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:500; }
-  .mock-tag{ font-size:11px; color:var(--grey); font-family:var(--font-mono); }
-  .mini-avatars{ display:flex; }
-  .mini-avatars span{ width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#D8D8D2,#EFEFEB); border:2px solid var(--white); margin-left:-7px; }
-  .mini-avatars span:first-child{ margin-left:0; }
-
-  /* ---------- activity feed ---------- */
-  .feed{
-    background:var(--white); border:1px solid var(--border); border-radius:16px; overflow:hidden;
-    box-shadow:var(--shadow-sm);
-  }
-  .feed-item{
-    display:flex; align-items:center; gap:14px; padding:16px 22px;
-    border-bottom:1px solid var(--border);
-    transition: background .15s ease;
-  }
-  .feed-item:hover{ background:var(--off-white); }
-  .feed-item:last-child{ border-bottom:none; }
-  .feed-text{ font-size:14px; color:var(--ink); flex:1; }
-  .feed-text b{ font-weight:600; }
-  .feed-time{ font-size:12px; color:var(--grey); font-family:var(--font-mono); white-space:nowrap; }
-
-  /* ---------- final cta ---------- */
-  .final-cta{
-    background: var(--ink);
-    color:var(--white);
-    border-radius:24px;
-    padding:72px 56px;
-    text-align:center;
-    position:relative;
-    overflow:hidden;
-  }
-  .final-cta::before{
-    content:'';
-    position:absolute; inset:0;
-    background: radial-gradient(500px 260px at 50% 0%, rgba(34,180,98,0.14), transparent 70%);
-  }
-  .final-cta > *{ position:relative; }
-  .final-cta h2{ color:var(--white); max-width:640px; margin:0 auto 16px; }
-  .final-cta p{ color:#B7BAC0; max-width:480px; margin:0 auto 34px; font-size:15.5px; }
-  .final-ctas{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
-  .final-cta .btn-dark{ background:var(--white); color:var(--ink); }
-  .final-cta .btn-ghost{ background:transparent; color:var(--white); border-color:#3A3D42; }
-  .final-cta .btn-ghost:hover{ border-color:#6a6d72; }
-
-  footer{ border-top:1px solid var(--border); padding:44px 0 32px; }
-  .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
-  .foot-links{ display:flex; gap:26px; }
-  .foot-links a{ font-size:13.5px; color:var(--ink-soft); }
-  .foot-links a:hover{ color:var(--ink); }
-  .foot-copy{ font-size:13px; color:var(--grey); }
-
   /* ---------- list-company modal ---------- */
   .modal-overlay{
     position:fixed; inset:0; z-index:1000;
@@ -1040,16 +611,15 @@
     <nav>
       <div class="logo"><span class="mark"></span>Build With People</div>
       <div class="nav-links">
-        <a href="#browse">Explore</a>
-        <a href="#companies">Companies</a>
-        <a href="#training">Sales opportunities</a>
-        <a href="#profile">How it works</a>
-        <a href="#for-companies">For companies</a>
-        <a href="#services">Launch services</a>
+        <a href="/opportunities">Opportunities</a>
+        <a href="/companies">For companies</a>
+        <a href="/sales-partners">For sales partners</a>
+        <a href="/how-it-works">How it works</a>
+        <a href="/pricing">Pricing</a>
       </div>
       <div class="nav-right">
         <a href="#" id="navSignIn">Sign in</a>
-        <button class="btn btn-dark btn-sm js-open-join-modal" id="navJoinBtn">Join Now</button>
+        <button class="btn btn-dark btn-sm js-open-modal" id="navJoinBtn">Launch a sales opportunity</button>
       </div>
     </nav>
   </div>
@@ -1058,97 +628,84 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <h1>Build companies with people who want to contribute.</h1>
-      <p class="lead">Discover startups, companies, and ideas looking for salespeople, designers, founders, creators, operators, and motivated contributors. Join teams, complete real work, earn commission, gain experience, or help build something from the beginning.</p>
+      <h1>Build a commission sales team without hiring full-time.</h1>
+      <p class="lead">Recruit independent sales partners, teach them your offer, certify their knowledge, and track the deals they generate — all from one place.</p>
       <div class="hero-ctas">
-        <a href="#browse" class="btn btn-dark">Explore opportunities</a>
-        <button class="btn btn-ghost js-open-modal">List your company</button>
+        <button class="btn btn-dark js-open-modal">Launch a sales opportunity</button>
+        <button class="btn btn-ghost js-open-join-modal">Find products to sell</button>
       </div>
       <div class="avatar-row">
-        <div class="avatars">
-          <span>MJ</span><span>DP</span><span>SR</span><span>KL</span>
-        </div>
-        <div class="label"><b>1,248</b> active builders, sellers, and creators</div>
+        <div class="label">Company vetting · Structured training · Verified commissions</div>
       </div>
     </div>
 
     <div class="preview">
       <div class="preview-top">
-        <span class="title">Recruiting now</span>
-        <span class="live"><span class="dot"></span>38 viewing</span>
+        <span class="title">How it works</span>
       </div>
 
       <div class="company-card">
         <div class="cc-head">
-          <div class="cc-name"><span class="cc-logo"><img src="/assets/logos/custom514.png" alt="Custom514 logo"></span>Custom514</div>
-          <span class="cc-btn js-view-company">View company</span>
+          <div class="cc-name"><span class="cc-logo">1</span>Recruit</div>
         </div>
-        <div class="cc-sub">Custom signage and physical brand experiences</div>
-        <div class="cc-tags">
-          <span class="tag">Commission sales</span>
-          <span class="tag">3D design</span>
-          <span class="tag">Content</span>
-        </div>
-        <div class="cc-foot">
-          <span class="cc-meta"><span class="dot"></span>12 active members</span>
-          <span class="cc-meta">Paid · Commission · Experience</span>
-        </div>
-        <div class="cc-progress"><i style="width:72%"></i></div>
+        <div class="cc-sub">Post your offer and commission terms. Vetted independent sales partners apply.</div>
       </div>
 
       <div class="company-card">
         <div class="cc-head">
-          <div class="cc-name"><span class="cc-logo"><img src="/assets/logos/localflow.png" alt="LocalFlow logo"></span>LocalFlow</div>
-          <span class="cc-btn js-view-company">View company</span>
+          <div class="cc-name"><span class="cc-logo">2</span>Train &amp; certify</div>
         </div>
-        <div class="cc-sub">Automating customer acquisition for local businesses</div>
-        <div class="cc-tags">
-          <span class="tag">Sales lead</span>
-          <span class="tag">Developer</span>
-          <span class="tag">Growth</span>
-        </div>
-        <div class="cc-foot">
-          <span class="cc-meta"><span class="dot"></span>7 active members</span>
-          <span class="cc-meta">Equity · Commission</span>
-        </div>
-        <div class="cc-progress"><i style="width:44%"></i></div>
-      </div>
-
-      <div class="company-card">
-        <div class="cc-head">
-          <div class="cc-name"><span class="cc-logo"><img src="/assets/logos/studionorth.png" alt="Studio North logo"></span>Studio North</div>
-          <span class="cc-btn js-view-company">View company</span>
-        </div>
-        <div class="cc-sub">A product design studio building physical and digital goods</div>
-        <div class="cc-tags">
-          <span class="tag">Industrial design</span>
-          <span class="tag">Content</span>
-          <span class="tag">Coordination</span>
-        </div>
-        <div class="cc-foot">
-          <span class="cc-meta"><span class="dot"></span>19 active members</span>
-          <span class="cc-meta">Paid · Portfolio · Experience</span>
-        </div>
-        <div class="cc-progress"><i style="width:88%"></i></div>
+        <div class="cc-sub">Upload your pricing, positioning, and FAQs. Partners study and pass a certification quiz before they sell.</div>
       </div>
 
       <div class="company-card dark">
         <div class="cc-head">
-          <div class="cc-name"><span class="cc-logo">BW</span>Build With People</div>
-          <span class="cc-btn js-view-company">View company</span>
+          <div class="cc-name"><span class="cc-logo">3</span>Track commission</div>
         </div>
-        <div class="cc-sub">The team building this platform is hiring too</div>
-        <div class="cc-tags">
-          <span class="tag">Commission sales</span>
-          <span class="tag">Content</span>
-          <span class="tag">Co-founders</span>
-        </div>
-        <div class="cc-foot">
-          <span class="cc-meta"><span class="dot"></span>We're hiring</span>
-          <span class="cc-meta">Paid · Equity · Commission</span>
-        </div>
-        <div class="cc-progress"><i style="width:100%"></i></div>
+        <div class="cc-sub">See who's certified, who's active, and exactly what's owed as deals close.</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="paths">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Two sides, one platform</span>
+      <h2>Whether you're hiring reps or looking for a product to sell.</h2>
+    </div>
+    <div class="audience-grid reveal">
+      <div class="audience-card">
+        <h3>For companies</h3>
+        <p>Build With People helps early-stage B2B companies recruit, train, and manage independent sales partners — all in one place.</p>
+        <div class="audience-card-ctas">
+          <button class="btn btn-dark js-open-modal">Launch a sales opportunity</button>
+          <a href="/companies" class="btn btn-ghost">Learn more</a>
+        </div>
+      </div>
+      <div class="audience-card dark">
+        <h3>For sales partners</h3>
+        <p>Find vetted products worth representing. Learn the offer, get certified, and earn commission on the deals you close.</p>
+        <div class="audience-card-ctas">
+          <button class="btn btn-dark js-open-join-modal">Find products to sell</button>
+          <a href="/sales-partners" class="btn btn-ghost">Learn more</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">How companies launch</span>
+      <h2>Three steps from posting an opportunity to tracking commission.</h2>
+      <p>No job boards, no cold outreach — just a structured process for bringing on independent sales partners.</p>
+    </div>
+    <div class="path-grid reveal">
+      <div class="path"><span class="idx">Step 01</span><h3>Post your opportunity</h3><p>Describe your offer, your commission structure, and what a great partner looks like.</p></div>
+      <div class="path"><span class="idx">Step 02</span><h3>Train &amp; certify partners</h3><p>Upload sales materials, pricing, and FAQs. Partners study and pass a certification quiz before they sell.</p></div>
+      <div class="path"><span class="idx">Step 03</span><h3>Track every deal</h3><p>See who's certified, who's active, and exactly what commission is owed as deals close.</p></div>
     </div>
   </div>
 </section>
@@ -1156,19 +713,15 @@
 <section id="browse">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="kicker">Browse companies, not job posts</span>
-      <h2>Discover entire missions, teams, and ideas — not isolated listings.</h2>
-      <p>Every company on Build With People publishes what it's building, who's already on the team, and exactly where you'd fit. You decide who's worth joining before you ever apply.</p>
+      <span class="kicker">Featured sales opportunities</span>
+      <h2>Companies currently recruiting commission sales partners.</h2>
+      <p>Every opportunity here comes with real training material and a certification quiz — you'll know the offer before you start selling.</p>
     </div>
 
     <div class="filters reveal">
       <span class="filter active">All</span>
-      <span class="filter">Sales</span>
-      <span class="filter">Design</span>
-      <span class="filter">Development</span>
-      <span class="filter">Marketing</span>
-      <span class="filter">Operations</span>
-      <span class="filter">Cofounder</span>
+      <span class="filter">B2B SaaS</span>
+      <span class="filter">Services</span>
       <span class="filter">Local</span>
       <span class="filter">Remote</span>
     </div>
@@ -1180,10 +733,10 @@
         </div>
         <div class="gc-desc">Custom signage and physical brand experiences.</div>
         <div class="gc-label">Currently recruiting</div>
-        <div class="gc-roles"><span class="tag">Commission sales</span><span class="tag">3D designers</span><span class="tag">Content creators</span></div>
-        <div class="gc-comp"><span class="comp-pill">Paid</span><span class="comp-pill">Commission</span><span class="comp-pill">Experience</span></div>
+        <div class="gc-roles"><span class="tag">Commission sales</span></div>
+        <div class="gc-comp"><span class="comp-pill">Commission</span></div>
         <div class="gc-bottom">
-          <span class="gc-active"><span class="dot"></span>12 active members</span>
+          <span class="gc-active"><span class="dot"></span>Founding partner</span>
           <span class="cc-btn js-view-company">View company</span>
         </div>
       </div>
@@ -1194,24 +747,10 @@
         </div>
         <div class="gc-desc">Helping local businesses automate customer acquisition.</div>
         <div class="gc-label">Currently recruiting</div>
-        <div class="gc-roles"><span class="tag">Sales lead</span><span class="tag">Developer</span><span class="tag">Growth marketer</span></div>
-        <div class="gc-comp"><span class="comp-pill">Equity</span><span class="comp-pill">Commission</span></div>
+        <div class="gc-roles"><span class="tag">Commission sales</span></div>
+        <div class="gc-comp"><span class="comp-pill">Commission</span></div>
         <div class="gc-bottom">
-          <span class="gc-active"><span class="dot"></span>7 active members</span>
-          <span class="cc-btn js-view-company">View company</span>
-        </div>
-      </div>
-
-      <div class="grid-card reveal">
-        <div class="gc-top">
-          <div class="gc-name"><span class="dot"></span>Studio North</div>
-        </div>
-        <div class="gc-desc">A product design studio building physical and digital products.</div>
-        <div class="gc-label">Currently recruiting</div>
-        <div class="gc-roles"><span class="tag">Industrial designers</span><span class="tag">Content creators</span><span class="tag">Project coordinators</span></div>
-        <div class="gc-comp"><span class="comp-pill">Paid</span><span class="comp-pill">Portfolio</span><span class="comp-pill">Experience</span></div>
-        <div class="gc-bottom">
-          <span class="gc-active"><span class="dot"></span>19 active members</span>
+          <span class="gc-active"><span class="dot"></span>Founding partner</span>
           <span class="cc-btn js-view-company">View company</span>
         </div>
       </div>
@@ -1220,34 +759,17 @@
         <div class="gc-top">
           <div class="gc-name"><span class="cc-logo">BW</span>Build With People</div>
         </div>
-        <div class="gc-desc">The team building this platform is hiring too.</div>
+        <div class="gc-desc">The team building this platform is recruiting sales partners too.</div>
         <div class="gc-label">Currently recruiting</div>
-        <div class="gc-roles"><span class="tag">Commission sales</span><span class="tag">Content</span><span class="tag">Co-founders</span></div>
-        <div class="gc-comp"><span class="comp-pill">Paid</span><span class="comp-pill">Equity</span><span class="comp-pill">Commission</span></div>
+        <div class="gc-roles"><span class="tag">Commission sales</span></div>
+        <div class="gc-comp"><span class="comp-pill">Commission</span></div>
         <div class="gc-bottom">
           <span class="gc-active"><span class="dot"></span>We're hiring</span>
           <span class="cc-btn js-view-company">View company</span>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<section class="section-alt">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="kicker">Find your way in</span>
-      <h2>Every company offers more than one way to contribute.</h2>
-      <p>Choose the arrangement that matches what you're looking for right now — and change it later as the relationship grows.</p>
-    </div>
-    <div class="path-grid reveal">
-      <div class="path"><span class="idx">Commission</span><h3>Earn commission</h3><p>Sell a certified product and take a cut of every deal you close.</p></div>
-      <div class="path"><span class="idx">Ownership</span><h3>Join for equity</h3><p>Trade time and skill for a real stake in what you're helping build.</p></div>
-      <div class="path"><span class="idx">Wages</span><h3>Get paid</h3><p>Structured, compensated roles for ongoing or project-based work.</p></div>
-      <div class="path"><span class="idx">Growth</span><h3>Build experience</h3><p>Take on real responsibility at an early-stage company for your portfolio.</p></div>
-      <div class="path"><span class="idx">Leadership</span><h3>Become a cofounder</h3><p>Step in early, help shape direction, and build the company from its foundation.</p></div>
-      <div class="path"><span class="idx">Scope</span><h3>Complete short-term tasks</h3><p>Take on a single defined task without committing to an ongoing role.</p></div>
-    </div>
+    <span class="demo-label">Example opportunities — shown until companies are live. <a href="/opportunities">See all opportunities →</a></span>
   </div>
 </section>
 
@@ -1256,7 +778,7 @@
     <div class="reveal">
       <span class="kicker">Learn before you sell</span>
       <h2>Every commission role comes with real training, not a script.</h2>
-      <p>Companies upload the material contributors need to represent them well. You study it, get tested, and earn the right to sell.</p>
+      <p>Companies upload the material sales partners need to represent them well. Partners study it, get tested, and earn the right to sell.</p>
       <div class="cert-list">
         <div class="cert-item">
           <div class="cert-icon">01</div>
@@ -1280,18 +802,15 @@
             <div class="cert-badge"><img src="/assets/logos/custom514.png" alt="Custom514 logo"></div>
             <div>
               <div class="cert-title">Custom514 Sales Certification</div>
-              <div class="cert-sub">Completed 3 days ago</div>
+              <div class="cert-sub">Example certification card</div>
             </div>
           </div>
           <span class="status-chip"><span class="dot"></span>Approved to sell</span>
         </div>
         <div class="cert-metrics">
-          <div class="metric"><span class="num">94%</span><span class="lbl">Score</span></div>
-          <div class="metric"><span class="num">12%</span><span class="lbl">Commission</span></div>
+          <div class="metric"><span class="num">94%</span><span class="lbl">Quiz score</span></div>
+          <div class="metric"><span class="num">12%</span><span class="lbl">Commission rate</span></div>
           <div class="metric"><span class="num">3/3</span><span class="lbl">Modules passed</span></div>
-          <div class="metric"><span class="num">$580</span><span class="lbl">Avg. deal price</span></div>
-          <div class="metric"><span class="num">$71</span><span class="lbl">Potential earnings / sale</span></div>
-          <div class="metric"><span class="num">Dec 2027</span><span class="lbl">Approved until</span></div>
         </div>
       </div>
     </div>
@@ -1303,29 +822,29 @@
     <div class="reveal">
       <div class="profile-card">
         <div class="profile-id">
-          <div class="profile-avatar">JR</div>
+          <div class="profile-avatar">SP</div>
           <div>
-            <div class="profile-name">Jordan Reyes</div>
-            <div class="profile-role">Commission sales · 3 companies joined</div>
+            <div class="profile-name">Example sales partner</div>
+            <div class="profile-role">Commission sales · 2 companies joined</div>
           </div>
         </div>
         <div class="profile-stats">
-          <div class="metric"><span class="num">$18.4k</span><span class="lbl">Revenue generated</span></div>
-          <div class="metric"><span class="num">31</span><span class="lbl">Deals closed</span></div>
-          <div class="metric"><span class="num">96%</span><span class="lbl">Avg. quiz score</span></div>
+          <div class="metric"><span class="num">—</span><span class="lbl">Deals closed</span></div>
+          <div class="metric"><span class="num">—</span><span class="lbl">Commission earned</span></div>
+          <div class="metric"><span class="num">96%</span><span class="lbl">Certification score</span></div>
         </div>
-        <div class="contrib-label"><span>Contribution history</span><span>Last 6 months</span></div>
+        <div class="contrib-label"><span>Illustrative dashboard</span><span>Sample data</span></div>
         <div class="contrib-grid" id="contribGrid"></div>
       </div>
     </div>
 
     <div class="profile-copy reveal">
-      <span class="kicker">Verified contribution profile</span>
-      <h2>A track record you build once and carry everywhere on the platform.</h2>
+      <span class="kicker">Commission tracking, built in</span>
+      <h2>See every certified partner and every deal, in real time.</h2>
       <div class="profile-feats">
-        <div class="profile-feat"><span class="dot d"></span><div><h4>Companies joined &amp; roles held</h4><p>A visible history of where you've contributed and what you did there.</p></div></div>
-        <div class="profile-feat"><span class="dot d"></span><div><h4>Revenue, deals, and tasks completed</h4><p>Real outcomes, not self-reported claims.</p></div></div>
-        <div class="profile-feat"><span class="dot d"></span><div><h4>Skills, quiz scores, and reviews</h4><p>Certification history that follows you from company to company.</p></div></div>
+        <div class="profile-feat"><span class="dot d"></span><div><h4>Certification status at a glance</h4><p>Know exactly who's studied your material and passed the quiz.</p></div></div>
+        <div class="profile-feat"><span class="dot d"></span><div><h4>Deals logged as they close</h4><p>Every sale is recorded against the partner who made it.</p></div></div>
+        <div class="profile-feat"><span class="dot d"></span><div><h4>Commission owed, calculated for you</h4><p>No spreadsheets — see what's owed to each partner as deals close.</p></div></div>
       </div>
     </div>
   </div>
@@ -1335,13 +854,13 @@
   <div class="wrap companies-panel">
     <div class="reveal">
       <span class="kicker">For companies</span>
-      <h2>Build a flexible team without hiring full-time too early.</h2>
-      <p>Post what you need, train the people who show up, and keep everything — resources, applicants, updates — in one place.</p>
+      <h2>Build a commission sales team without hiring full-time.</h2>
+      <p>Post what you need, train the partners who apply, and keep everything — applicants, certification, commission — in one place.</p>
       <div class="checklist">
-        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Create a public profile and list open needs</div>
-        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Recruit and train commission salespeople</div>
-        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Track applicants and share updates with the team</div>
-        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Manage company resources in one place</div>
+        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Create a public profile and list your opportunity</div>
+        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Recruit and train independent commission salespeople</div>
+        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Track applicants and certification progress</div>
+        <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Track commission owed as deals close</div>
       </div>
     </div>
     <div class="reveal">
@@ -1351,88 +870,17 @@
           <div class="mini-avatars"><span></span><span></span><span></span></div>
         </div>
         <div class="mock-row">
-          <div class="mock-left"><span class="dot"></span>Equity — Technical Cofounder</div>
+          <div class="mock-left"><span class="dot"></span>Commission — Enterprise Rep</div>
           <span class="mock-tag">4 applicants</span>
         </div>
         <div class="mock-row">
-          <div class="mock-left"><span class="dot"></span>Paid — 3D Designer</div>
+          <div class="mock-left"><span class="dot"></span>Certification — In review</div>
           <span class="mock-tag">Reviewing</span>
         </div>
         <div class="mock-row">
-          <div class="mock-left">Portfolio — Content Creator</div>
+          <div class="mock-left">Commission — Field Rep</div>
           <span class="mock-tag">Draft</span>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="services">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <span class="kicker">One-stop shop</span>
-      <h2>Not sure where to start? We'll help you launch, then help you staff it.</h2>
-      <p>From landing on an idea to a live site to a physical prototype in your hands — we build the first version with you. When you're ready to grow, we can source and place cost-effective overseas talent for your team too.</p>
-    </div>
-
-    <div class="pricing-grid reveal">
-      <div class="price-card">
-        <span class="price-step">Step 01 · Get online</span>
-        <h3>Idea &amp; basic site</h3>
-        <div class="price">$100<span> starting, excl. domain</span></div>
-        <p class="price-note">We'll help you land on an idea and get a basic site built and hosted.</p>
-        <div class="price-feats">
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Help finding &amp; validating your idea</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Basic site, built and hosted</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Clean, modern UI</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Domain purchased separately</div>
-        </div>
-        <a href="#services" class="btn btn-ghost btn-sm">Get started</a>
-      </div>
-
-      <div class="price-card featured">
-        <span class="price-badge">Most popular</span>
-        <span class="price-step">Step 02 · Look the part</span>
-        <h3>Custom design</h3>
-        <div class="price">$250<span> starting</span></div>
-        <p class="price-note">Everything in the basic site, plus custom visuals built around your brand.</p>
-        <div class="price-feats">
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Idea &amp; basic site</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Advanced custom imagery &amp; graphics</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Brand-matched visual design</div>
-        </div>
-        <a href="#services" class="btn btn-dark btn-sm">Get started</a>
-      </div>
-
-      <div class="price-card">
-        <span class="price-step">Step 03 · Bring people in</span>
-        <h3>Full login suite</h3>
-        <div class="price">$450<span> starting</span></div>
-        <p class="price-note">Everything above, plus accounts so users can sign up, sign in, and come back.</p>
-        <div class="price-feats">
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Custom design</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>User accounts, sign in &amp; sign up</div>
-          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Ready for real users from day one</div>
-        </div>
-        <a href="#services" class="btn btn-ghost btn-sm">Get started</a>
-      </div>
-    </div>
-
-    <div class="service-grid reveal">
-      <div class="service-card">
-        <div class="cert-icon">3D</div>
-        <h3>Product design &amp; prototyping</h3>
-        <p>Building something physical? We design it in CAD or Blender and 3D print a working prototype, so you're holding what you're building before you commit further.</p>
-        <div class="price-note">Custom quote, based on scope</div>
-        <a href="#services" class="btn btn-ghost btn-sm">Talk to us</a>
-      </div>
-
-      <div class="service-card dark">
-        <div class="cert-icon">GT</div>
-        <h3>Sourced overseas talent</h3>
-        <p>Tell us the role. We recruit and place cost-effective overseas talent for your team, and run light onboarding training so they're productive from day one.</p>
-        <div class="price-note">Premium service · starting at $300</div>
-        <a href="#services" class="btn btn-dark btn-sm">Talk to us</a>
       </div>
     </div>
   </div>
@@ -1441,16 +889,85 @@
 <section class="section-alt">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="kicker">Live activity</span>
-      <h2>The platform, right now.</h2>
-      <p>Every join, certification, and closed deal shows up here as it happens.</p>
+      <span class="kicker">Where we are today</span>
+      <h2>We're building our founding cohort of companies and sales partners.</h2>
+      <p>Build With People is early. Rather than invent traction we don't have yet, here's where things actually stand.</p>
     </div>
-    <div class="feed reveal">
-      <div class="feed-item"><span class="dot"></span><span class="feed-text"><b>Maya</b> joined Studio North as a designer.</span><span class="feed-time">2 min ago</span></div>
-      <div class="feed-item"><span class="dot"></span><span class="feed-text"><b>Jordan</b> earned a 96% sales certification score.</span><span class="feed-time">6 min ago</span></div>
-      <div class="feed-item"><span class="dot"></span><span class="feed-text"><b>Custom514</b> opened three commission sales positions.</span><span class="feed-time">14 min ago</span></div>
-      <div class="feed-item"><span class="dot"></span><span class="feed-text"><b>LocalFlow</b> added a technical cofounder opening.</span><span class="feed-time">28 min ago</span></div>
-      <div class="feed-item"><span class="dot"></span><span class="feed-text"><b>Daniel</b> closed a $2,400 deal.</span><span class="feed-time">41 min ago</span></div>
+    <div class="cohort-panel reveal">
+      <h3>Founding cohort — open now</h3>
+      <p>We're onboarding a small group of early-stage B2B companies and independent sales partners to shape the platform with us. Founding companies get hands-on help setting up their first sales opportunity and training materials; founding partners get early access to vetted offers as they launch.</p>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Pricing</span>
+      <h2>Founding cohort pricing, while we build this out together.</h2>
+      <p>No invented tiers or fake plans — here's the honest state of pricing today.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="price-card featured">
+        <span class="price-badge">Founding cohort</span>
+        <span class="price-step">Available now</span>
+        <h3>Founding companies</h3>
+        <div class="price">Free<span> during founding cohort</span></div>
+        <p class="price-note">List your opportunity, upload training material, and recruit certified commission partners at no cost while we build out the platform together.</p>
+        <div class="price-feats">
+          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Company vetting &amp; a public opportunity listing</div>
+          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Structured training &amp; certification tools</div>
+          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Commission tracking on every deal</div>
+        </div>
+        <button class="btn btn-dark btn-sm js-open-modal">Launch a sales opportunity</button>
+      </div>
+
+      <div class="price-card">
+        <span class="price-step">After the founding cohort</span>
+        <h3>Standard pricing</h3>
+        <div class="price">Contact us</div>
+        <p class="price-note">Standard plans are still being finalized based on what we learn from the founding cohort. Reach out if you want to be included in that conversation.</p>
+        <div class="price-feats">
+          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Same core recruiting, training &amp; tracking tools</div>
+          <div class="check-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="#1E8E4F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Pricing set once the founding cohort wraps</div>
+        </div>
+        <a href="/pricing" class="btn btn-ghost btn-sm">See pricing details</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-alt" id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">FAQ</span>
+      <h2>Questions companies and sales partners ask us.</h2>
+    </div>
+    <div class="faq-list reveal">
+      <details class="faq-item">
+        <summary>Who is Build With People for?</summary>
+        <p>Early-stage B2B companies that want to recruit, train, and manage independent, commission-based sales partners — and the sales partners who want to represent vetted products for a cut of what they sell.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How does company vetting work?</summary>
+        <p>Before a company's opportunity goes live, we review the basics — what they're selling, who they're selling to, and the commission structure — so sales partners aren't walking into a vague or misleading offer.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What does "certified" mean for a sales partner?</summary>
+        <p>Each company uploads its own sales material — pricing, positioning, objection handling. Partners study it and pass a quiz before they're approved to sell that specific offer.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How is commission tracked?</summary>
+        <p>Closed deals are logged against the partner who closed them, so both sides can see exactly what's owed without a spreadsheet.</p>
+      </details>
+      <details class="faq-item">
+        <summary>What does it cost?</summary>
+        <p>Founding cohort companies use the platform free while we build it out together. See the <a href="/pricing">pricing page</a> for the current state of things.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Do you build websites, prototypes, or handle staffing?</summary>
+        <p>No. Build With People is focused solely on helping companies recruit, train, and manage independent commission sales partners.</p>
+      </details>
     </div>
   </div>
 </section>
@@ -1458,11 +975,11 @@
 <section>
   <div class="wrap">
     <div class="final-cta reveal">
-      <h2>Your next team might already be here.</h2>
-      <p>List your company, explain what you're building, and connect with people ready to sell, design, create, operate, and contribute.</p>
+      <h2>Ready to build your commission sales team?</h2>
+      <p>Launch an opportunity, upload your training material, and start recruiting certified sales partners.</p>
       <div class="final-ctas">
-        <button class="btn btn-dark js-open-modal">Create a company profile</button>
-        <a href="#browse" class="btn btn-ghost">Browse opportunities</a>
+        <button class="btn btn-dark js-open-modal">Launch a sales opportunity</button>
+        <button class="btn btn-ghost js-open-join-modal">Find products to sell</button>
       </div>
     </div>
   </div>
@@ -1472,11 +989,13 @@
   <div class="wrap foot-row">
     <div class="logo"><span class="mark"></span>Build With People</div>
     <div class="foot-links">
-      <a href="#browse">Explore</a>
-      <a href="#companies">Companies</a>
-      <a href="#training">Sales opportunities</a>
-      <a href="#for-companies">For companies</a>
-      <a href="#services">Launch services</a>
+      <a href="/opportunities">Opportunities</a>
+      <a href="/companies">For companies</a>
+      <a href="/sales-partners">For sales partners</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/terms">Terms</a>
+      <a href="/privacy">Privacy</a>
     </div>
     <div class="foot-copy">© 2026 Build With People</div>
   </div>
@@ -1648,12 +1167,12 @@
   <div class="modal">
     <div id="modalForm">
       <div class="modal-head">
-        <h3>List your company</h3>
+        <h3>Launch a sales opportunity</h3>
         <button class="modal-close" id="modalClose" aria-label="Close">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <p class="modal-sub">Tell contributors what you're building and what you need. This becomes your public company card.</p>
+      <p class="modal-sub">Tell sales partners what you're building and what you need. This becomes your public company card.</p>
 
       <div class="modal-progress">
         <div class="modal-progress-track"><span class="modal-progress-fill" id="progressFill"></span></div>
@@ -1782,12 +1301,12 @@
   <div class="modal">
     <div id="joinModalForm">
       <div class="modal-head">
-        <h3>Join Build With People</h3>
+        <h3>Find products to sell</h3>
         <button class="modal-close" id="joinModalClose" aria-label="Close">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <p class="modal-sub">A few quick questions — whether you're looking to join a team or bring your own idea to life.</p>
+      <p class="modal-sub">A few quick questions so we can match you with commission opportunities worth representing.</p>
 
       <div class="modal-progress">
         <div class="modal-progress-track"><span class="modal-progress-fill" id="joinProgressFill"></span></div>
@@ -1960,7 +1479,7 @@
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       </button>
     </div>
-    <p class="modal-sub">Grow your profile, list a company, get certified to sell, or get help building.</p>
+    <p class="modal-sub">Grow your profile, list a company, or get certified to sell.</p>
     <div class="create-hub-list" id="createHubList"></div>
   </div>
 </div>
@@ -2290,7 +1809,7 @@
   function signOutUI(){
     isSignedIn = false;
     document.getElementById('navSignIn').style.display = '';
-    document.getElementById('navJoinBtn').textContent = 'Join Now';
+    document.getElementById('navJoinBtn').textContent = 'Launch a sales opportunity';
   }
 
   // contribution grid — signature element, GitHub-style history
@@ -2612,7 +2131,14 @@
   }
 
   document.querySelectorAll('.js-open-modal').forEach(btn=>{
-    btn.addEventListener('click', openModal);
+    btn.addEventListener('click', (e)=>{
+      if(isSignedIn && btn.id === 'navJoinBtn'){
+        e.preventDefault();
+        document.getElementById('profile').scrollIntoView({ behavior:'smooth' });
+        return;
+      }
+      openModal();
+    });
   });
   document.getElementById('modalClose').addEventListener('click', closeModal);
   overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
@@ -3787,8 +3313,7 @@
     const items = [
       { id:'verify', done:isVerified, title:'Get verified', desc:'Improve your profile and unlock more matches.' },
       { id:'list-company', done:verification.hasListedCompany, title:'List your company', desc:'Recruit contributors and build your team.' },
-      { id:'sales', done:hasActiveCert, pending:hasPendingCert, title:'Start a sales profile', desc:'Become certified to represent companies.' },
-      { id:'services', done:false, title:'Launch services', desc:'Get help building your startup. 🚀' }
+      { id:'sales', done:hasActiveCert, pending:hasPendingCert, title:'Start a sales profile', desc:'Become certified to represent companies.' }
     ];
 
     listEl.innerHTML = items.map(item => `
@@ -3811,13 +3336,6 @@
     if(id === 'verify') openVerifyModal();
     else if(id === 'list-company') openModal();
     else if(id === 'sales') openSalesModal();
-    else if(id === 'services'){
-      showView('marketing');
-      setTimeout(()=>{
-        const el = document.getElementById('services');
-        if(el) el.scrollIntoView({ behavior:'smooth' });
-      }, 250);
-    }
   }
 
   // -- Get verified --
