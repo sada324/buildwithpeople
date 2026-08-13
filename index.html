@@ -364,6 +364,9 @@
     .dash-badge-admin{ font-size:10px; padding:2px 7px; }
     .dash-top-right .btn.btn-sm{ font-size:12px; padding:7px 10px; }
     .dash-textlink{ font-size:13px; }
+    .dash-balance-pill{ padding:5px 11px; }
+    .dash-balance-label{ font-size:9.5px; }
+    .dash-balance-amount{ font-size:13px; }
 
     .dash-body{ padding:28px 0 56px; }
     .dash-greeting h1{ font-size:22px; }
@@ -373,6 +376,33 @@
 
     .dash-grid{ gap:14px; }
     .dash-panel{ padding:18px; }
+    .dash-companies-panel .dash-match-list{ grid-template-columns:1fr; }
+
+    .dash-listing-row{ flex-direction:column; align-items:stretch; gap:8px; }
+    .dash-listing-row .cc-btn{ width:100%; text-align:center; }
+
+    /* modals — full-bleed on small screens instead of a fixed max-width card */
+    .modal-overlay{ padding:12px; align-items:flex-end; }
+    .modal{ padding:22px 18px; max-height:92vh; border-radius:18px 18px 0 0; }
+    .modal-head h3{ font-size:18px; }
+
+    .manage-tabs{ overflow-x:auto; flex-wrap:nowrap; -webkit-overflow-scrolling:touch; }
+    .manage-tab{ flex-shrink:0; margin-right:14px; }
+    .manage-company-head-id{ min-width:0; }
+    .manage-company-head-id > div{ min-width:0; }
+    .manage-company-sub{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+    .manage-listing-pricing-row{ flex-direction:column; gap:16px; }
+    .listing-photo-upload{ flex-wrap:wrap; }
+    .manage-listing-amount{ width:100%; }
+    .manage-listing-actions{ flex-direction:column; align-items:stretch; }
+    .manage-listing-actions .btn{ width:100%; }
+
+    .fb-listing-body{ padding:12px 14px; }
+    .post-listing-info .pl-row{ flex-direction:column; gap:2px; }
+    .post-listing-info .pl-value{ text-align:left; }
+
+    .manage-auto-accept-row{ margin-top:14px; }
   }
   .dash-panel{ background:var(--white); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
   .dash-panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:18px; }
@@ -1160,7 +1190,7 @@
         <h1 id="dashGreeting">Welcome, there.</h1>
         <p id="dashSubGreeting">Here's what's happening for you right now.</p>
       </div>
-      <button type="button" class="btn btn-dark" id="startBuildingBtn">Start Building</button>
+      <button type="button" class="btn btn-dark" id="startBuildingBtn">Start Earning</button>
     </div>
 
     <div class="dash-panel dash-companies-panel" id="dashCompaniesPanel" style="display:none">
@@ -2960,10 +2990,13 @@
   async function fetchMyCompanies(){
     if(!currentUser) return [];
     try {
-      const companyFields = 'id, name, description, roles, comp, logo_url, has_stamp, status, listing_price, commission_type, commission_value, commission_notes, auto_accept_applications, listing_title, listing_description, listing_photo_url';
+      // select('*') on the joined row rather than an explicit column list —
+      // that way this keeps working even before every listing/commission
+      // migration below has been run against a given Supabase project
+      // (an explicit list 400s the whole query if any column is missing).
       const [certRes, appRes] = await Promise.all([
-        withTimeout(sb.from('company_certifications').select(`status, companies(${companyFields})`).eq('user_id', currentUser.id).eq('status', 'active')),
-        withTimeout(sb.from('applications').select(`status, companies(${companyFields})`).eq('applicant_id', currentUser.id).eq('status', 'accepted'))
+        withTimeout(sb.from('company_certifications').select('status, companies(*)').eq('user_id', currentUser.id).eq('status', 'active')),
+        withTimeout(sb.from('applications').select('status, companies(*)').eq('applicant_id', currentUser.id).eq('status', 'accepted'))
       ]);
       const byId = new Map();
       (certRes.data || []).forEach(r => {
@@ -3100,7 +3133,7 @@
 
     try {
       const { data: company, error: companyErr } = await withTimeout(
-        sb.from('companies').select('listing_price, commission_type, commission_value, commission_notes, listing_title, listing_description, listing_photo_url').eq('id', companyId).single()
+        sb.from('companies').select('*').eq('id', companyId).single()
       );
       if(companyErr) throw companyErr;
 
@@ -3592,7 +3625,7 @@
     return new Set(certs.filter(c => c.status === 'active' && c.companies).map(c => c.companies.name));
   }
 
-  // ---------- Create hub: "Start Building" checklist ----------
+  // ---------- Create hub: "Start Earning" checklist ----------
   // Requires the schema in supabase/create_hub_setup.sql (profiles verification
   // columns + companies / company_certifications tables and RLS) to be run in
   // the Supabase SQL editor first — the fetches below fail gracefully until then.
@@ -4363,7 +4396,7 @@
     document.body.style.overflow = 'hidden';
 
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('id, name, logo_url, listing_price, commission_type, commission_value, commission_notes, auto_accept_applications, listing_title, listing_description, listing_photo_url').eq('name', companyName).limit(1));
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('name', companyName).limit(1));
       if(error) throw error;
       if(!data || !data.length) throw new Error('Company not found');
       manageCompanyState = {
