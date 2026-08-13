@@ -578,6 +578,53 @@
   .dash-match-card .cc-btn{ align-self:flex-start; margin-top:2px; }
   .dash-match-actions{ display:flex; gap:8px; align-self:flex-start; margin-top:2px; }
 
+  /* walkthrough circle — filled black once this company's Facebook listing
+     is posted and verified, same idea as the create-hub checklist. */
+  .walk-circle{
+    width:16px; height:16px; border-radius:50%; border:2px solid var(--border-strong);
+    display:inline-flex; align-items:center; justify-content:center; color:transparent;
+    flex-shrink:0; margin-right:8px; transition: background .15s ease, border-color .15s ease;
+  }
+  .walk-circle.filled{ background:var(--ink); border-color:var(--ink); color:var(--white); }
+  .dash-listing-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:2px; padding-top:10px; border-top:1px solid var(--border); }
+  .dash-listing-status{ font-size:11.5px; color:var(--ink-soft); font-family:var(--font-mono); }
+  .dash-listing-status.status-verified{ color:var(--green); font-weight:600; }
+  .dash-listing-status.status-submitted{ color:var(--grey); }
+  .dash-listing-status.status-rejected{ color:#B3261E; }
+
+  .post-listing-info{
+    background:var(--off-white); border:1px solid var(--border); border-radius:10px;
+    padding:14px 16px; margin-bottom:18px; display:flex; flex-direction:column; gap:6px;
+  }
+  .post-listing-info .pl-row{ display:flex; justify-content:space-between; gap:10px; font-size:13px; }
+  .post-listing-info .pl-label{ color:var(--grey); }
+  .post-listing-info .pl-value{ font-weight:600; color:var(--ink); text-align:right; }
+  .post-listing-info .pl-notes{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; margin-top:4px; }
+  .post-listing-status-msg{ font-size:12.5px; padding:10px 12px; border-radius:8px; margin-bottom:14px; }
+  .post-listing-status-msg.verified{ background:var(--green-soft); color:var(--green); }
+  .post-listing-status-msg.submitted{ background:var(--off-white); color:var(--ink-soft); border:1px solid var(--border); }
+  .post-listing-status-msg.rejected{ background:#FBEAE9; color:#B3261E; }
+
+  /* balance tracker pill in the dashboard topbar */
+  .dash-balance-pill{
+    display:flex; align-items:baseline; gap:6px; padding:6px 14px; border-radius:20px;
+    background:var(--off-white); border:1px solid var(--border); flex-shrink:0;
+  }
+  .dash-balance-label{ font-size:10.5px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.03em; color:var(--grey); }
+  .dash-balance-amount{ font-family:var(--font-display); font-size:14px; font-weight:700; color:var(--ink); }
+
+  .manage-listing-item{ padding:14px 0; border-bottom:1px solid var(--border); }
+  .manage-listing-item:last-child{ border-bottom:none; }
+  .manage-listing-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+  .manage-listing-name{ font-size:13.5px; font-weight:600; }
+  .manage-listing-url{ font-size:12.5px; word-break:break-all; }
+  .manage-listing-note{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.4; }
+  .manage-listing-actions{ display:flex; align-items:center; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .manage-listing-amount{ width:90px; border:1px solid var(--border-strong); border-radius:6px; padding:6px 8px; font-size:12.5px; font-family:var(--font-body); }
+  .manage-listing-pricing{ display:flex; flex-direction:column; gap:12px; padding-bottom:16px; margin-bottom:16px; border-bottom:1px solid var(--border); }
+  .manage-listing-pricing-row{ display:flex; gap:10px; }
+  .manage-listing-pricing-row .field-group{ flex:1; margin-bottom:0; }
+
   .dash-activity{ grid-area:activity; }
   .dash-empty{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; padding:22px 10px; }
   .admin-users-panel{ grid-column:1 / -1; }
@@ -1061,6 +1108,10 @@
     <div class="wrap dash-topbar-inner">
       <div class="logo"><span class="mark"></span>Build With People</div>
       <div class="dash-top-right">
+        <div class="dash-balance-pill" id="dashBalancePill" style="display:none">
+          <span class="dash-balance-label">Balance</span>
+          <span class="dash-balance-amount" id="dashBalanceAmount">$0</span>
+        </div>
         <span class="dash-badge-admin" id="dashAdminBadge" style="display:none">Admin</span>
         <button class="btn btn-ghost btn-sm" id="dashSwapBtn" style="display:none">Switch to admin view</button>
         <button class="dash-textlink" id="dashLogoutBtn">Log out</button>
@@ -1641,8 +1692,55 @@
         <span class="chip-select" data-val="Portfolio">Portfolio</span>
       </div>
     </div>
+    <div class="field-group">
+      <label class="field-label" for="editListingPrice">Listing price ($ per Facebook listing)</label>
+      <input class="field-input" id="editListingPrice" type="number" min="0" step="0.01" placeholder="e.g. 49">
+    </div>
+    <div class="manage-listing-pricing-row">
+      <div class="field-group">
+        <label class="field-label" for="editListingCommType">Commission structure</label>
+        <select class="field-input" id="editListingCommType">
+          <option value="percent">Percent per listing</option>
+          <option value="flat">Flat amount per listing</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="editListingCommValue" id="editListingCommValueLabel">Commission %</label>
+        <input class="field-input" id="editListingCommValue" type="number" min="0" step="0.01" placeholder="e.g. 20">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="editListingCommNotes">Commission notes</label>
+      <textarea class="field-textarea" id="editListingCommNotes" placeholder="e.g. Paid out after the listing sells; 20% on the first $500, 10% after that."></textarea>
+    </div>
     <p class="field-error" id="editListingError">Something went wrong — try again.</p>
     <button type="button" class="btn btn-dark modal-submit" id="editListingSaveBtn">Save changes</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="postListingModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="postListingTitle">Post your Facebook listing</h3>
+      <button class="modal-close" id="postListingClose" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="modal-sub" id="postListingSub">Post this company's listing to Facebook, then submit it here for review.</p>
+
+    <div class="post-listing-info" id="postListingInfo"></div>
+    <p class="post-listing-status-msg" id="postListingStatusMsg" style="display:none"></p>
+
+    <div class="field-group">
+      <label class="field-label" for="postListingUrl">Facebook listing URL</label>
+      <input class="field-input" id="postListingUrl" type="url" placeholder="https://facebook.com/marketplace/item/...">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="postListingNote">Notes for the reviewer (optional)</label>
+      <textarea class="field-textarea" id="postListingNote" placeholder="Anything they should know before checking it off"></textarea>
+    </div>
+    <p class="field-error" id="postListingError">Something went wrong — try again.</p>
+    <button type="button" class="btn btn-dark modal-submit" id="postListingSubmitBtn">Submit for review</button>
   </div>
 </div>
 
@@ -1707,11 +1805,13 @@
     <div class="manage-tabs" id="manageTabs">
       <button type="button" class="manage-tab active" data-tab="applicants">Pending<span class="manage-tab-count" id="manageApplicantsCount" style="display:none"></span></button>
       <button type="button" class="manage-tab" data-tab="members">Members</button>
+      <button type="button" class="manage-tab" data-tab="listings">Listings<span class="manage-tab-count" id="manageListingsCount" style="display:none"></span></button>
       <button type="button" class="manage-tab" data-tab="messages">Messages</button>
     </div>
 
     <div class="manage-tab-panel" id="manageApplicantsPanel"></div>
     <div class="manage-tab-panel hidden" id="manageMembersPanel"></div>
+    <div class="manage-tab-panel hidden" id="manageListingsPanel"></div>
     <div class="manage-tab-panel hidden" id="manageMessagesPanel"></div>
     <p class="field-error" id="manageCompanyError">Something went wrong — try again.</p>
   </div>
@@ -2816,9 +2916,10 @@
   async function fetchMyCompanies(){
     if(!currentUser) return [];
     try {
+      const companyFields = 'id, name, description, roles, comp, logo_url, has_stamp, status, listing_price, commission_type, commission_value, commission_notes';
       const [certRes, appRes] = await Promise.all([
-        withTimeout(sb.from('company_certifications').select('status, companies(id, name, description, roles, comp, logo_url, has_stamp, status)').eq('user_id', currentUser.id).eq('status', 'active')),
-        withTimeout(sb.from('applications').select('status, companies(id, name, description, roles, comp, logo_url, has_stamp, status)').eq('applicant_id', currentUser.id).eq('status', 'accepted'))
+        withTimeout(sb.from('company_certifications').select(`status, companies(${companyFields})`).eq('user_id', currentUser.id).eq('status', 'active')),
+        withTimeout(sb.from('applications').select(`status, companies(${companyFields})`).eq('applicant_id', currentUser.id).eq('status', 'accepted'))
       ]);
       const byId = new Map();
       (certRes.data || []).forEach(r => {
@@ -2835,14 +2936,43 @@
     }
   }
 
+  async function fetchMyListingTasks(){
+    if(!currentUser) return new Map();
+    try {
+      const { data, error } = await withTimeout(sb.from('listing_tasks').select('*').eq('user_id', currentUser.id));
+      if(error) throw error;
+      const byCompany = new Map();
+      (data || []).forEach(t => byCompany.set(t.company_id, t));
+      return byCompany;
+    } catch(e){
+      return new Map();
+    }
+  }
+
+  const LISTING_STATUS_LABEL = {
+    none: 'Facebook listing not posted yet',
+    pending: 'Facebook listing not posted yet',
+    submitted: 'Submitted — awaiting review',
+    verified: 'Verified — commission earned',
+    rejected: 'Changes requested — resubmit'
+  };
+  const LISTING_BTN_LABEL = {
+    none: 'Post Facebook listing',
+    pending: 'Post Facebook listing',
+    submitted: 'View submission',
+    verified: 'View listing',
+    rejected: 'Resubmit listing'
+  };
+
   async function refreshMyCompaniesPanel(){
     const panel = document.getElementById('dashCompaniesPanel');
     const listEl = document.getElementById('dashCompaniesList');
     const subEl = document.getElementById('dashCompaniesSub');
 
-    const companies = await fetchMyCompanies();
+    const [companies, tasksByCompany] = await Promise.all([fetchMyCompanies(), fetchMyListingTasks()]);
     if(!companies.length){
       panel.style.display = 'none';
+      refreshDashboardBalance(tasksByCompany);
       return;
     }
 
@@ -2859,16 +2989,26 @@
       const actionBtn = c.isOwner
         ? `<button type="button" class="cc-btn js-manage-company" data-company-name="${escapeHtml(c.name)}">Manage</button>`
         : `<button type="button" class="cc-btn js-view-company">View company</button>`;
+
+      const task = tasksByCompany.get(c.id);
+      const status = task ? task.status : 'none';
+      const circleFilled = status === 'verified';
+      const circle = `<span class="walk-circle ${circleFilled ? 'filled' : ''}">${circleFilled ? checkSvg() : ''}</span>`;
+
       return `
         <div class="dash-match-card">
           ${stamp}
           <div class="dash-match-top">
-            <div class="gc-name">${logo}${escapeHtml(c.name)}</div>
+            <div class="gc-name">${circle}${logo}${escapeHtml(c.name)}</div>
             ${roleBadge}
           </div>
           <div class="gc-desc">${escapeHtml(c.description || '')}</div>
           <div class="dash-match-tags gc-roles">${roleTags}${compPills}</div>
           <div class="dash-match-actions">${actionBtn}</div>
+          <div class="dash-listing-row">
+            <span class="dash-listing-status status-${status}">${LISTING_STATUS_LABEL[status]}</span>
+            <button type="button" class="cc-btn js-post-listing" data-company-id="${c.id}" data-company-name="${escapeHtml(c.name)}">${LISTING_BTN_LABEL[status]}</button>
+          </div>
         </div>`;
     }).join('');
 
@@ -2876,7 +3016,139 @@
     listEl.querySelectorAll('.js-manage-company').forEach(btn=>{
       btn.addEventListener('click', ()=> openManageCompanyModal(btn.dataset.companyName));
     });
+    listEl.querySelectorAll('.js-post-listing').forEach(btn=>{
+      btn.addEventListener('click', ()=> openPostListingModal(btn.dataset.companyId, btn.dataset.companyName));
+    });
+
+    refreshDashboardBalance(tasksByCompany);
   }
+
+  function refreshDashboardBalance(tasksByCompany){
+    const pill = document.getElementById('dashBalancePill');
+    const amountEl = document.getElementById('dashBalanceAmount');
+    let total = 0;
+    tasksByCompany.forEach(t => {
+      if(t.status === 'verified') total += Number(t.amount) || 0;
+    });
+    pill.style.display = '';
+    amountEl.textContent = formatMoney(total);
+  }
+
+  // -- Post Facebook listing walkthrough — one company at a time, mirrors
+  // the "Your companies" circle: not started -> submitted -> verified.
+  // Requires supabase/facebook_listings_setup.sql.
+
+  let postListingState = null; // { companyId, companyName }
+
+  async function openPostListingModal(companyId, companyName){
+    postListingState = { companyId, companyName };
+    document.getElementById('postListingError').classList.remove('show');
+    document.getElementById('postListingTitle').textContent = `Post your Facebook listing — ${companyName}`;
+    document.getElementById('postListingInfo').innerHTML = '<p class="field-hint">Loading…</p>';
+    document.getElementById('postListingStatusMsg').style.display = 'none';
+    document.getElementById('postListingUrl').value = '';
+    document.getElementById('postListingNote').value = '';
+
+    const overlay = document.getElementById('postListingModalOverlay');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    try {
+      const { data: company, error: companyErr } = await withTimeout(
+        sb.from('companies').select('listing_price, commission_type, commission_value, commission_notes').eq('id', companyId).single()
+      );
+      if(companyErr) throw companyErr;
+
+      const c = { listingPrice: company.listing_price, commissionType: company.commission_type || 'percent', commissionValue: company.commission_value, commissionNotes: company.commission_notes };
+      const infoRows = [
+        `<div class="pl-row"><span class="pl-label">Listing price</span><span class="pl-value">${formatMoney(c.listingPrice)}</span></div>`,
+        `<div class="pl-row"><span class="pl-label">Commission</span><span class="pl-value">${escapeHtml(commissionSummary(c))}</span></div>`
+      ];
+      if(c.commissionNotes) infoRows.push(`<div class="pl-notes">${escapeHtml(c.commissionNotes)}</div>`);
+      document.getElementById('postListingInfo').innerHTML = infoRows.join('');
+
+      let task = null;
+      if(currentUser){
+        const { data: taskRow } = await withTimeout(
+          sb.from('listing_tasks').select('*').eq('company_id', companyId).eq('user_id', currentUser.id).maybeSingle()
+        );
+        task = taskRow || null;
+      }
+
+      const submitBtn = document.getElementById('postListingSubmitBtn');
+      const statusMsg = document.getElementById('postListingStatusMsg');
+      if(task){
+        document.getElementById('postListingUrl').value = task.listing_url || '';
+        document.getElementById('postListingNote').value = task.note || '';
+      }
+      if(task && task.status === 'verified'){
+        statusMsg.className = 'post-listing-status-msg verified';
+        statusMsg.textContent = `Verified — ${formatMoney(task.amount)} added to your balance.`;
+        statusMsg.style.display = '';
+        submitBtn.textContent = 'Update & resubmit';
+      } else if(task && task.status === 'submitted'){
+        statusMsg.className = 'post-listing-status-msg submitted';
+        statusMsg.textContent = "Submitted — awaiting review from this company.";
+        statusMsg.style.display = '';
+        submitBtn.textContent = 'Resubmit';
+      } else if(task && task.status === 'rejected'){
+        statusMsg.className = 'post-listing-status-msg rejected';
+        statusMsg.textContent = 'This company asked for changes — update it and resubmit.';
+        statusMsg.style.display = '';
+        submitBtn.textContent = 'Resubmit for review';
+      } else {
+        submitBtn.textContent = 'Submit for review';
+      }
+    } catch(e){
+      document.getElementById('postListingInfo').innerHTML = '';
+      document.getElementById('postListingError').textContent = "Couldn't load this company's listing info — try again.";
+      document.getElementById('postListingError').classList.add('show');
+    }
+  }
+
+  function closePostListingModal(){
+    document.getElementById('postListingModalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    postListingState = null;
+  }
+  document.getElementById('postListingClose').addEventListener('click', closePostListingModal);
+  document.getElementById('postListingModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'postListingModalOverlay') closePostListingModal();
+  });
+
+  document.getElementById('postListingSubmitBtn').addEventListener('click', async ()=>{
+    if(!postListingState || !currentUser) return;
+    const errEl = document.getElementById('postListingError');
+    errEl.classList.remove('show');
+    const url = document.getElementById('postListingUrl').value.trim();
+    if(!url){
+      errEl.textContent = 'Paste a link to the Facebook listing first.';
+      errEl.classList.add('show');
+      return;
+    }
+    const btn = document.getElementById('postListingSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    try {
+      const { error } = await withTimeout(sb.from('listing_tasks').upsert({
+        company_id: postListingState.companyId,
+        user_id: currentUser.id,
+        listing_url: url,
+        note: document.getElementById('postListingNote').value.trim(),
+        status: 'submitted',
+        submitted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'company_id,user_id' }));
+      if(error) throw error;
+      closePostListingModal();
+      refreshMyCompaniesPanel();
+    } catch(e){
+      errEl.textContent = "Couldn't submit your listing — try again.";
+      errEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+    }
+  });
 
   function formatJoinedDate(value){
     if(!value) return '—';
@@ -3978,13 +4250,14 @@
     }
   }
 
-  let manageCompanyState = null; // { id, name, logoUrl }
-  const manageTabLoaded = { members:false, messages:false };
+  let manageCompanyState = null; // { id, name, logoUrl, listingPrice, commissionType, commissionValue, commissionNotes }
+  const manageTabLoaded = { members:false, messages:false, listings:false };
 
   function switchManageTab(tab){
     document.querySelectorAll('#manageTabs .manage-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.getElementById('manageApplicantsPanel').classList.toggle('hidden', tab !== 'applicants');
     document.getElementById('manageMembersPanel').classList.toggle('hidden', tab !== 'members');
+    document.getElementById('manageListingsPanel').classList.toggle('hidden', tab !== 'listings');
     document.getElementById('manageMessagesPanel').classList.toggle('hidden', tab !== 'messages');
   }
 
@@ -3995,6 +4268,10 @@
       if(tabBtn.dataset.tab === 'members' && !manageTabLoaded.members){
         manageTabLoaded.members = true;
         await renderManageMembersTab();
+      }
+      if(tabBtn.dataset.tab === 'listings' && !manageTabLoaded.listings){
+        manageTabLoaded.listings = true;
+        await renderManageListingsTab();
       }
       if(tabBtn.dataset.tab === 'messages' && !manageTabLoaded.messages){
         manageTabLoaded.messages = true;
@@ -4010,18 +4287,24 @@
     document.getElementById('manageCompanyLogo').textContent = initials(companyName);
     document.getElementById('manageApplicantsPanel').innerHTML = '<p class="field-hint">Loading…</p>';
     document.getElementById('manageMembersPanel').innerHTML = '';
+    document.getElementById('manageListingsPanel').innerHTML = '';
     document.getElementById('manageMessagesPanel').innerHTML = '';
     manageTabLoaded.members = false;
+    manageTabLoaded.listings = false;
     manageTabLoaded.messages = false;
     switchManageTab('applicants');
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('id, name, logo_url').eq('name', companyName).limit(1));
+      const { data, error } = await withTimeout(sb.from('companies').select('id, name, logo_url, listing_price, commission_type, commission_value, commission_notes').eq('name', companyName).limit(1));
       if(error) throw error;
       if(!data || !data.length) throw new Error('Company not found');
-      manageCompanyState = { id: data[0].id, name: data[0].name, logoUrl: data[0].logo_url };
+      manageCompanyState = {
+        id: data[0].id, name: data[0].name, logoUrl: data[0].logo_url,
+        listingPrice: data[0].listing_price, commissionType: data[0].commission_type || 'percent',
+        commissionValue: data[0].commission_value, commissionNotes: data[0].commission_notes
+      };
       document.getElementById('manageCompanyLogo').innerHTML = data[0].logo_url
         ? `<img src="${data[0].logo_url}" alt="">` : escapeHtml(initials(data[0].name));
       await renderManageApplicantsTab();
@@ -4206,6 +4489,171 @@
     });
   }
 
+  // -- Owner side: "Listings" — set the listing price / commission structure
+  // for this company, and review partners' submitted Facebook listings.
+  // Requires supabase/facebook_listings_setup.sql.
+
+  function formatMoney(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    return '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits:0, maximumFractionDigits:2 });
+  }
+
+  function commissionSummary(c){
+    if(c.commissionValue == null) return 'No commission structure set yet';
+    return c.commissionType === 'flat'
+      ? `${formatMoney(c.commissionValue)} flat per listing`
+      : `${c.commissionValue}% per listing`;
+  }
+
+  function suggestedCommission(c){
+    if(c.commissionValue == null) return null;
+    if(c.commissionType === 'flat') return c.commissionValue;
+    if(c.listingPrice == null) return null;
+    return Math.round((c.listingPrice * c.commissionValue / 100) * 100) / 100;
+  }
+
+  async function fetchCompanyListingTasks(companyId){
+    try {
+      const { data, error } = await withTimeout(sb.from('listing_tasks').select('*').eq('company_id', companyId).in('status', ['submitted','verified','rejected']).order('updated_at', { ascending:false }));
+      if(error) throw error;
+      const tasks = data || [];
+      if(!tasks.length) return [];
+      const userIds = Array.from(new Set(tasks.map(t => t.user_id)));
+      const { data: profiles } = await withTimeout(sb.from('profiles').select('id, name, avatar_url').in('id', userIds));
+      const profileMap = {};
+      (profiles || []).forEach(p => { profileMap[p.id] = p; });
+      return tasks.map(t => ({ ...t, profile: profileMap[t.user_id] || {} }));
+    } catch(e){
+      return null;
+    }
+  }
+
+  async function renderManageListingsTab(){
+    if(!manageCompanyState) return;
+    const panel = document.getElementById('manageListingsPanel');
+    const countEl = document.getElementById('manageListingsCount');
+    const c = manageCompanyState;
+
+    const pricingHtml = `
+      <div class="manage-listing-pricing">
+        <div class="manage-listing-pricing-row">
+          <div class="field-group">
+            <label class="field-label" for="mlPrice">Listing price ($)</label>
+            <input class="field-input" id="mlPrice" type="number" min="0" step="0.01" value="${c.listingPrice != null ? c.listingPrice : ''}">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="mlCommType">Commission structure</label>
+            <select class="field-input" id="mlCommType">
+              <option value="percent" ${c.commissionType !== 'flat' ? 'selected' : ''}>Percent per listing</option>
+              <option value="flat" ${c.commissionType === 'flat' ? 'selected' : ''}>Flat amount per listing</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="mlCommValue" id="mlCommValueLabel">${c.commissionType === 'flat' ? 'Commission ($)' : 'Commission %'}</label>
+            <input class="field-input" id="mlCommValue" type="number" min="0" step="0.01" value="${c.commissionValue != null ? c.commissionValue : ''}">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="mlCommNotes">Commission notes</label>
+          <textarea class="field-textarea" id="mlCommNotes">${escapeHtml(c.commissionNotes || '')}</textarea>
+        </div>
+        <button type="button" class="btn btn-ghost btn-sm" id="mlSaveBtn" style="align-self:flex-start">Save pricing</button>
+      </div>`;
+
+    panel.innerHTML = pricingHtml + '<p class="field-hint">Loading submissions…</p>';
+
+    document.getElementById('mlCommType').addEventListener('change', ()=>{
+      document.getElementById('mlCommValueLabel').textContent = document.getElementById('mlCommType').value === 'flat' ? 'Commission ($)' : 'Commission %';
+    });
+
+    document.getElementById('mlSaveBtn').addEventListener('click', async ()=>{
+      const btn = document.getElementById('mlSaveBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      const priceRaw = document.getElementById('mlPrice').value.trim();
+      const valueRaw = document.getElementById('mlCommValue').value.trim();
+      const patch = {
+        listing_price: priceRaw ? parseFloat(priceRaw) : null,
+        commission_type: document.getElementById('mlCommType').value,
+        commission_value: valueRaw ? parseFloat(valueRaw) : null,
+        commission_notes: document.getElementById('mlCommNotes').value.trim(),
+        updated_at: new Date().toISOString()
+      };
+      try {
+        const { error } = await withTimeout(sb.from('companies').update(patch).eq('id', c.id));
+        if(error) throw error;
+        manageCompanyState = { ...c, listingPrice: patch.listing_price, commissionType: patch.commission_type, commissionValue: patch.commission_value, commissionNotes: patch.commission_notes };
+        btn.textContent = 'Saved';
+        setTimeout(()=>{ btn.textContent = 'Save pricing'; btn.disabled = false; }, 1200);
+      } catch(e){
+        document.getElementById('manageCompanyError').classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Save pricing';
+      }
+    });
+
+    const tasks = await fetchCompanyListingTasks(c.id);
+    const listWrap = panel.querySelector('.manage-listing-pricing').nextElementSibling;
+    if(tasks === null){
+      listWrap.remove();
+      document.getElementById('manageCompanyError').classList.add('show');
+      return;
+    }
+
+    const pendingCount = tasks.filter(t => t.status === 'submitted').length;
+    countEl.style.display = pendingCount ? '' : 'none';
+    countEl.textContent = pendingCount;
+
+    if(!tasks.length){
+      listWrap.outerHTML = '<p class="field-hint">No Facebook listings submitted yet.</p>';
+      return;
+    }
+
+    listWrap.outerHTML = tasks.map(t => {
+      const suggested = suggestedCommission(manageCompanyState);
+      const statusLabel = t.status === 'verified' ? `Verified — ${formatMoney(t.amount)} owed`
+        : t.status === 'rejected' ? 'Changes requested' : 'Awaiting review';
+      const actions = t.status === 'submitted'
+        ? `<input type="number" min="0" step="0.01" class="manage-listing-amount" id="ml-amount-${t.id}" placeholder="Amount" value="${suggested != null ? suggested : ''}">
+           <button type="button" class="btn btn-dark btn-sm js-listing-verify" data-task-id="${t.id}">Approve</button>
+           <button type="button" class="btn btn-ghost btn-sm js-listing-reject" data-task-id="${t.id}">Reject</button>`
+        : '';
+      return `
+        <div class="manage-listing-item">
+          <div class="manage-listing-head">
+            <span class="manage-listing-name">${escapeHtml(t.profile.name || 'A partner')}</span>
+            <span class="dash-listing-status status-${t.status}">${statusLabel}</span>
+          </div>
+          ${t.listing_url ? `<a class="manage-listing-url" href="${escapeHtml(t.listing_url)}" target="_blank" rel="noopener">${escapeHtml(t.listing_url)}</a>` : ''}
+          ${t.note ? `<p class="manage-listing-note">${escapeHtml(t.note)}</p>` : ''}
+          <div class="manage-listing-actions">${actions}</div>
+        </div>`;
+    }).join('');
+
+    panel.querySelectorAll('.js-listing-verify').forEach(btn=>{
+      btn.addEventListener('click', ()=> reviewListingTask(btn.dataset.taskId, 'verified'));
+    });
+    panel.querySelectorAll('.js-listing-reject').forEach(btn=>{
+      btn.addEventListener('click', ()=> reviewListingTask(btn.dataset.taskId, 'rejected'));
+    });
+  }
+
+  async function reviewListingTask(taskId, status){
+    const patch = { status, verified_at: new Date().toISOString(), verified_by: currentUser ? currentUser.id : null };
+    if(status === 'verified'){
+      const amountInput = document.getElementById(`ml-amount-${taskId}`);
+      const raw = amountInput ? amountInput.value.trim() : '';
+      patch.amount = raw ? parseFloat(raw) : null;
+    }
+    try {
+      const { error } = await withTimeout(sb.from('listing_tasks').update(patch).eq('id', taskId));
+      if(error) throw error;
+      await renderManageListingsTab();
+    } catch(e){
+      document.getElementById('manageCompanyError').classList.add('show');
+    }
+  }
+
   async function fetchCompanyConversations(companyId){
     try {
       const { data, error } = await withTimeout(sb.from('conversations').select('id, user_id, last_message_at, rep_last_read_at').eq('company_id', companyId).order('last_message_at', { ascending:false }));
@@ -4289,6 +4737,12 @@
     chip.addEventListener('click', ()=> toggleChip(chip, true));
   });
 
+  function updateCommValueLabel(){
+    const isFlat = document.getElementById('editListingCommType').value === 'flat';
+    document.getElementById('editListingCommValueLabel').textContent = isFlat ? 'Commission ($)' : 'Commission %';
+  }
+  document.getElementById('editListingCommType').addEventListener('change', updateCommValueLabel);
+
   function setLogoPreview(url, name){
     if(url) editListingLogoPreview.innerHTML = `<img src="${url}" alt="${escapeHtml(name || '')} logo">`;
     else { editListingLogoPreview.innerHTML = ''; editListingLogoPreview.textContent = initials(name || 'Co'); }
@@ -4335,6 +4789,11 @@
       setLogoPreview(null, 'New company');
       document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(c => c.classList.remove('selected'));
       document.querySelectorAll('#editListingCompGroup .chip-select').forEach(c => c.classList.remove('selected'));
+      document.getElementById('editListingPrice').value = '';
+      document.getElementById('editListingCommType').value = 'percent';
+      document.getElementById('editListingCommValue').value = '';
+      document.getElementById('editListingCommNotes').value = '';
+      updateCommValueLabel();
       document.getElementById('editListingSaveBtn').textContent = 'Add company';
       editListingModalOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -4360,6 +4819,11 @@
       document.querySelectorAll('#editListingCompGroup .chip-select').forEach(c=>{
         c.classList.toggle('selected', comp.includes(c.dataset.val));
       });
+      document.getElementById('editListingPrice').value = data.listing_price != null ? data.listing_price : '';
+      document.getElementById('editListingCommType').value = data.commission_type || 'percent';
+      document.getElementById('editListingCommValue').value = data.commission_value != null ? data.commission_value : '';
+      document.getElementById('editListingCommNotes').value = data.commission_notes || '';
+      updateCommValueLabel();
       editListingModalOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch(e){
@@ -4391,12 +4855,18 @@
     try {
       const roles = Array.from(document.querySelectorAll('#editListingRolesGroup .chip-select.selected')).map(c=>c.dataset.val);
       const comp = Array.from(document.querySelectorAll('#editListingCompGroup .chip-select.selected')).map(c=>c.dataset.val);
+      const priceRaw = document.getElementById('editListingPrice').value.trim();
+      const commValueRaw = document.getElementById('editListingCommValue').value.trim();
       const payload = {
         name,
         description: document.getElementById('editListingDesc').value.trim(),
         website: document.getElementById('editListingWebsite').value.trim(),
         stage: document.getElementById('editListingStage').value,
         roles, comp,
+        listing_price: priceRaw ? parseFloat(priceRaw) : null,
+        commission_type: document.getElementById('editListingCommType').value,
+        commission_value: commValueRaw ? parseFloat(commValueRaw) : null,
+        commission_notes: document.getElementById('editListingCommNotes').value.trim(),
         updated_at: new Date().toISOString()
       };
 
