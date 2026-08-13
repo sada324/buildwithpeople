@@ -302,12 +302,14 @@
   .grid-card.dark .cc-btn:hover{ background:#EDEDED; }
 
   /* ---------- contractor campaign niches ---------- */
-  .niche-section{ background:var(--ink); color:var(--white); overflow:hidden; }
+  .niche-section{ background:var(--ink); color:var(--white); overflow:hidden; padding:20px 0 50px; }
+  .niche-section > .wrap{ display:flex; flex-direction:column; }
   .niche-section .section-head{ max-width:720px; }
+  .niche-section .section-head{ order:2; margin-top:38px; margin-bottom:0; }
   .niche-section .kicker{ color:#7FD6A4; }
   .niche-section h2{ color:var(--white); }
   .niche-section .section-head p{ color:#B7BAC0; }
-  .niche-marquee{ overflow:hidden; width:100%; }
+  .niche-marquee{ order:1; overflow:hidden; width:100%; }
   .niche-track{
     display:flex; width:max-content; gap:18px;
     animation:niche-scroll 58s linear infinite; will-change:transform;
@@ -339,7 +341,7 @@
     background:rgba(16,17,19,.74); border:1px solid rgba(255,255,255,.22);
     color:#F2F3F4; font:11px var(--font-mono); backdrop-filter:blur(8px);
   }
-  .niche-note{ color:#8F949B; font:11px var(--font-mono); margin-top:18px; }
+  .niche-note{ order:3; color:#8F949B; font:11px var(--font-mono); margin-top:18px; }
   @keyframes niche-scroll{
     from{ transform:translateX(0); }
     to{ transform:translateX(calc(-50% - 9px)); }
