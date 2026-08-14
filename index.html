@@ -682,8 +682,21 @@
   .fb-listing-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
   .fb-listing-body{ padding:14px 16px; }
   .fb-listing-price{ font-family:var(--font-display); font-weight:700; font-size:16px; }
-  .fb-listing-title{ font-size:13.5px; font-weight:600; margin-top:2px; }
-  .fb-listing-desc{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; margin-top:6px; }
+  .fb-listing-title-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-top:2px; }
+  .fb-listing-title{ font-size:13.5px; font-weight:600; }
+  .fb-copy-btn{
+    flex-shrink:0; display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+    color:var(--ink-soft); background:var(--off-white); border:1px solid var(--border-strong); border-radius:6px;
+    padding:4px 8px; cursor:pointer; transition: all .15s ease; white-space:nowrap;
+  }
+  .fb-copy-btn:hover{ border-color:var(--ink); color:var(--ink); }
+  .fb-copy-btn.copied{ color:var(--green); border-color:var(--green); background:var(--green-soft); }
+  .fb-listing-desc-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-top:8px; }
+  .fb-listing-desc-wrap{ flex:1; min-width:0; }
+  .fb-listing-desc{ font-size:12.5px; color:var(--ink-soft); line-height:1.4; }
+  .fb-listing-desc.clamped{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .fb-view-more-btn{ font-size:12px; font-weight:600; color:var(--green); background:none; border:none; padding:4px 0 0; cursor:pointer; }
+  .fb-view-more-btn:hover{ text-decoration:underline; }
   .fb-listing-open{
     display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
     padding:11px; border-top:1px solid var(--border); background:var(--off-white);
@@ -3163,6 +3176,35 @@
 
   let postListingState = null; // { companyId, companyName }
 
+  // Copies the given text so a partner can paste it straight into Facebook's
+  // title/description fields, with a brief "Copied!" confirmation on the
+  // button and a fallback for browsers/contexts without the Clipboard API.
+  async function copyListingText(text, btn, restoreLabel){
+    if(!text) return;
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+    } catch(e){
+      btn.textContent = "Couldn't copy";
+    }
+    setTimeout(()=>{
+      btn.textContent = restoreLabel;
+      btn.classList.remove('copied');
+    }, 1500);
+  }
+
   async function openPostListingModal(companyId, companyName){
     postListingState = { companyId, companyName };
     document.getElementById('postListingError').classList.remove('show');
@@ -3183,14 +3225,26 @@
       if(companyErr) throw companyErr;
 
       const c = { listingPrice: company.listing_price, commissionType: company.commission_type || 'percent', commissionValue: company.commission_value, commissionNotes: company.commission_notes };
+      const listingTitle = company.listing_title || companyName + ' listing';
+      const listingDesc = company.listing_description || '';
 
       const fbCard = `
         <div class="fb-listing-card">
           <div class="fb-listing-photo">${company.listing_photo_url ? `<img src="${escapeHtml(company.listing_photo_url)}" alt="">` : 'No photo yet — ask ' + escapeHtml(companyName) + ' to add one'}</div>
           <div class="fb-listing-body">
             <div class="fb-listing-price">${formatMoney(c.listingPrice)}</div>
-            <div class="fb-listing-title">${escapeHtml(company.listing_title || companyName + ' listing')}</div>
-            ${company.listing_description ? `<div class="fb-listing-desc">${escapeHtml(company.listing_description)}</div>` : ''}
+            <div class="fb-listing-title-row">
+              <div class="fb-listing-title">${escapeHtml(listingTitle)}</div>
+              <button type="button" class="fb-copy-btn" id="fbCopyTitleBtn">Copy title</button>
+            </div>
+            ${listingDesc ? `
+            <div class="fb-listing-desc-row">
+              <div class="fb-listing-desc-wrap">
+                <div class="fb-listing-desc" id="fbListingDesc">${escapeHtml(listingDesc)}</div>
+                <button type="button" class="fb-view-more-btn" id="fbViewMoreBtn" style="display:none">View more</button>
+              </div>
+              <button type="button" class="fb-copy-btn" id="fbCopyDescBtn">Copy</button>
+            </div>` : ''}
           </div>
           <a class="fb-listing-open" href="https://www.facebook.com/marketplace/create/item" target="_blank" rel="noopener">
             <img src="/assets/icons/facebook.webp" alt=""> Open Facebook Marketplace
@@ -3202,6 +3256,26 @@
       ];
       if(c.commissionNotes) infoRows.push(`<div class="pl-notes">${escapeHtml(c.commissionNotes)}</div>`);
       document.getElementById('postListingInfo').innerHTML = fbCard + infoRows.join('');
+
+      const copyTitleBtn = document.getElementById('fbCopyTitleBtn');
+      if(copyTitleBtn) copyTitleBtn.addEventListener('click', ()=> copyListingText(listingTitle, copyTitleBtn, 'Copy title'));
+
+      const copyDescBtn = document.getElementById('fbCopyDescBtn');
+      if(copyDescBtn) copyDescBtn.addEventListener('click', ()=> copyListingText(listingDesc, copyDescBtn, 'Copy'));
+
+      const descEl = document.getElementById('fbListingDesc');
+      const viewMoreBtn = document.getElementById('fbViewMoreBtn');
+      if(descEl && viewMoreBtn){
+        descEl.classList.add('clamped');
+        if(descEl.scrollHeight > descEl.clientHeight + 2){
+          viewMoreBtn.style.display = '';
+          viewMoreBtn.addEventListener('click', ()=>{
+            const expanded = descEl.classList.toggle('expanded');
+            descEl.classList.toggle('clamped', !expanded);
+            viewMoreBtn.textContent = expanded ? 'View less' : 'View more';
+          });
+        }
+      }
 
       let task = null;
       if(currentUser){
