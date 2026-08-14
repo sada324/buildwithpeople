@@ -381,6 +381,14 @@
     .dash-panel{ padding:18px; }
     .dash-companies-panel .dash-match-list{ grid-template-columns:1fr; }
 
+    /* company cards ("Matches for you" / "Your companies") — more room to
+       breathe, bigger tap targets, and let the name/badge wrap onto their
+       own line instead of fighting for space in one tight row. */
+    .dash-match-card{ padding:16px 14px; gap:10px; }
+    .dash-match-top{ flex-wrap:wrap; row-gap:6px; }
+    .dash-match-tags{ gap:8px; }
+    .dash-match-card .cc-btn, .dash-match-actions .cc-btn{ padding:9px 14px; font-size:12.5px; }
+
     .dash-listing-row{ flex-direction:column; align-items:stretch; gap:8px; }
     .dash-listing-row .cc-btn{ width:100%; text-align:center; }
 
