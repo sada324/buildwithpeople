@@ -179,10 +179,13 @@
   .view-actions .btn-ghost{ background:rgba(255,255,255,0.55); }
   .view-tags{ display:none; flex-wrap:wrap; gap:6px; justify-content:center; margin:-8px 0 22px; }
   .view-tags.show{ display:flex; }
-  .view-link{ display:none; align-items:center; gap:5px; font-size:13px; font-weight:600; color:var(--green); margin:-10px 0 20px; }
+  .view-links{ display:none; flex-direction:column; align-items:center; gap:8px; margin:-10px 0 20px; }
+  .view-link{ display:none; align-items:center; gap:5px; font-size:13px; font-weight:600; color:var(--green); }
   .view-link.show{ display:inline-flex; }
   .view-link:hover{ text-decoration:underline; }
+  .view-link-icon{ width:14px; height:14px; flex-shrink:0; }
   .view-modal.member .view-link{ justify-content:flex-start; }
+  .view-modal.member .view-links{ align-items:flex-start; }
 
   .view-modal.member{
     background:var(--white); border:1px solid var(--border);
@@ -1724,6 +1727,11 @@
       <input class="field-input" id="editListingWebsite" type="url" placeholder="https://yourcompany.com">
     </div>
     <div class="field-group">
+      <label class="field-label" for="editListingDiscord">Discord invite link</label>
+      <input class="field-input" id="editListingDiscord" type="url" placeholder="https://discord.gg/yourgroup">
+      <p class="field-hint">Shown to certified reps and members — invite your team's Discord group.</p>
+    </div>
+    <div class="field-group">
       <label class="field-label" for="editListingStage">Stage</label>
       <select class="field-input" id="editListingStage">
         <option value="Idea">Idea</option>
@@ -1898,7 +1906,10 @@
     <h3 id="profileViewTitle">Name</h3>
     <p id="profileViewDesc">Headline</p>
     <div class="view-tags" id="profileViewTags"></div>
-    <a href="#" class="view-link" id="profileViewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
+    <div class="view-links">
+      <a href="#" class="view-link" id="profileViewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
+      <a href="#" class="view-link" id="profileViewDiscordLink" target="_blank" rel="noopener noreferrer"><img class="view-link-icon" src="/assets/icons/discord.svg" alt="">Join Discord ↗</a>
+    </div>
   </div>
 </div>
 
@@ -1914,7 +1925,10 @@
     <h3 id="viewTitle">Sign in to view this company</h3>
     <p id="viewDesc">Create a free account to see the full profile, team, open roles, and compensation details.</p>
     <div class="view-tags" id="viewTags"></div>
-    <a href="#" class="view-link" id="viewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
+    <div class="view-links">
+      <a href="#" class="view-link" id="viewLink" target="_blank" rel="noopener noreferrer">Visit website ↗</a>
+      <a href="#" class="view-link" id="viewDiscordLink" target="_blank" rel="noopener noreferrer"><img class="view-link-icon" src="/assets/icons/discord.svg" alt="">Join Discord ↗</a>
+    </div>
     <div class="view-actions" id="viewActionsGuest">
       <a href="#" class="btn btn-dark" id="viewSignInBtn">Sign in</a>
       <a href="#" class="btn btn-ghost" id="viewCreateBtn">Create account</a>
@@ -2178,6 +2192,7 @@
   const viewDesc = document.getElementById('viewDesc');
   const viewTags = document.getElementById('viewTags');
   const viewLink = document.getElementById('viewLink');
+  const viewDiscordLink = document.getElementById('viewDiscordLink');
   const viewActionsGuest = document.getElementById('viewActionsGuest');
   const viewActionsMember = document.getElementById('viewActionsMember');
 
@@ -2193,6 +2208,31 @@
       linkEl.removeAttribute('href');
       linkEl.classList.remove('show');
     }
+    syncViewLinksWrapper(linkEl);
+  }
+
+  // Discord invites are shown whenever a company has set one — no separate
+  // admin visibility toggle, unlike the website link.
+  function applyDiscordLink(linkEl, discordUrl){
+    if(discordUrl && discordUrl.trim()){
+      let href = discordUrl.trim();
+      if(!/^https?:\/\//i.test(href)) href = 'https://' + href;
+      linkEl.href = href;
+      linkEl.classList.add('show');
+    } else {
+      linkEl.removeAttribute('href');
+      linkEl.classList.remove('show');
+    }
+    syncViewLinksWrapper(linkEl);
+  }
+
+  // The two link rows live in a shared wrapper that's collapsed unless at
+  // least one of them is visible, so an empty wrapper doesn't leave a gap.
+  function syncViewLinksWrapper(linkEl){
+    const wrap = linkEl.closest('.view-links');
+    if(!wrap) return;
+    const anyShown = Array.from(wrap.children).some(el => el.classList.contains('show'));
+    wrap.style.display = anyShown ? 'flex' : 'none';
   }
 
   function openViewPopup(){
@@ -2213,6 +2253,7 @@
     viewTags.classList.remove('show');
     viewTags.innerHTML = '';
     applyCompanyLink(viewLink, null, false);
+    applyDiscordLink(viewDiscordLink, null);
     viewActionsGuest.classList.remove('hidden');
     viewActionsMember.classList.add('hidden');
   }
@@ -2246,22 +2287,26 @@
     viewTags.innerHTML = Array.from(pillEls).map(t=>`<span class="${t.className}">${t.textContent}</span>`).join('');
     viewTags.classList.toggle('show', pillEls.length > 0);
     applyCompanyLink(viewLink, null, false);
+    applyDiscordLink(viewDiscordLink, null);
     viewActionsGuest.classList.add('hidden');
     viewActionsMember.classList.remove('hidden');
     refreshApplyButtonState(name);
     refreshCompanyLink(name);
   }
 
-  // Populates the website link asynchronously so opening the popup never
-  // waits on a network round trip — it just appears once (if) allowed.
+  // Populates the website/Discord links asynchronously so opening the popup
+  // never waits on a network round trip — they just appear once (if) set.
+  // select('*') rather than an explicit column list so this keeps working
+  // even before every company-field migration has been run.
   async function refreshCompanyLink(name){
     try {
-      const { data, error } = await withTimeout(sb.from('companies').select('name, website, show_website').eq('name', name).single());
+      const { data, error } = await withTimeout(sb.from('companies').select('*').eq('name', name).single());
       if(error || !data) return;
       if(currentViewCompanyName === name){
         applyCompanyLink(viewLink, data.website, data.show_website);
+        applyDiscordLink(viewDiscordLink, data.discord_url);
       }
-    } catch(e){ /* leave link hidden */ }
+    } catch(e){ /* leave links hidden */ }
   }
 
   function bindViewCompanyButton(btn){
@@ -4192,6 +4237,7 @@
       tagsEl.innerHTML = tags.join('');
       tagsEl.classList.toggle('show', tags.length > 0);
       applyCompanyLink(document.getElementById('profileViewLink'), data.website, data.show_website);
+      applyDiscordLink(document.getElementById('profileViewDiscordLink'), data.discord_url);
       profileViewOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
     } catch(e){
@@ -4404,7 +4450,8 @@
         listingPrice: data[0].listing_price, commissionType: data[0].commission_type || 'percent',
         commissionValue: data[0].commission_value, commissionNotes: data[0].commission_notes,
         autoAccept: !!data[0].auto_accept_applications,
-        listingTitle: data[0].listing_title, listingDescription: data[0].listing_description, listingPhotoUrl: data[0].listing_photo_url
+        listingTitle: data[0].listing_title, listingDescription: data[0].listing_description, listingPhotoUrl: data[0].listing_photo_url,
+        discordUrl: data[0].discord_url
       };
       document.getElementById('manageCompanyLogo').innerHTML = data[0].logo_url
         ? `<img src="${data[0].logo_url}" alt="">` : escapeHtml(initials(data[0].name));
@@ -4667,6 +4714,11 @@
           </div>
         </div>
         <div class="field-group">
+          <label class="field-label" for="mlDiscordUrl">Discord invite link</label>
+          <input class="field-input" id="mlDiscordUrl" type="url" placeholder="https://discord.gg/yourgroup" value="${escapeHtml(c.discordUrl || '')}">
+          <p class="field-hint">Shown to certified reps and members on this company's profile.</p>
+        </div>
+        <div class="field-group">
           <label class="field-label" for="mlListingTitle">Listing title</label>
           <input class="field-input" id="mlListingTitle" type="text" placeholder="e.g. Custom neon sign — made to order" value="${escapeHtml(c.listingTitle || '')}">
         </div>
@@ -4732,6 +4784,7 @@
         commission_notes: document.getElementById('mlCommNotes').value.trim(),
         listing_title: document.getElementById('mlListingTitle').value.trim(),
         listing_description: document.getElementById('mlListingDesc').value.trim(),
+        discord_url: document.getElementById('mlDiscordUrl').value.trim(),
         updated_at: new Date().toISOString()
       };
       try {
@@ -4751,7 +4804,7 @@
         manageCompanyState = {
           ...c, listingPrice: patch.listing_price, commissionType: patch.commission_type, commissionValue: patch.commission_value,
           commissionNotes: patch.commission_notes, listingTitle: patch.listing_title, listingDescription: patch.listing_description,
-          listingPhotoUrl: patch.listing_photo_url || c.listingPhotoUrl
+          listingPhotoUrl: patch.listing_photo_url || c.listingPhotoUrl, discordUrl: patch.discord_url
         };
         mlPhotoFile = null;
         btn.textContent = 'Saved';
@@ -4956,6 +5009,7 @@
       document.getElementById('editListingName').value = '';
       document.getElementById('editListingDesc').value = '';
       document.getElementById('editListingWebsite').value = '';
+      document.getElementById('editListingDiscord').value = '';
       document.getElementById('editListingStage').value = 'Idea';
       setLogoPreview(null, 'New company');
       document.querySelectorAll('#editListingRolesGroup .chip-select').forEach(c => c.classList.remove('selected'));
@@ -4980,6 +5034,7 @@
       document.getElementById('editListingName').value = data.name || '';
       document.getElementById('editListingDesc').value = data.description || '';
       document.getElementById('editListingWebsite').value = data.website || '';
+      document.getElementById('editListingDiscord').value = data.discord_url || '';
       document.getElementById('editListingStage').value = data.stage || 'Idea';
       setLogoPreview(data.logo_url, data.name);
       const roles = data.roles || [];
@@ -5032,6 +5087,7 @@
         name,
         description: document.getElementById('editListingDesc').value.trim(),
         website: document.getElementById('editListingWebsite').value.trim(),
+        discord_url: document.getElementById('editListingDiscord').value.trim(),
         stage: document.getElementById('editListingStage').value,
         roles, comp,
         listing_price: priceRaw ? parseFloat(priceRaw) : null,
