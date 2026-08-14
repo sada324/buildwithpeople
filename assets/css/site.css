@@ -517,7 +517,7 @@
 
   footer{ border-top:1px solid var(--border); padding:44px 0 32px; }
   .foot-row{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px; }
-  .foot-links{ display:flex; gap:26px; }
+  .foot-links{ display:flex; flex-wrap:wrap; row-gap:10px; gap:26px; }
   .foot-links a{ font-size:13.5px; color:var(--ink-soft); }
   .foot-links a:hover{ color:var(--ink); }
   .foot-copy{ font-size:13px; color:var(--grey); }
