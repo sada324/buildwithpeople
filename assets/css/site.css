@@ -200,7 +200,7 @@
   .company-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-2px); border-color:var(--border-strong); }
   .company-card:last-child{ margin-bottom:0; }
   .cc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .cc-name{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14.5px; }
+  .cc-name{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14.5px; min-width:0; overflow-wrap:anywhere; }
   .cc-logo{
     width:22px; height:22px; border-radius:50%; flex-shrink:0;
     background: linear-gradient(135deg,#D8D8D2,#EFEFEB);
@@ -280,7 +280,7 @@
   }
   .grid-card:hover{ box-shadow:var(--shadow-md); transform:translateY(-3px); border-color:var(--border-strong); }
   .gc-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
-  .gc-name{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:16.5px; }
+  .gc-name{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; font-size:16.5px; min-width:0; overflow-wrap:anywhere; }
   .gc-desc{ font-size:13.5px; color:var(--ink-soft); margin-bottom:16px; min-height:38px; overflow-wrap:anywhere; }
   .gc-label{ font-size:11px; color:var(--grey); font-family:var(--font-mono); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em; }
   .gc-roles{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
