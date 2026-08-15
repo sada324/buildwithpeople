@@ -731,7 +731,26 @@
 
   .dash-snapshot{ grid-area:snapshot; }
   .dash-messages{ grid-area:messages; }
-  .dash-snapshot-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .dash-snapshot-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+
+  /* Keep intrinsic card content from widening the single dashboard column. */
+  .dash-grid, .dash-grid > *, .dash-panel, .dash-panel-head,
+  .dash-match-card, .dash-match-top, .gc-name, .metric{ min-width:0; }
+  .dash-panel, .dash-match-card{ max-width:100%; }
+  .dash-panel-head h3, .dash-panel-sub, .gc-name{ overflow-wrap:anywhere; }
+
+  @media (max-width:640px){
+    /* This block intentionally follows the base panel rules so the mobile
+       padding is not overridden later in the stylesheet. */
+    .dash-panel{ padding:18px; }
+    .dash-panel-head{ align-items:flex-start; }
+    .dash-matches .dash-panel-head{ flex-direction:column; gap:4px; }
+    .dash-matches .dash-panel-sub{ text-align:left; }
+    .dash-match-top{ align-items:flex-start; flex-wrap:wrap; }
+    .dash-match-card.has-bell .dash-match-top{ padding-right:30px; }
+    .dash-match-actions{ flex-wrap:wrap; max-width:100%; }
+    .metric .lbl{ display:block; overflow-wrap:anywhere; }
+  }
 
   /* reveal on scroll */
   .reveal{ opacity:0; transform:translateY(16px); transition: opacity .6s ease, transform .6s ease; }
