@@ -217,6 +217,14 @@
   }
   .navlinks a:hover{ color:var(--ink); }
   .navlinks a:hover::after{ right:0; }
+  .nav-actions{ display:flex; align-items:center; gap:10px; }
+  .lang-toggle{
+    width:38px; height:38px; border:1px solid var(--line-strong);
+    background:transparent; color:var(--ink); border-radius:50%;
+    font:500 .68rem/1 var(--font-mono); letter-spacing:.08em;
+    transition:background .2s ease,color .2s ease,border-color .2s ease;
+  }
+  .lang-toggle:hover{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
 
   .btn-primary{
     background:var(--ink); color:var(--paper);
@@ -443,6 +451,7 @@
     font:500 .65rem/1 var(--font-mono);
     letter-spacing:.14em;
   }
+  html[lang="fr"] .work-grid::before{ content:"GLISSEZ POUR EXPLORER  ·  DÉFILEZ POUR ACCÉLÉRER"; }
   .work-grid::after{
     content:"↔";
     position:absolute; right:24px; bottom:18px; z-index:20;
@@ -486,6 +495,7 @@
     .work-grid{ height:560px; min-height:560px; border-radius:18px; }
     .draft-card{ width:min(76vw,340px); }
     .work-grid::before{ content:"SWIPE TO EXPLORE"; }
+    html[lang="fr"] .work-grid::before{ content:"GLISSEZ POUR EXPLORER"; }
   }
   @media (prefers-reduced-motion:reduce){
     .work-grid{ display:grid; height:auto; min-height:0; padding:56px 18px 18px; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; overflow:visible; }
@@ -598,7 +608,10 @@
       <a href="#work">Work</a>
       <a href="#contact">Contact</a>
     </nav>
-    <a class="btn-primary accent" href="#contact">Start a build</a>
+    <div class="nav-actions">
+      <button class="lang-toggle" id="lang-toggle" type="button" aria-label="Passer au français" aria-pressed="false">FR</button>
+      <a class="btn-primary accent" href="#contact">Start a build</a>
+    </div>
   </div>
 </header>
 
@@ -855,6 +868,66 @@
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var coarse = window.matchMedia('(pointer: coarse)').matches;
+
+  // lightweight native EN / FR translation
+  var langToggle = document.getElementById('lang-toggle');
+  var translations = {
+    'Process':'Méthode','Packages':'Forfaits','Work':'Projets','Contact':'Contact',
+    'Start a build':'Démarrer un projet','Independent digital studio — Toronto / Worldwide':'Studio numérique indépendant — Toronto / Monde entier',
+    'Brands built':'Des marques conçues','to hit harder.':'pour marquer fort.',
+    'We shape sharp identities and high-performance digital experiences for companies that refuse to blend in. Strategy, design, and code — under one roof.':'Nous créons des identités fortes et des expériences numériques performantes pour les entreprises qui refusent de passer inaperçues. Stratégie, design et code — sous un même toit.',
+    'Start a build →':'Démarrer un projet →','View the work':'Voir les projets',
+    'Sheet 02 — Process':'Planche 02 — Méthode','Three passes. No wasted lines.':'Trois étapes. Rien de superflu.',
+    'Draft':'Concevoir','Wireframes, content architecture, and a motion concept — a full plan before a pixel ships.':'Maquettes, architecture de contenu et concept de mouvement — un plan complet avant la production.',
+    'Build':'Créer','Hand-built front end, real animation, clean semantic markup. No page-builder bloat, ever.':'Interface développée sur mesure, animations fluides et code propre. Aucun constructeur de pages lourd.',
+    'Ship':'Lancer','Launch, measure, tune. You get the source files and a site you can keep growing.':'Mise en ligne, mesure et optimisation. Vous recevez les fichiers sources et un site prêt à évoluer.',
+    'Sheet 03 — Packages':'Planche 03 — Forfaits','Pick a pane, or build a rig.':'Choisissez votre formule.',
+    'Fixed scope, fixed price. Bigger builds get scoped together.':'Portée et prix fixes. Les projets plus ambitieux sont évalués avec vous.',
+    'Single Page':'Page unique','One page. Every pixel earns its place.':'Une page. Chaque pixel compte.',
+    'One-page site, built by hand':'Site d’une page créé sur mesure','Custom motion hero':'Section d’accueil animée sur mesure',
+    'Copywriting pass included':'Révision des textes incluse','3 rounds of revisions':'3 rondes de révisions','3–7 day delivery':'Livraison en 3 à 7 jours',
+    'No monthly overhead':'Aucuns frais mensuels','Start for $500':'Commencer pour 500 $',
+    'Multi Page':'Pages multiples','Up to eight pages, one system.':'Jusqu’à huit pages, un seul système.',
+    'Most booked':'Le plus populaire','Up to 8 pages':'Jusqu’à 8 pages','Full design system + components':'Système de design complet + composants',
+    'CMS-ready content model':'Structure de contenu prête pour un CMS','Motion throughout, not just the hero':'Animations dans tout le site',
+    '5 rounds of revisions':'5 rondes de révisions','Timeline depends on project — up to 4 weeks':'Échéancier selon le projet — jusqu’à 4 semaines',
+    'Start for $1.3k':'Commencer pour 1 300 $','Custom Rig':'Projet sur mesure',
+    'Dashboards, tools, and sites that do more than sit there.':'Tableaux de bord, outils et sites conçus pour agir.',
+    'Interactive apps & dashboards':'Applications interactives et tableaux de bord','Third-party integrations':'Intégrations tierces',
+    'Design + engineering paired':'Design + développement réunis','Optional ongoing support':'Soutien continu en option',
+    'Timeline scoped to project':'Échéancier adapté au projet','Talk scope':'Discuter du projet',
+    'Sheet 04 — Selected Work':'Planche 04 — Projets sélectionnés','Eight brands. No repeated formula.':'Huit marques. Aucune formule répétée.',
+    'Identity-led web concepts built to show range without losing precision.':'Des concepts numériques guidés par l’identité, variés sans jamais perdre en précision.',
+    'DRAG TO EXPLORE  ·  SCROLL TO ACCELERATE':'GLISSEZ POUR EXPLORER  ·  DÉFILEZ POUR ACCÉLÉRER',
+    'Sheet 05 — Contact':'Planche 05 — Contact',"Let's draft":"Créons quelque chose",'something.':'ensemble.',
+    'Tell us what you\'re building. We reply with next steps within one business day.':'Parlez-nous de votre projet. Nous vous répondrons avec les prochaines étapes en un jour ouvrable.',
+    'Call the studio':'Appeler le studio','See packages':'Voir les forfaits','Studio BWP — Precision web studio':'Studio BWP — Studio web de précision',
+    'Sheet 05 / 05 — End of set':'Planche 05 / 05 — Fin','All drafts final upon shipping.':'Tous les projets sont finalisés à la livraison.'
+  };
+  var reverseTranslations = {};
+  Object.keys(translations).forEach(function(key){ reverseTranslations[translations[key]] = key; });
+  function swapLanguage(toFrench){
+    var map = toFrench ? translations : reverseTranslations;
+    document.querySelectorAll('body *').forEach(function(el){
+      if(el.id === 'lang-toggle' || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') return;
+      Array.prototype.forEach.call(el.childNodes,function(node){
+        if(node.nodeType !== 3) return;
+        var value = node.nodeValue.trim();
+        if(map[value]) node.nodeValue = node.nodeValue.replace(value,map[value]);
+      });
+    });
+    document.documentElement.lang = toFrench ? 'fr' : 'en';
+    document.title = toFrench ? 'BWP — Studio de marque et numérique' : 'BWP — Brand & Digital Studio';
+    langToggle.textContent = toFrench ? 'EN' : 'FR';
+    langToggle.setAttribute('aria-pressed',String(toFrench));
+    langToggle.setAttribute('aria-label',toFrench ? 'Switch to English' : 'Passer au français');
+    localStorage.setItem('bwp-language',toFrench ? 'fr' : 'en');
+  }
+  if(langToggle){
+    var frenchActive = localStorage.getItem('bwp-language') === 'fr';
+    if(frenchActive) swapLanguage(true);
+    langToggle.addEventListener('click',function(){ frenchActive = !frenchActive; swapLanguage(frenchActive); });
+  }
 
   // reveal on scroll
   var els = document.querySelectorAll('[data-reveal]');
