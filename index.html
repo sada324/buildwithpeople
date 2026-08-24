@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pane — Brand &amp; Digital Studio</title>
+<title>BWP — Brand &amp; Digital Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
@@ -490,6 +490,32 @@
     .work-grid{ display:grid; height:auto; min-height:0; padding:56px 18px 18px; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; overflow:visible; }
     .draft-card{ position:relative; inset:auto; width:auto; transform:none !important; opacity:1 !important; }
   }
+
+  /* ---------- project slideshow ---------- */
+  .project-lightbox{
+    position:fixed; inset:0; z-index:100;
+    display:grid; grid-template-rows:auto 1fr auto;
+    background:rgba(7,7,7,.97); color:#fff;
+    padding:clamp(18px,3vw,42px);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .3s ease,visibility .3s ease;
+  }
+  .project-lightbox.open{ opacity:1; visibility:visible; pointer-events:auto; }
+  .lightbox-top,.lightbox-bottom{ display:flex; align-items:center; justify-content:space-between; gap:20px; }
+  .lightbox-count{ color:rgba(255,255,255,.55); }
+  .lightbox-close,.lightbox-arrow{
+    border:1px solid rgba(255,255,255,.25); background:transparent; color:#fff;
+    width:48px; height:48px; border-radius:50%; font-size:1.3rem;
+    display:grid; place-items:center; transition:background .2s ease,color .2s ease;
+  }
+  .lightbox-close:hover,.lightbox-arrow:hover{ background:#fff; color:#111; }
+  .lightbox-stage{ min-height:0; display:grid; place-items:center; padding:clamp(18px,3vw,42px) 0; overflow:hidden; }
+  .lightbox-image{ max-width:min(1180px,88vw); max-height:70vh; width:auto; height:auto; object-fit:contain; border-radius:12px; box-shadow:0 30px 100px rgba(0,0,0,.55); }
+  .lightbox-bottom{ align-items:flex-end; }
+  .lightbox-copy h3{ font:400 clamp(1.7rem,4vw,3.6rem)/.95 var(--font-display); letter-spacing:-.04em; }
+  .lightbox-copy p{ margin-top:9px; color:rgba(255,255,255,.58); }
+  .lightbox-nav{ display:flex; gap:10px; }
+  body.lightbox-open{ overflow:hidden; }
   .draft-meta .label{ text-align:right; }
 
   /* ---------- contact ---------- */
@@ -547,7 +573,7 @@
 
 <header>
   <div class="nav">
-    <div class="brand">PANE</div>
+    <div class="brand">BWP</div>
     <nav class="navlinks">
       <a href="#process">Process</a>
       <a href="#packages">Packages</a>
@@ -577,7 +603,7 @@
       </div>
 
       <div class="titleblock">
-        <div class="titleblock-row"><span>Title Block</span><span>Studio Pane</span></div>
+        <div class="titleblock-row"><span>Title Block</span><span>Studio BWP</span></div>
         <div class="titleblock-row"><span>Focus</span><span>Identity × Digital</span></div>
         <div class="titleblock-row"><span>Built for</span><span>Launches / Rebrands / Growth</span></div>
         <div class="titleblock-row"><span>Availability</span><span>Q4 — 02 openings</span></div>
@@ -634,7 +660,7 @@
     <div class="packages">
       <div class="plan" data-reveal>
         <span class="crop-corner pt-tl"></span><span class="crop-corner pt-br"></span>
-        <h3>Single Pane</h3>
+        <h3>Single Page</h3>
         <p class="tag">One page. Every pixel earns its place.</p>
         <div class="rule"></div>
         <div class="price mono">$500</div>
@@ -650,7 +676,7 @@
       <div class="plan featured" data-reveal>
         <span class="badge mono">Most booked</span>
         <span class="crop-corner pt-tl"></span><span class="crop-corner pt-br"></span>
-        <h3>Multi Pane</h3>
+        <h3>Multi Page</h3>
         <p class="tag">Up to eight pages, one system.</p>
         <div class="rule"></div>
         <div class="price mono">$1.3k</div>
@@ -774,7 +800,7 @@
         </div>
       </div>
       <div class="contact-foot label" data-reveal>
-        <span>Studio Pane — Precision web studio</span>
+        <span>Studio BWP — Precision web studio</span>
         <span>Sheet 05 / 05 — End of set</span>
       </div>
     </div>
@@ -782,10 +808,27 @@
 
 </main>
 
+<div class="project-lightbox" id="project-lightbox" role="dialog" aria-modal="true" aria-label="Project slideshow" aria-hidden="true">
+  <div class="lightbox-top">
+    <span class="lightbox-count label">01 / 08</span>
+    <button class="lightbox-close" type="button" aria-label="Close slideshow">×</button>
+  </div>
+  <div class="lightbox-stage">
+    <img class="lightbox-image" src="" alt="">
+  </div>
+  <div class="lightbox-bottom">
+    <div class="lightbox-copy"><h3></h3><p></p></div>
+    <div class="lightbox-nav">
+      <button class="lightbox-arrow lightbox-prev" type="button" aria-label="Previous project">←</button>
+      <button class="lightbox-arrow lightbox-next" type="button" aria-label="Next project">→</button>
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-row">
-    <div class="brand" style="font-size:1.1rem;">PANE</div>
-    <span class="label">© 2026 Studio Pane. All drafts final upon shipping.</span>
+    <div class="brand" style="font-size:1.1rem;">BWP</div>
+    <span class="label">© 2026 Studio BWP. All drafts final upon shipping.</span>
   </div>
 </footer>
 
@@ -859,6 +902,7 @@
     var scrollBoost = 0;
     var dragging = false;
     var dragX = 0;
+    var wheelDragDistance = 0;
     var lastScrollY = window.scrollY;
 
     function layoutWheel(){
@@ -882,6 +926,8 @@
     wheel.addEventListener('pointerdown', function(ev){
       dragging = true;
       dragX = ev.clientX;
+      wheelDragDistance = 0;
+      wheel.dataset.dragged = 'false';
       wheelVelocity = 0;
       wheel.classList.add('is-dragging');
       if(wheel.setPointerCapture) wheel.setPointerCapture(ev.pointerId);
@@ -890,11 +936,17 @@
       if(!dragging) return;
       var dx = ev.clientX - dragX;
       dragX = ev.clientX;
+      wheelDragDistance += Math.abs(dx);
+      if(wheelDragDistance > 8) wheel.dataset.dragged = 'true';
       wheelAngle += dx * 0.0055;
       wheelVelocity = dx * 0.00018;
       layoutWheel();
     });
-    function releaseWheel(){ dragging = false; wheel.classList.remove('is-dragging'); }
+    function releaseWheel(){
+      dragging = false;
+      wheel.classList.remove('is-dragging');
+      setTimeout(function(){ wheel.dataset.dragged = 'false'; },0);
+    }
     wheel.addEventListener('pointerup', releaseWheel);
     wheel.addEventListener('pointercancel', releaseWheel);
 
@@ -915,6 +967,72 @@
     })();
     window.addEventListener('resize', layoutWheel);
     layoutWheel();
+  }
+
+  // full-screen project slideshow
+  var lightbox = document.getElementById('project-lightbox');
+  if(lightbox && wheelCards.length){
+    var slideIndex = 0;
+    var slideImage = lightbox.querySelector('.lightbox-image');
+    var slideTitle = lightbox.querySelector('.lightbox-copy h3');
+    var slideText = lightbox.querySelector('.lightbox-copy p');
+    var slideCount = lightbox.querySelector('.lightbox-count');
+    var closeSlide = lightbox.querySelector('.lightbox-close');
+    var prevSlide = lightbox.querySelector('.lightbox-prev');
+    var nextSlide = lightbox.querySelector('.lightbox-next');
+
+    wheelCards.forEach(function(card,i){
+      card.setAttribute('role','button');
+      card.setAttribute('tabindex','0');
+      card.setAttribute('aria-label','Open ' + card.querySelector('h3').childNodes[0].textContent.trim() + ' project');
+      card.addEventListener('click',function(){
+        if(wheel && wheel.dataset.dragged === 'true') return;
+        openProject(i);
+      });
+      card.addEventListener('keydown',function(ev){
+        if(ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); openProject(i); }
+      });
+    });
+
+    function renderProject(){
+      var card = wheelCards[slideIndex];
+      var source = card.querySelector('img');
+      var heading = card.querySelector('h3');
+      var detail = heading.querySelector('span');
+      slideImage.src = source.src;
+      slideImage.alt = source.alt;
+      slideTitle.textContent = heading.childNodes[0].textContent.trim();
+      slideText.textContent = detail ? detail.textContent : '';
+      slideCount.textContent = String(slideIndex + 1).padStart(2,'0') + ' / ' + String(wheelCards.length).padStart(2,'0');
+    }
+    function openProject(index){
+      slideIndex = index;
+      renderProject();
+      lightbox.classList.add('open');
+      lightbox.setAttribute('aria-hidden','false');
+      document.body.classList.add('lightbox-open');
+      closeSlide.focus();
+    }
+    function closeProject(){
+      lightbox.classList.remove('open');
+      lightbox.setAttribute('aria-hidden','true');
+      document.body.classList.remove('lightbox-open');
+      wheelCards[slideIndex].focus();
+    }
+    function moveProject(step){
+      slideIndex = (slideIndex + step + wheelCards.length) % wheelCards.length;
+      renderProject();
+    }
+    closeSlide.addEventListener('click',closeProject);
+    prevSlide.addEventListener('click',function(){ moveProject(-1); });
+    nextSlide.addEventListener('click',function(){ moveProject(1); });
+    lightbox.addEventListener('click',function(ev){ if(ev.target === lightbox) closeProject(); });
+    document.addEventListener('keydown',function(ev){
+      if(!lightbox.classList.contains('open')) return;
+      if(ev.key === 'Escape') closeProject();
+      if(ev.key === 'ArrowLeft') moveProject(-1);
+      if(ev.key === 'ArrowRight') moveProject(1);
+    });
   }
 })();
 </script>
