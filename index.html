@@ -306,6 +306,44 @@
     margin-top:16px;
   }
   .hero-cta{ display:flex; flex-wrap:wrap; gap:14px; margin-top:24px; }
+  .hero-video-card{
+    position:relative;
+    margin-top:clamp(28px,4vw,48px);
+    border:1px solid var(--ink);
+    background:#050505;
+    overflow:hidden;
+    aspect-ratio:16 / 9;
+    box-shadow:0 24px 64px -38px rgba(0,0,0,0.5);
+  }
+  .hero-video-card video{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .hero-video-label{
+    position:absolute;
+    z-index:1;
+    left:14px;
+    top:14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 10px;
+    color:#fff;
+    background:rgba(5,5,5,0.78);
+    backdrop-filter:blur(8px);
+    font-size:0.64rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+  }
+  .hero-video-label::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--accent);
+  }
 
   .titleblock{
     margin-top:64px;
@@ -633,6 +671,13 @@
         <a class="btn-ghost" href="#work">View the work</a>
       </div>
 
+      <div class="hero-video-card" data-reveal>
+        <span class="hero-video-label mono">Brand motion / 30 sec</span>
+        <video autoplay muted loop playsinline preload="metadata" aria-label="BWP brand video example">
+          <source src="marketing-video-web.m4v" type="video/mp4">
+        </video>
+      </div>
+
       <div class="titleblock">
         <div class="titleblock-row"><span>Title Block</span><span>Studio BWP</span></div>
         <div class="titleblock-row"><span>Focus</span><span>Identity × Digital</span></div>
@@ -892,7 +937,7 @@
     'Start a build':'Démarrer un projet','Independent digital studio — Toronto / Worldwide':'Studio numérique indépendant — Toronto / Monde entier',
     'Brands built':'Des marques conçues','to hit harder.':'pour marquer fort.',
     'We shape sharp identities and high-performance digital experiences for companies that refuse to blend in. Strategy, design, and code — under one roof.':'Nous créons des identités fortes et des expériences numériques performantes pour les entreprises qui refusent de passer inaperçues. Stratégie, design et code — sous un même toit.',
-    'Start a build →':'Démarrer un projet →','View the work':'Voir les projets',
+    'Start a build →':'Démarrer un projet →','View the work':'Voir les projets','Brand motion / 30 sec':'Vidéo de marque / 30 s',
     'Sheet 02 — Process':'Planche 02 — Méthode','Three passes. No wasted lines.':'Trois étapes. Rien de superflu.',
     'Draft':'Concevoir','Wireframes, content architecture, and a motion concept — a full plan before a pixel ships.':'Maquettes, architecture de contenu et concept de mouvement — un plan complet avant la production.',
     'Build':'Créer','Hand-built front end, real animation, clean semantic markup. No page-builder bloat, ever.':'Interface développée sur mesure, animations fluides et code propre. Aucun constructeur de pages lourd.',
