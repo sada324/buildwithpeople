@@ -322,6 +322,7 @@
     width:100%;
     height:100%;
     object-fit:contain;
+    cursor:pointer;
   }
   .hero-video-label{
     position:absolute;
@@ -346,6 +347,22 @@
     border-radius:50%;
     background:var(--accent);
   }
+  .video-sound-toggle{
+    position:absolute;
+    z-index:2;
+    right:14px;
+    bottom:14px;
+    border:1px solid rgba(255,255,255,0.45);
+    padding:9px 12px;
+    color:#fff;
+    background:rgba(5,5,5,0.78);
+    backdrop-filter:blur(8px);
+    font-family:var(--font-mono);
+    font-size:0.65rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .video-sound-toggle:hover{ border-color:#fff; }
 
   .titleblock{
     margin-top:64px;
@@ -675,9 +692,10 @@
 
       <div class="hero-video-card" data-reveal>
         <span class="hero-video-label mono">Brand motion / 30 sec</span>
-        <video autoplay muted loop playsinline preload="metadata" aria-label="BWP brand video example">
+        <video id="brand-video" autoplay muted loop playsinline preload="metadata" aria-label="BWP brand video example">
           <source src="marketing-video-web.m4v" type="video/mp4">
         </video>
+        <button class="video-sound-toggle" id="video-sound-toggle" type="button" aria-label="Enable video sound" aria-pressed="false">◖)) Sound on</button>
       </div>
 
       <div class="titleblock">
@@ -993,7 +1011,30 @@
   if(langToggle){
     var frenchActive = localStorage.getItem('bwp-language') === 'fr';
     if(frenchActive) swapLanguage(true);
-    langToggle.addEventListener('click',function(){ frenchActive = !frenchActive; swapLanguage(frenchActive); });
+    langToggle.addEventListener('click',function(){ frenchActive = !frenchActive; swapLanguage(frenchActive); renderSoundState(); });
+  }
+
+  // autoplay begins muted; a tap on the video or control toggles audio
+  var brandVideo = document.getElementById('brand-video');
+  var soundToggle = document.getElementById('video-sound-toggle');
+  function renderSoundState(){
+    if(!brandVideo || !soundToggle) return;
+    var french = document.documentElement.lang === 'fr';
+    var muted = brandVideo.muted;
+    soundToggle.textContent = muted ? (french ? '◖)) Activer le son' : '◖)) Sound on') : (french ? '◖)) Couper le son' : '◖)) Sound off');
+    soundToggle.setAttribute('aria-label',muted ? (french ? 'Activer le son de la vidéo' : 'Enable video sound') : (french ? 'Couper le son de la vidéo' : 'Mute video sound'));
+    soundToggle.setAttribute('aria-pressed',String(!muted));
+  }
+  function toggleVideoSound(){
+    if(!brandVideo) return;
+    brandVideo.muted = !brandVideo.muted;
+    if(!brandVideo.muted) brandVideo.play().catch(function(){});
+    renderSoundState();
+  }
+  if(brandVideo && soundToggle){
+    soundToggle.addEventListener('click',toggleVideoSound);
+    brandVideo.addEventListener('click',toggleVideoSound);
+    renderSoundState();
   }
 
   // reveal on scroll
